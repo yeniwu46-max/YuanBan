@@ -1,0 +1,41 @@
+<template>
+  <button class="toggle" :class="{ on: modelValue }" @click="$emit('update:modelValue', !modelValue)">
+    <view></view>
+  </button>
+</template>
+
+<script setup lang="ts">
+defineProps<{ modelValue: boolean }>()
+defineEmits<{ 'update:modelValue': [value: boolean] }>()
+</script>
+
+<style scoped lang="scss">
+.toggle {
+  position: relative;
+  width: 56px;
+  height: 32px;
+  border-radius: 999px;
+  background: #d9d2c3;
+  flex-shrink: 0;
+}
+
+.toggle.on {
+  background: #7ab66b;
+}
+
+.toggle view {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle.on view {
+  left: 28px;
+}
+</style>
+

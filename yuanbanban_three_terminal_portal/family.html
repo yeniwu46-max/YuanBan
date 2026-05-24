@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>鼋伴伴子女端完整 HTML 原型</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#F5F1E8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#243A31;display:flex;align-items:center;justify-content:center}
+.stage{display:flex;gap:26px;align-items:center;padding:22px}
+.phone{position:relative;width:390px;height:844px;background:#FCFAF5;border:10px solid #26382F;border-radius:42px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,.22)}
+.phone:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 4%,rgba(122,182,107,.18),transparent 30%),radial-gradient(circle at 88% 8%,rgba(232,166,78,.16),transparent 26%),radial-gradient(circle at 50% 98%,rgba(151,201,159,.10),transparent 30%)}
+.page{position:absolute;inset:0;display:none;overflow:auto;padding-bottom:112px}.page.active{display:block}.page::-webkit-scrollbar{width:0}
+.header{position:relative;z-index:2;padding:30px 24px 14px;display:flex;align-items:center;justify-content:space-between}
+.label{font-size:14px;color:#7A6F5D;font-weight:800}.muted{color:#7A6F5D}h1{margin:2px 0 0;font-size:28px;line-height:1.12;font-weight:1000;letter-spacing:-.4px}h2{margin:0;font-size:21px;font-weight:1000}p{margin:0}button{font-family:inherit;border:0;cursor:pointer}
+.icon-btn{width:48px;height:48px;border-radius:50%;background:#fff;border:1px solid #E9E0D0;box-shadow:0 3px 10px rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;color:#446A57;font-size:24px}
+.section{position:relative;z-index:1;padding:0 24px;margin-top:16px}.scroll{position:relative;z-index:1;padding:0 24px 28px;height:calc(100% - 86px - 98px);overflow:auto}.scroll::-webkit-scrollbar{width:0}
+.section-title{position:relative;z-index:1;padding:0 24px;margin:20px 0 12px;display:flex;align-items:center;justify-content:space-between}
+.card{background:white;border:1px solid #EFE3CE;border-radius:28px;box-shadow:0 4px 12px rgba(63,52,29,.05)}
+.hero-green,.hero-warm,.hero-red{border-radius:34px;padding:20px;box-shadow:0 4px 12px rgba(63,52,29,.05);overflow:hidden;position:relative}
+.hero-green{background:#E7F3DF;border:1px solid #CBE2BF}.hero-warm{background:#FFF7E8;border:1px solid #F0D8A8}.hero-red{background:#FFF1EC;border:1px solid #F0B5AE}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.78);font-size:14px;font-weight:1000;color:#315943}
+.row{display:flex;align-items:center;gap:12px}.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.iconbox{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:#E6F2DF;color:#5B8B62;font-size:22px;flex-shrink:0}.iconbox.warm{background:#FFF0D6;color:#C9822C}.iconbox.red{background:#FFE0DA;color:#E56B5F}.iconbox.gray{background:#F4EFE5;color:#8E816E}
+.tag{padding:3px 9px;border-radius:999px;font-size:12px;font-weight:1000;background:#E6F2DF;color:#5B8B62;white-space:nowrap}.tag.warm{background:#FFF0D6;color:#C9822C}.tag.red{background:#FFE0DA;color:#E56B5F}.tag.gray{background:#F4EFE5;color:#8E816E}
+.big-btn{height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:17px;font-weight:1000}.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.btn-green{background:#7AB66B;color:white;box-shadow:0 6px 14px rgba(122,182,107,.26)}.btn-warm{background:#E8A64E;color:white;box-shadow:0 6px 14px rgba(232,166,78,.24)}.btn-white{background:white;color:#315943;border:1px solid #D6E8D4;box-shadow:0 3px 8px rgba(0,0,0,.04)}
+.health-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.quick-card,.health-card{min-height:116px;border-radius:24px;background:white;border:1px solid #EFE3CE;padding:16px;box-shadow:0 4px 12px rgba(63,52,29,.05);text-align:left}
+.quick-action{height:92px;border-radius:24px;background:white;border:1px solid #EFE3CE;box-shadow:0 4px 12px rgba(63,52,29,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:1000;color:#315943}
+.value{margin-top:4px;display:flex;align-items:flex-end;gap:4px}.num{font-size:26px;line-height:1;font-weight:1000;color:#243A31}.unit{font-size:12px;margin-bottom:2px;color:#7A6F5D}.small-title{margin-top:12px;font-size:15px;color:#7A6F5D;font-weight:800}.status{margin-top:8px;font-size:14px;font-weight:1000;color:#5B8B62}.status.warm{color:#C9822C}
+.list{position:relative;z-index:1;padding:0 24px;display:flex;flex-direction:column;gap:12px}.row-card{min-height:82px;width:100%;border-radius:24px;background:white;border:1px solid #EFE3CE;box-shadow:0 4px 12px rgba(63,52,29,.05);padding:14px;display:flex;align-items:center;gap:12px;text-align:left}.row-main{flex:1;min-width:0}.row-title{display:flex;align-items:center;gap:7px;font-size:18px;font-weight:1000}.row-desc{margin-top:4px;font-size:14px;color:#7A6F5D;line-height:1.35}.chev{color:#B8AA92;font-size:24px;flex-shrink:0}
+.yuan{position:relative;width:36px;height:36px}.yuan.large{width:64px;height:64px}.yuan .head{position:absolute;left:22%;top:7%;width:56%;height:38%;border-radius:999px 999px 8px 8px;background:#7AB66B}.yuan .body{position:absolute;left:8%;top:35%;width:84%;height:45%;border-radius:999px;background:#87C977}.yuan .eye-l,.yuan .eye-r{position:absolute;top:47%;width:8%;height:8%;border-radius:50%;background:#26382F}.yuan .eye-l{left:27%}.yuan .eye-r{right:27%}.yuan .mouth{position:absolute;left:40%;top:63%;width:20%;height:5%;border-radius:999px;background:rgba(38,56,47,.45)}
+.bottom-nav{position:absolute;left:0;right:0;bottom:0;height:98px;background:rgba(252,250,245,.96);backdrop-filter:blur(12px);border-top:1px solid #EFE7D8;border-radius:34px 34px 0 0;padding:12px 28px 0;z-index:20}
+.nav-grid{display:grid;grid-template-columns:repeat(4,1fr);align-items:start;text-align:center;color:#9A927F}.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;font-weight:1000}.nav-icon{width:44px;height:44px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px}.nav-item.active{color:#416348}.nav-item.active .nav-icon{background:#E6F2DF}
+.switcher{width:245px;max-height:820px;overflow:auto;background:#FFFDF7;border:1px solid #E9E0D0;border-radius:28px;padding:16px;box-shadow:0 14px 40px rgba(0,0,0,.10)}.switcher h3{margin:0 0 12px;font-size:18px}.switcher button{width:100%;height:42px;margin:4px 0;border-radius:14px;background:white;border:1px solid #EFE3CE;color:#315943;font-weight:1000;font-size:14px}.switcher button.active{background:#E6F2DF;border-color:#9FCB91}.group{font-size:12px;color:#8B7753;font-weight:1000;margin:14px 0 5px}
+.tabbar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-radius:22px;background:#F1ECE1;padding:6px;margin-bottom:16px}.tabbar button{height:42px;border-radius:16px;background:transparent;color:#8C806C;font-weight:1000}.tabbar button.active{background:white;color:#315943;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.photo{height:92px;border-radius:22px;background:#F7F2E8;border:1px solid #EFE3CE;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}.photo b{font-size:30px}.photo span{font-size:12px;font-weight:1000;color:#7A6F5D}
+.toggle{position:relative;width:56px;height:32px;border-radius:999px;background:#D9D2C3;flex-shrink:0}.toggle.on{background:#7AB66B}.toggle span{position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:white;box-shadow:0 2px 4px rgba(0,0,0,.1)}.toggle.on span{left:28px}
+</style>
+</head>
+<body>
+<div class="stage">
+<div class="phone">
+
+<main id="guardian" class="page active">
+  <div class="header"><div><div class="label">子女端 · 守护中心</div><button style="background:transparent;padding:0;display:flex;align-items:center;gap:4px"><h1>李奶奶</h1><span>⌄</span></button></div><button class="icon-btn">🔔</button></div>
+  <section class="scroll">
+    <div class="hero-green"><div class="between" style="align-items:flex-start"><div><div class="pill">🛡️ 当前安全</div><p style="margin-top:15px;font-size:24px;line-height:1.35;font-weight:1000">李奶奶今日状态良好，<br>守护设备正常运行。</p><p class="muted" style="margin-top:8px;line-height:1.5">最近同步：1 分钟前 · 家中客厅活动正常</p></div><div style="width:88px;height:88px;border-radius:28px;background:white;border:1px solid #D6E8D4;display:flex;align-items:center;justify-content:center;text-align:center"><div><b style="font-size:28px;color:#315943">92</b><div style="font-size:12px;font-weight:1000;color:#7A6F5D">守护分</div></div></div></div><div class="btn-grid" style="grid-template-columns:repeat(3,1fr)"><div class="card" style="padding:12px;text-align:center"><span class="muted">设备在线</span><h2>4 台</h2></div><div class="card" style="padding:12px;text-align:center"><span class="muted">风险提醒</span><h2 style="color:#C9822C">2 条</h2></div><div class="card" style="padding:12px;text-align:center"><span class="muted">服药完成</span><h2>80%</h2></div></div></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>快捷关怀</h2></div>
+    <div class="quick-grid"><button class="quick-action">📹<span>视频</span></button><button class="quick-action">☎<span>电话</span></button><button class="quick-action">🎙<span>语音</span></button><button class="quick-action">📍<span>位置</span></button></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>风险提醒</h2><button class="link">查看全部 ›</button></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <button class="row-card" onclick="showPage('alert')"><div class="iconbox warm">💧</div><div class="row-main"><div class="row-title">血压轻微偏高</div><div class="row-desc">今天 08:40 · 建议今晚提醒老人睡前复测</div></div><span class="tag warm">需关注</span></button>
+      <button class="row-card"><div class="iconbox warm">🔋</div><div class="row-main"><div class="row-title">SOS 按钮电量偏低</div><div class="row-desc">今天 08:12 · 当前电量 23%</div></div><span class="tag warm">低电量</span></button>
+      <button class="row-card"><div class="iconbox">💊</div><div class="row-main"><div class="row-title">服药确认延后</div><div class="row-desc">昨天 18:45 · 晚间服药晚确认 15 分钟</div></div><span class="tag">已处理</span></button>
+    </div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>健康摘要</h2><button class="link" onclick="showPage('report')">查看报告 ›</button></div>
+    <div class="health-grid"><button class="health-card"><div class="iconbox">❤️</div><div class="small-title">心率</div><div class="value"><span class="num">78</span><span class="unit">次/分</span></div><div class="status">正常</div></button><button class="health-card"><div class="iconbox">🌬️</div><div class="small-title">呼吸</div><div class="value"><span class="num">17</span><span class="unit">次/分</span></div><div class="status">稳定</div></button><button class="health-card"><div class="iconbox warm">💧</div><div class="small-title">血压</div><div class="value"><span class="num">128/82</span><span class="unit">mmHg</span></div><div class="status warm">偏高</div></button><button class="health-card"><div class="iconbox">🌙</div><div class="small-title">睡眠</div><div class="value"><span class="num">7.8</span><span class="unit">小时</span></div><div class="status">良好</div></button></div>
+    <div class="hero-warm" style="margin-top:18px"><div class="row" style="align-items:flex-start"><div class="iconbox warm"><div class="yuan"><i class="head"></i><i class="body"></i><i class="eye-l"></i><i class="eye-r"></i><i class="mouth"></i></div></div><div><b style="font-size:18px">小鼋关怀建议</b><p class="muted" style="margin-top:6px;line-height:1.5">今天老人整体状态平稳，但血压略高。建议晚上发起一次简短视频，提醒少盐饮食。</p></div></div><div class="btn-grid"><button class="big-btn btn-green">➤ 发关怀消息</button><button class="big-btn btn-white">💬 查看建议</button></div></div>
+  </section>
+</main>
+
+<main id="alert" class="page">
+  <div class="header"><button class="icon-btn" onclick="showPage('guardian')">‹</button><div style="text-align:center"><div class="label">子女端 · 告警处理</div><h1 style="font-size:27px">告警详情</h1></div><button class="icon-btn">🔔</button></div>
+  <section class="scroll">
+    <div id="alertHero" class="hero-red"><div class="between" style="align-items:flex-start"><div><div class="pill" style="color:#E56B5F">⚠️ 中风险提醒</div><p style="margin-top:15px;font-size:24px;line-height:1.35;font-weight:1000">李奶奶血压轻微偏高，建议今晚关注。</p><p class="muted" style="margin-top:8px;line-height:1.5">08:40 监测到血压 128/82 mmHg，建议睡前复测并减少盐分摄入。</p></div><div class="iconbox red" style="width:88px;height:88px;border-radius:28px;font-size:42px">💧</div></div><div class="btn-grid" style="grid-template-columns:repeat(3,1fr)"><div class="card" style="padding:12px;text-align:center"><span class="muted">等级</span><h2 style="color:#C9822C">中</h2></div><div class="card" style="padding:12px;text-align:center"><span class="muted">时间</span><h2>08:40</h2></div><div class="card" style="padding:12px;text-align:center"><span class="muted">状态</span><h2 style="color:#C9822C">待确认</h2></div></div></div>
+    <div class="btn-grid"><button class="big-btn btn-green">☎ 联系老人</button><button class="big-btn btn-white">📹 发起视频</button></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>处理进度</h2><span id="alertStatus" style="color:#C9822C;font-weight:1000">进行中</span></div>
+    <div class="card" id="timeline" style="padding:16px"><div class="row"><div class="iconbox">✓</div><div><b>系统生成告警</b><p class="muted">08:40 · 血压轻微偏高</p></div></div><hr style="border:0;border-top:1px solid #EFE7D8"><div class="row"><div class="iconbox">✓</div><div><b>通知子女端</b><p class="muted">08:41 · 微信通知已送达</p></div></div><hr style="border:0;border-top:1px solid #EFE7D8"><div class="row"><div class="iconbox warm">⏳</div><div><b>子女确认查看</b><p class="muted">等待确认处理</p></div></div></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>老人当前状态</h2><button onclick="showPage('report')" class="link">查看报告 ›</button></div>
+    <div class="health-grid"><button class="health-card"><div class="iconbox">❤️</div><div class="small-title">心率</div><div class="value"><span class="num">78</span><span class="unit">次/分</span></div><div class="status">正常</div></button><button class="health-card"><div class="iconbox">🌬️</div><div class="small-title">呼吸</div><div class="value"><span class="num">17</span><span class="unit">次/分</span></div><div class="status">稳定</div></button><button class="health-card"><div class="iconbox warm">💧</div><div class="small-title">血压</div><div class="value"><span class="num">128/82</span><span class="unit">mmHg</span></div><div class="status warm">偏高</div></button><button class="health-card"><div class="iconbox">📶</div><div class="small-title">设备</div><div class="value"><span class="num" style="font-size:22px">在线</span></div><div class="status">1 分钟前</div></button></div>
+    <div class="hero-warm" style="margin-top:18px"><div class="row" style="align-items:flex-start"><div class="iconbox warm"><div class="yuan"><i class="head"></i><i class="body"></i><i class="eye-l"></i><i class="eye-r"></i><i class="mouth"></i></div></div><div><b style="font-size:18px">小鼋处理建议</b><p class="muted" style="margin-top:6px;line-height:1.5">建议先给老人打个电话，确认是否不舒服。若状态正常，可提醒晚饭少盐，并在睡前复测血压。</p></div></div><div class="btn-grid"><button class="big-btn btn-warm">➤ 发送提醒</button><button class="big-btn btn-white">🎙 语音留言</button></div></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>推荐处理</h2></div>
+    <div style="display:flex;flex-direction:column;gap:12px"><button class="row-card"><div class="iconbox">☎</div><div class="row-main"><div class="row-title">电话确认老人状态</div><div class="row-desc">询问是否头晕、胸闷或不适</div></div><span class="chev">›</span></button><button class="row-card"><div class="iconbox">💬</div><div class="row-main"><div class="row-title">发送少盐与复测提醒</div><div class="row-desc">让小鼋用温和语气提醒老人</div></div><span class="chev">›</span></button><button class="row-card"><div class="iconbox warm">🏢</div><div class="row-main"><div class="row-title">必要时联系社区</div><div class="row-desc">如老人无人回应，可请求社区协助</div></div><span class="chev">›</span></button></div>
+    <div class="card" style="padding:16px;margin-top:18px"><div class="row"><div class="iconbox">📋</div><div><b style="font-size:18px">处理结果</b><p class="muted">联系老人后，可记录并关闭本次提醒。</p></div></div><div class="btn-grid"><button onclick="resolveAlert()" class="big-btn btn-green">✓ 已处理</button><button onclick="pendingAlert()" class="big-btn btn-white">⏳ 稍后处理</button></div></div>
+  </section>
+</main>
+
+<main id="report" class="page">
+  <div class="header"><div><div class="label">子女端 · 报告中心</div><h1>李奶奶</h1></div><button class="icon-btn">🔔</button></div>
+  <section class="scroll">
+    <div class="tabbar"><button>日报</button><button class="active">周报</button><button>月报</button></div>
+    <div class="hero-green"><div class="between" style="align-items:flex-start"><div><div class="pill">🛡️ 本周整体平稳</div><p style="margin-top:15px;font-size:24px;line-height:1.35;font-weight:1000">李奶奶本周状态良好，<br>血压有轻微波动。</p><p class="muted" style="margin-top:8px;line-height:1.5">睡眠较上周提升，未发生 SOS 或跌倒风险事件。</p></div><div style="width:88px;height:88px;border-radius:28px;background:white;border:1px solid #D6E8D4;display:flex;align-items:center;justify-content:center;text-align:center"><div><b style="font-size:28px;color:#315943">89</b><div style="font-size:12px;font-weight:1000;color:#7A6F5D">健康分</div></div></div></div><div class="btn-grid" style="grid-template-columns:repeat(4,1fr)"><div class="card" style="padding:8px;text-align:center"><span class="muted">风险</span><h2 style="color:#C9822C">2次</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">服药</span><h2>80%</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">睡眠</span><h2>7.8h</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">设备</span><h2>在线</h2></div></div></div>
+    <div class="hero-warm" style="margin-top:18px"><div class="row" style="align-items:flex-start"><div class="iconbox warm"><div class="yuan"><i class="head"></i><i class="body"></i><i class="eye-l"></i><i class="eye-r"></i><i class="mouth"></i></div></div><div><b style="font-size:18px">小鼋本周解读 🔊</b><p class="muted" style="margin-top:6px;line-height:1.5">本周老人整体状态稳定，血压有 2 次轻微偏高，建议继续关注晚间饮食与睡前复测习惯。</p></div></div></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>核心指标</h2><button class="link">详细报告 ›</button></div>
+    <div class="health-grid"><button class="health-card"><div class="iconbox">❤️</div><div class="small-title">平均心率</div><div class="value"><span class="num">76</span><span class="unit">次/分</span></div><div class="status">正常</div></button><button class="health-card"><div class="iconbox">🌬️</div><div class="small-title">平均呼吸</div><div class="value"><span class="num">17</span><span class="unit">次/分</span></div><div class="status">平稳</div></button><button class="health-card"><div class="iconbox warm">💧</div><div class="small-title">平均血压</div><div class="value"><span class="num">128/82</span><span class="unit">mmHg</span></div><div class="status warm">偏高</div></button><button class="health-card"><div class="iconbox">🌙</div><div class="small-title">平均睡眠</div><div class="value"><span class="num">7.8</span><span class="unit">小时</span></div><div class="status">良好</div></button></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>趋势分析</h2><span class="muted" style="font-weight:1000">近 7 天</span></div>
+    <div class="card" style="padding:16px"><b style="font-size:18px">血压与睡眠变化</b><p class="muted" style="font-size:13px;margin-top:4px">今天血压略高，睡眠稳定提升</p><svg viewBox="0 0 318 150" style="width:100%;height:150px;margin-top:8px"><path d="M10 76 C40 60 60 82 84 68 C110 52 130 58 158 64 C188 70 204 50 232 44 C260 40 282 58 308 38" stroke="#C9822C" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M10 102 C38 100 58 94 84 95 C110 90 132 90 158 86 C186 82 206 82 232 76 C260 72 282 74 308 68" stroke="#7AB66B" stroke-width="4" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>异常记录汇总</h2><span class="muted" style="font-weight:1000">本周 3 条</span></div>
+    <div style="display:flex;flex-direction:column;gap:12px"><button onclick="showPage('alert')" class="row-card"><div class="iconbox warm">💧</div><div class="row-main"><div class="row-title">血压轻微偏高 2 次</div><div class="row-desc">周三、今天各出现 1 次，建议继续复测</div></div><span class="tag warm">需关注</span></button><button class="row-card"><div class="iconbox">⏰</div><div class="row-main"><div class="row-title">服药延后确认 1 次</div><div class="row-desc">昨天 18:45 晚间服药延后 15 分钟</div></div><span class="tag">已处理</span></button></div>
+    <div class="hero-green" style="margin-top:18px"><div class="row" style="align-items:flex-start"><div class="iconbox">💬</div><div><b style="font-size:18px">给家人的建议</b><p class="muted" style="margin-top:6px;line-height:1.5">建议今晚发起一次 5 分钟视频，提醒老人少盐饮食，并确认睡前是否完成血压复测。</p></div></div><div class="btn-grid"><button class="big-btn btn-green">📹 发起视频</button><button class="big-btn btn-white">☎ 电话关怀</button></div></div>
+  </section>
+</main>
+
+<main id="care" class="page">
+  <div class="header"><div><div class="label">子女端 · 关怀中心</div><h1>李奶奶</h1></div><button class="icon-btn">🔔</button></div>
+  <section class="scroll">
+    <div class="hero-warm"><div class="between" style="align-items:flex-start"><div><div class="pill" style="color:#8B6A33">💚 今日适合主动关怀</div><p style="margin-top:15px;font-size:24px;line-height:1.35;font-weight:1000">李奶奶今天状态平稳，适合发一段轻松问候。</p><p class="muted" style="margin-top:8px;line-height:1.5">小鼋建议晚上 19:30 后视频 5 分钟，顺便提醒少盐饮食。</p></div><div class="iconbox warm" style="width:88px;height:88px;border-radius:28px"><div class="yuan large"><i class="head"></i><i class="body"></i><i class="eye-l"></i><i class="eye-r"></i><i class="mouth"></i></div></div></div><div class="btn-grid" style="grid-template-columns:repeat(3,1fr)"><div class="card" style="padding:12px;text-align:center"><span class="muted">陪伴值</span><h2 style="color:#C9822C">281</h2></div><div class="card" style="padding:12px;text-align:center"><span class="muted">本周联系</span><h2>4次</h2></div><div class="card" style="padding:12px;text-align:center"><span class="muted">相册更新</span><h2>3张</h2></div></div></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>快捷关怀</h2></div><div class="quick-grid"><button class="quick-action">📹<span>视频</span></button><button class="quick-action">☎<span>电话</span></button><button class="quick-action">🎙<span>语音</span></button><button class="quick-action">📷<span>传照片</span></button></div>
+    <div class="card" style="padding:16px;margin-top:18px"><div class="row" style="align-items:flex-start"><div class="iconbox warm">✨</div><div><b style="font-size:18px">小鼋生成的问候</b><p class="muted" style="margin-top:8px;line-height:1.5">“妈，今天身体状态挺平稳的。晚上吃清淡一点，饭后慢慢走一会儿，睡前记得再测一下血压。我晚点和你视频。”</p></div></div><div class="btn-grid"><button class="big-btn btn-green">➤ 发送给老人</button><button class="big-btn btn-white">🎙 录语音</button></div></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>家庭相册</h2><button class="link">上传 +</button></div><div class="card" style="padding:16px"><div class="photo-grid"><button class="photo"><b>🎂</b><span>孙女生日</span></button><button class="photo"><b>🌳</b><span>公园散步</span></button><button class="photo"><b>🍲</b><span>家庭聚餐</span></button></div><div class="btn-grid"><button class="big-btn btn-green">🖼 上传照片</button><button class="big-btn btn-white">💬 配一句话</button></div></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>今日关怀任务</h2><span class="muted" style="font-weight:1000">2 / 4 完成</span></div>
+    <div style="display:flex;flex-direction:column;gap:12px"><div class="row-card"><div class="iconbox">✓</div><div class="row-main"><div class="row-title">查看今日状态</div><div class="row-desc">已查看守护首页</div></div><span class="tag">完成</span></div><div class="row-card"><div class="iconbox warm">📹</div><div class="row-main"><div class="row-title">今晚视频 5 分钟</div><div class="row-desc">建议 19:30 后发起</div></div><span class="chev">›</span></div><div class="row-card"><div class="iconbox">📷</div><div class="row-main"><div class="row-title">上传 1 张家庭照片</div><div class="row-desc">让老人端相册更新</div></div><span class="chev">›</span></div></div>
+  </section>
+</main>
+
+<main id="settings" class="page">
+  <div class="header"><div><div class="label">子女端 · 设置中心</div><h1>设置与绑定</h1></div><button class="icon-btn">🔔</button></div>
+  <section class="scroll">
+    <div class="hero-green"><div class="row" style="align-items:flex-start"><div class="iconbox" style="width:72px;height:72px;border-radius:26px;font-size:38px">👤</div><div><div class="pill">🛡️ 已绑定 1 位老人</div><p style="margin-top:12px;font-size:23px;line-height:1.35;font-weight:1000">当前守护对象：李奶奶</p><p class="muted">关系：女儿 · 权限：主要联系人</p></div></div><div class="btn-grid" style="grid-template-columns:repeat(3,1fr)"><div class="card" style="padding:12px;text-align:center"><span class="muted">通知规则</span><h2>已开启</h2></div><div class="card" style="padding:12px;text-align:center"><span class="muted">紧急权限</span><h2 style="color:#C9822C">主要</h2></div><div class="card" style="padding:12px;text-align:center"><span class="muted">设备协助</span><h2>可管理</h2></div></div></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>绑定老人</h2><button class="link">添加 +</button></div>
+    <div class="card" style="padding:16px"><div class="row"><div class="iconbox">👤</div><div style="flex:1"><b style="font-size:20px">李奶奶</b><p class="muted">72 岁 · 家中客厅 · 设备在线</p></div><span class="tag">守护中</span></div><div class="btn-grid" style="grid-template-columns:repeat(3,1fr)"><button class="big-btn btn-white" style="font-size:14px">▣ 绑定码</button><button class="big-btn btn-warm" style="font-size:14px">⚙ 权限</button><button class="big-btn btn-white" style="font-size:14px">☎ 联系</button></div></div>
+    <div class="health-grid" style="margin-top:14px"><button class="quick-card"><div class="iconbox">▣</div><b style="display:block;margin-top:12px;font-size:18px">扫码绑定</b><p class="muted" style="font-size:13px;margin-top:5px">扫描老人端二维码</p></button><button class="quick-card"><div class="iconbox warm">🔗</div><b style="display:block;margin-top:12px;font-size:18px">邀请码绑定</b><p class="muted" style="font-size:13px;margin-top:5px">输入 6 位绑定码</p></button></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>通知规则</h2><button class="link">高级设置 ›</button></div>
+    <div style="display:flex;flex-direction:column;gap:12px"><div class="row-card"><div class="iconbox warm">🚨</div><div class="row-main"><div class="row-title">SOS / 跌倒立即通知</div><div class="row-desc">紧急事件会强提醒并尝试电话通知</div></div><button class="toggle on"><span></span></button></div><div class="row-card"><div class="iconbox">❤️</div><div class="row-main"><div class="row-title">每日健康摘要</div><div class="row-desc">每天 20:00 推送老人健康简报</div></div><button class="toggle on"><span></span></button></div><div class="row-card"><div class="iconbox">💊</div><div class="row-main"><div class="row-title">服药延迟提醒</div><div class="row-desc">超过提醒时间未确认时通知你</div></div><button class="toggle on"><span></span></button></div></div>
+    <div class="hero-warm" style="margin-top:18px"><div class="row"><div class="iconbox warm">🔋</div><div style="flex:1"><b style="font-size:18px">SOS 按钮电量偏低</b><p class="muted" style="margin-top:6px">当前电量 23%，建议尽快帮老人检查或更换电池。</p></div><span class="chev">›</span></div><div class="btn-grid"><button class="big-btn btn-warm">💬 提醒家人</button><button class="big-btn btn-white">📶 查看设备</button></div></div>
+    <div class="section-title" style="padding:0;margin-left:0;margin-right:0"><h2>隐私与权限</h2></div>
+    <div style="display:flex;flex-direction:column;gap:12px"><button class="row-card"><div class="iconbox">🔐</div><div class="row-main"><div class="row-title">数据访问权限</div><div class="row-desc">查看你能访问哪些老人数据</div></div><span class="tag">已授权</span></button><button class="row-card"><div class="iconbox">🙈</div><div class="row-main"><div class="row-title">隐私说明</div><div class="row-desc">了解哪些内容不会被采集</div></div><span class="tag">保护中</span></button><button class="row-card"><div class="iconbox">👪</div><div class="row-main"><div class="row-title">家庭成员管理</div><div class="row-desc">添加兄弟姐妹或其他联系人</div></div><span class="tag">3 人</span></button></div>
+  </section>
+</main>
+
+<nav class="bottom-nav"><div class="nav-grid">
+  <div class="nav-item active" data-target="guardian" onclick="showPage('guardian')"><div class="nav-icon">⌂</div><span>守护</span></div>
+  <div class="nav-item" data-target="report" onclick="showPage('report')"><div class="nav-icon">▤</div><span>报告</span></div>
+  <div class="nav-item" data-target="care" onclick="showPage('care')"><div class="nav-icon">♡</div><span>关怀</span></div>
+  <div class="nav-item" data-target="settings" onclick="showPage('settings')"><div class="nav-icon">⚙</div><span>设置</span></div>
+</div></nav>
+</div>
+
+<aside class="switcher">
+  <h3>子女端完整原型</h3>
+  <div class="group">主页面</div>
+  <button class="active" data-target="guardian" onclick="showPage('guardian')">守护首页</button>
+  <button data-target="report" onclick="showPage('report')">健康报告页</button>
+  <button data-target="care" onclick="showPage('care')">关怀中心页</button>
+  <button data-target="settings" onclick="showPage('settings')">设置 / 绑定老人页</button>
+  <div class="group">流程页面</div>
+  <button data-target="alert" onclick="showPage('alert')">告警详情页</button>
+  <p style="font-size:13px;line-height:1.5;color:#7A6F5D;margin-top:12px">下载后双击 index.html 即可预览。右侧按钮和底部导航均可切换页面。</p>
+</aside>
+</div>
+<script>
+function showPage(id){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.switcher button').forEach(b=>b.classList.toggle('active',b.dataset.target===id));
+ document.querySelectorAll('.bottom-nav .nav-item').forEach(i=>i.classList.toggle('active',i.dataset.target===id));
+}
+function resolveAlert(){
+ document.getElementById('alertHero').className='hero-green';
+ document.getElementById('alertHero').innerHTML='<div class="between" style="align-items:flex-start"><div><div class="pill">✓ 已处理完成</div><p style="margin-top:15px;font-size:24px;line-height:1.35;font-weight:1000">本次血压提醒已完成处理。</p><p class="muted" style="margin-top:8px;line-height:1.5">已记录：已联系老人，并提醒睡前复测血压。</p></div><div class="iconbox" style="width:88px;height:88px;border-radius:28px;font-size:42px">✓</div></div><div class="btn-grid" style="grid-template-columns:repeat(3,1fr)"><div class="card" style="padding:12px;text-align:center"><span class="muted">等级</span><h2>中</h2></div><div class="card" style="padding:12px;text-align:center"><span class="muted">时间</span><h2>08:40</h2></div><div class="card" style="padding:12px;text-align:center"><span class="muted">状态</span><h2>完成</h2></div></div>';
+ document.getElementById('alertStatus').textContent='已关闭';
+ document.getElementById('alertStatus').style.color='#5B8B62';
+}
+function pendingAlert(){ location.reload(); }
+</script>
+</body>
+</html>

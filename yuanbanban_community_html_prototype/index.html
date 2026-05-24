@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>鼋伴伴社区端完整 HTML 原型</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#F5F1E8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#243A31;display:flex;align-items:center;justify-content:center}
+.stage{display:flex;gap:26px;align-items:center;padding:22px}
+.phone{position:relative;width:390px;height:844px;background:#FCFAF5;border:10px solid #26382F;border-radius:42px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,.22)}
+.phone:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 4%,rgba(122,182,107,.18),transparent 30%),radial-gradient(circle at 88% 8%,rgba(232,166,78,.16),transparent 26%),radial-gradient(circle at 50% 98%,rgba(151,201,159,.10),transparent 30%)}
+.page{position:absolute;inset:0;display:none;overflow:auto;padding-bottom:112px}.page.active{display:block}.page::-webkit-scrollbar{width:0}
+.header{position:relative;z-index:2;padding:30px 24px 14px;display:flex;align-items:center;justify-content:space-between}
+.label{font-size:14px;color:#7A6F5D;font-weight:800}.muted{color:#7A6F5D}h1{margin:2px 0 0;font-size:28px;line-height:1.12;font-weight:1000;letter-spacing:-.4px}h2{margin:0;font-size:21px;font-weight:1000}p{margin:0}button{font-family:inherit;border:0;cursor:pointer}
+.icon-btn{width:48px;height:48px;border-radius:50%;background:#fff;border:1px solid #E9E0D0;box-shadow:0 3px 10px rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;color:#446A57;font-size:22px;position:relative}
+.dot{position:absolute;right:8px;top:8px;width:10px;height:10px;border-radius:50%;background:#E56B5F}
+.scroll{position:relative;z-index:1;padding:0 24px 28px;height:calc(100% - 86px - 98px);overflow:auto}.scroll::-webkit-scrollbar{width:0}
+.section-title{position:relative;z-index:1;margin:20px 0 12px;display:flex;align-items:center;justify-content:space-between}
+.card{background:white;border:1px solid #EFE3CE;border-radius:28px;box-shadow:0 4px 12px rgba(63,52,29,.05)}
+.hero-green,.hero-warm,.hero-red,.hero-gray{border-radius:34px;padding:20px;box-shadow:0 4px 12px rgba(63,52,29,.05);overflow:hidden;position:relative}
+.hero-green{background:#E7F3DF;border:1px solid #CBE2BF}.hero-warm{background:#FFF7E8;border:1px solid #F0D8A8}.hero-red{background:#FFF1EC;border:1px solid #F0B5AE}.hero-gray{background:#F7FAF1;border:1px solid #DCE9CF}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.78);font-size:14px;font-weight:1000;color:#315943}
+.row{display:flex;align-items:center;gap:12px}.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.iconbox{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:#E6F2DF;color:#5B8B62;font-size:22px;flex-shrink:0}.iconbox.warm{background:#FFF0D6;color:#C9822C}.iconbox.red{background:#FFE0DA;color:#E56B5F}.iconbox.gray{background:#F4EFE5;color:#8E816E}
+.tag{padding:3px 9px;border-radius:999px;font-size:12px;font-weight:1000;background:#E6F2DF;color:#5B8B62;white-space:nowrap}.tag.warm{background:#FFF0D6;color:#C9822C}.tag.red{background:#FFE0DA;color:#E56B5F}.tag.gray{background:#F4EFE5;color:#8E816E}
+.big-btn{height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:1000}.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.btn-green{background:#7AB66B;color:white;box-shadow:0 6px 14px rgba(122,182,107,.26)}.btn-warm{background:#E8A64E;color:white;box-shadow:0 6px 14px rgba(232,166,78,.24)}.btn-red{background:#E56B5F;color:white;box-shadow:0 6px 14px rgba(229,107,95,.22)}.btn-white{background:white;color:#315943;border:1px solid #D6E8D4;box-shadow:0 3px 8px rgba(0,0,0,.04)}
+.health-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.quick-card,.health-card{min-height:116px;border-radius:24px;background:white;border:1px solid #EFE3CE;padding:16px;box-shadow:0 4px 12px rgba(63,52,29,.05);text-align:left}
+.quick-action{height:92px;border-radius:24px;background:white;border:1px solid #EFE3CE;box-shadow:0 4px 12px rgba(63,52,29,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:1000;color:#315943}
+.value{margin-top:4px;display:flex;align-items:flex-end;gap:4px}.num{font-size:25px;line-height:1;font-weight:1000;color:#243A31}.unit{font-size:12px;margin-bottom:2px;color:#7A6F5D}.small-title{margin-top:12px;font-size:15px;color:#7A6F5D;font-weight:800}.status{margin-top:8px;font-size:14px;font-weight:1000;color:#5B8B62}.status.warm{color:#C9822C}
+.row-card{min-height:82px;width:100%;border-radius:24px;background:white;border:1px solid #EFE3CE;box-shadow:0 4px 12px rgba(63,52,29,.05);padding:14px;display:flex;align-items:center;gap:12px;text-align:left}.row-main{flex:1;min-width:0}.row-title{display:flex;align-items:center;gap:7px;font-size:18px;font-weight:1000}.row-desc{margin-top:4px;font-size:14px;color:#7A6F5D;line-height:1.35}.chev{color:#B8AA92;font-size:24px;flex-shrink:0}
+.yuan{position:relative;width:36px;height:36px}.yuan.large{width:64px;height:64px}.yuan .head{position:absolute;left:22%;top:7%;width:56%;height:38%;border-radius:999px 999px 8px 8px;background:#7AB66B}.yuan .body{position:absolute;left:8%;top:35%;width:84%;height:45%;border-radius:999px;background:#87C977}.yuan .eye-l,.yuan .eye-r{position:absolute;top:47%;width:8%;height:8%;border-radius:50%;background:#26382F}.yuan .eye-l{left:27%}.yuan .eye-r{right:27%}.yuan .mouth{position:absolute;left:40%;top:63%;width:20%;height:5%;border-radius:999px;background:rgba(38,56,47,.45)}
+.bottom-nav{position:absolute;left:0;right:0;bottom:0;height:98px;background:rgba(252,250,245,.96);backdrop-filter:blur(12px);border-top:1px solid #EFE7D8;border-radius:34px 34px 0 0;padding:12px 28px 0;z-index:20}
+.nav-grid{display:grid;grid-template-columns:repeat(4,1fr);align-items:start;text-align:center;color:#9A927F}.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;font-weight:1000}.nav-icon{width:44px;height:44px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px}.nav-item.active{color:#416348}.nav-item.active .nav-icon{background:#E6F2DF}
+.switcher{width:255px;max-height:820px;overflow:auto;background:#FFFDF7;border:1px solid #E9E0D0;border-radius:28px;padding:16px;box-shadow:0 14px 40px rgba(0,0,0,.10)}.switcher h3{margin:0 0 12px;font-size:18px}.switcher button{width:100%;height:42px;margin:4px 0;border-radius:14px;background:white;border:1px solid #EFE3CE;color:#315943;font-weight:1000;font-size:14px}.switcher button.active{background:#E6F2DF;border-color:#9FCB91}.group{font-size:12px;color:#8B7753;font-weight:1000;margin:14px 0 5px}
+.tabbar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;border-radius:22px;background:#F1ECE1;padding:6px;margin-bottom:12px}.tabbar button{height:42px;border-radius:16px;background:transparent;color:#8C806C;font-weight:1000;font-size:14px}.tabbar button.active{background:white;color:#315943;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.photo{height:92px;border-radius:22px;background:#F7F2E8;border:1px solid #EFE3CE;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}.photo b{font-size:30px}.photo span{font-size:12px;font-weight:1000;color:#7A6F5D}
+.map{height:130px;border-radius:24px;background:white;border:1px solid #DCE9CF;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}.map:before{content:"";position:absolute;inset:0;opacity:.6;background:linear-gradient(90deg,#EEF3E8 1px,transparent 1px),linear-gradient(#EEF3E8 1px,transparent 1px);background-size:24px 24px}
+</style>
+</head>
+<body>
+<div class="stage">
+<div class="phone">
+
+<!-- 看板 -->
+<main id="dashboard" class="page active">
+  <div class="header"><div><div class="label">社区端 · 服务工作台</div><h1>椿木营社区站</h1></div><div class="row"><button class="icon-btn">⌕</button><button class="icon-btn">🔔<span class="dot"></span></button></div></div>
+  <section class="scroll">
+    <div class="hero-green"><div class="between" style="align-items:flex-start"><div><div class="pill">📋 今日工单总览</div><p style="margin-top:15px;font-size:24px;line-height:1.35;font-weight:1000">今日待处理 8 项，<br>其中紧急告警 2 项。</p><p class="muted" style="margin-top:8px;line-height:1.5">当前值班：王社工 · 设备在线率 96% · 服务响应正常</p></div><div style="width:88px;height:88px;border-radius:28px;background:white;border:1px solid #D6E8D4;display:flex;align-items:center;justify-content:center;text-align:center"><div><b style="font-size:28px;color:#315943">18</b><div style="font-size:12px;font-weight:1000;color:#7A6F5D">总工单</div></div></div></div><div class="btn-grid" style="grid-template-columns:repeat(4,1fr)"><div class="card" style="padding:8px;text-align:center"><span class="muted">紧急</span><h2 style="color:#C9822C">2</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">上门</span><h2>3</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">活动</span><h2>1</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">完成</span><h2>10</h2></div></div></div>
+    <div class="section-title"><h2>快捷操作</h2></div>
+    <div class="quick-grid"><button class="quick-action">＋<span>新建工单</span></button><button onclick="showPage('activity')" class="quick-action">📅<span>发活动</span></button><button class="quick-action">🏠<span>上门服务</span></button><button class="quick-action">⌕<span>巡检设备</span></button></div>
+    <div class="section-title"><h2>运营概览</h2></div>
+    <div class="health-grid"><button class="health-card"><div class="iconbox warm">⚠</div><div class="small-title">异常告警</div><div class="value"><span class="num">6</span></div><div class="status warm">今日累计</div></button><button class="health-card"><div class="iconbox">👥</div><div class="small-title">服务老人</div><div class="value"><span class="num">128</span></div><div class="status">当前覆盖</div></button><button class="health-card"><div class="iconbox">📡</div><div class="small-title">设备在线率</div><div class="value"><span class="num">96%</span></div><div class="status">运行稳定</div></button><button class="health-card"><div class="iconbox">💚</div><div class="small-title">满意回访</div><div class="value"><span class="num">24</span></div><div class="status">本周完成</div></button></div>
+    <div class="section-title"><h2>紧急告警</h2><button onclick="showPage('workorders')" class="link">全部工单 ›</button></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <button onclick="showPage('alert')" class="row-card"><div class="iconbox red">🚨</div><div class="row-main"><div class="row-title">李奶奶 · SOS 求助触发</div><div class="row-desc">5 分钟前 · 家中卧室 · 已通知子女，待社区确认</div></div><span class="tag red">紧急</span></button>
+      <button onclick="showPage('alert')" class="row-card"><div class="iconbox warm">⚠</div><div class="row-main"><div class="row-title">陈爷爷 · 跌倒风险告警</div><div class="row-desc">12 分钟前 · 客厅活动异常 · 建议尽快回访</div></div><span class="tag warm">高优先</span></button>
+    </div>
+    <div class="section-title"><h2>社区活动</h2><button onclick="showPage('activity')" class="link">管理活动 ›</button></div>
+    <div class="card" style="padding:16px"><div class="row"><div class="iconbox warm">📅</div><div style="flex:1"><b style="font-size:18px">今日活动：银龄太极体验课</b><p class="muted" style="margin-top:5px">下午 16:30 · 社区活动室 · 已报名 18 人，待签到 6 人</p></div><span class="tag">进行中</span></div><div class="btn-grid"><button class="big-btn btn-green">✓ 活动签到</button><button class="big-btn btn-white">▤ 查看名单</button></div></div>
+    <div class="section-title"><h2>重点关注老人</h2><span class="muted" style="font-weight:1000">今日 4 位</span></div>
+    <div style="display:flex;flex-direction:column;gap:12px"><button onclick="showPage('profile')" class="row-card"><div class="iconbox red">👤</div><div class="row-main"><div class="row-title">李奶奶</div><div class="row-desc">SOS 求助处理中 · 子女已响应 · 社区待回拨</div></div><span class="chev">›</span></button><button onclick="showPage('profile')" class="row-card"><div class="iconbox warm">👤</div><div class="row-main"><div class="row-title">陈爷爷</div><div class="row-desc">跌倒风险待确认 · 客厅活动异常</div></div><span class="chev">›</span></button></div>
+  </section>
+</main>
+
+<!-- 工单列表 -->
+<main id="workorders" class="page">
+  <div class="header"><div><div class="label">社区端 · 工单中心</div><h1>工单列表</h1></div><div class="row"><button class="icon-btn">⌕</button><button class="icon-btn">🔔<span class="dot"></span></button></div></div>
+  <section class="scroll">
+    <div class="hero-green"><div class="between" style="align-items:flex-start"><div><div class="pill">📋 今日工单池</div><p style="margin-top:15px;font-size:24px;line-height:1.35;font-weight:1000">当前待处理 12 项，<br>其中紧急 3 项。</p><p class="muted" style="margin-top:8px">按优先级自动排序 · 值班社工：王社工</p></div><div style="width:88px;height:88px;border-radius:28px;background:white;border:1px solid #D6E8D4;display:flex;align-items:center;justify-content:center;text-align:center"><div><b style="font-size:28px;color:#315943">18</b><div style="font-size:12px;font-weight:1000;color:#7A6F5D">总工单</div></div></div></div><div class="btn-grid" style="grid-template-columns:repeat(4,1fr)"><div class="card" style="padding:8px;text-align:center"><span class="muted">紧急</span><h2 style="color:#E56B5F">3</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">上门</span><h2 style="color:#C9822C">4</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">设备</span><h2>3</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">完成</span><h2>10</h2></div></div></div>
+    <div class="section-title"><h2>工单操作</h2></div><div class="quick-grid"><button class="quick-action">＋<span>新建</span></button><button class="quick-action">☰<span>筛选</span></button><button class="quick-action">↕<span>排序</span></button><button class="quick-action">↓<span>导出</span></button></div>
+    <div class="card" style="padding:16px;margin-top:18px"><div class="row"><span style="font-size:24px">⌕</span><p class="muted" style="font-weight:1000">搜索老人姓名 / 工单编号 / 地址</p></div></div>
+    <div class="section-title"><h2>工单分类</h2><button class="link">更多条件 ›</button></div>
+    <div class="tabbar"><button id="tab-urgent" class="active" onclick="switchTab('urgent')">紧急</button><button id="tab-visit" onclick="switchTab('visit')">上门</button><button id="tab-device" onclick="switchTab('device')">设备</button><button id="tab-done" onclick="switchTab('done')">完成</button></div>
+    <div id="orderList" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div class="section-title"><h2>批量处理</h2></div>
+    <div class="card" style="padding:16px"><div class="row" style="align-items:flex-start"><div class="iconbox">✓</div><div><b style="font-size:18px">建议优先处理紧急与高优先级工单</b><p class="muted" style="margin-top:6px">系统已根据告警等级、等待时长、老人风险标签自动排序。</p></div></div><div class="btn-grid"><button class="big-btn btn-green">☎ 批量回访</button><button class="big-btn btn-white">▤ 生成日报</button></div></div>
+    <div class="section-title"><h2>值班分配</h2></div>
+    <div class="hero-gray"><div class="row"><div class="iconbox warm">👤</div><div style="flex:1"><b>王社工</b><p class="muted">当前处理：SOS 2 项，上门 1 项</p></div><span class="tag warm">忙碌</span></div><hr style="border:0;border-top:1px solid #E6EDD8"><div class="row"><div class="iconbox">👤</div><div style="flex:1"><b>陈社工</b><p class="muted">当前处理：设备巡检 2 项</p></div><span class="tag">正常</span></div></div>
+    <div class="hero-warm" style="margin-top:18px"><div class="row" style="align-items:flex-start"><div class="iconbox warm"><div class="yuan"><i class="head"></i><i class="body"></i><i class="eye-l"></i><i class="eye-r"></i><i class="mouth"></i></div></div><div><b style="font-size:18px">小鼋派单建议</b><p class="muted" style="margin-top:6px">建议王社工优先处理李奶奶 SOS 工单；设备类工单可分配给陈社工。</p></div></div><div class="btn-grid"><button class="big-btn btn-warm">➤ 一键派单</button><button class="big-btn btn-white">💬 通知值班</button></div></div>
+  </section>
+</main>
+
+<!-- 告警工单详情 -->
+<main id="alert" class="page">
+  <div class="header"><button class="icon-btn" onclick="showPage('dashboard')">‹</button><div style="text-align:center"><div class="label">社区端 · 告警工单</div><h1 style="font-size:27px">工单详情</h1></div><button class="icon-btn">🔔<span class="dot"></span></button></div>
+  <section class="scroll">
+    <div id="alertHero" class="hero-red"><div class="between" style="align-items:flex-start"><div><div class="pill" style="color:#E56B5F">🚨 紧急告警工单</div><p style="margin-top:15px;font-size:24px;line-height:1.35;font-weight:1000">李奶奶触发 SOS，社区需确认现场情况。</p><p class="muted" style="margin-top:8px;line-height:1.5">09:18 由老人端 SOS 按钮触发，子女端已收到通知，社区端需要协同响应。</p></div><div class="iconbox red" style="width:88px;height:88px;border-radius:28px;font-size:42px">🚨</div></div><div class="btn-grid" style="grid-template-columns:repeat(3,1fr)"><div class="card" style="padding:10px;text-align:center"><span class="muted">优先级</span><h2 style="color:#C9822C">紧急</h2></div><div class="card" style="padding:10px;text-align:center"><span class="muted">已用时</span><h2 style="color:#C9822C">5分</h2></div><div class="card" style="padding:10px;text-align:center"><span class="muted">状态</span><h2 style="color:#C9822C">处理中</h2></div></div></div>
+    <div class="btn-grid"><button class="big-btn btn-red">☎ 电话确认</button><button class="big-btn btn-white">🧭 导航上门</button></div>
+    <div class="section-title"><h2>工单信息</h2><span class="muted" style="font-weight:1000">#SOS-018</span></div>
+    <div style="display:flex;flex-direction:column;gap:12px"><button onclick="showPage('profile')" class="row-card"><div class="iconbox warm">👤</div><div class="row-main"><div class="row-title">服务对象</div><div class="row-desc">李奶奶 · 72 岁 · 独居老人 · 重点关注</div></div><span class="tag warm">重点</span></button><div class="row-card"><div class="iconbox">📍</div><div class="row-main"><div class="row-title">告警位置</div><div class="row-desc">椿木营社区 3 栋 2 单元 401 · 卧室附近</div></div><span class="tag">已定位</span></div><div class="row-card"><div class="iconbox warm">⏰</div><div class="row-main"><div class="row-title">触发时间</div><div class="row-desc">今天 09:18 · 老人端 SOS 按钮主动触发</div></div><span class="tag warm">5分钟前</span></div></div>
+    <div class="section-title"><h2>响应进度</h2><span id="alertState" style="color:#C9822C;font-weight:1000">正在响应</span></div>
+    <div id="timeline" class="card" style="padding:16px"><div class="row"><div class="iconbox">✓</div><div><b>老人端触发 SOS</b><p class="muted">09:18 · 床头 SOS 按钮触发</p></div></div><hr style="border:0;border-top:1px solid #EFE7D8"><div class="row"><div class="iconbox">✓</div><div><b>子女端收到通知</b><p class="muted">09:18 · 女儿已查看告警</p></div></div><hr style="border:0;border-top:1px solid #EFE7D8"><div class="row"><div class="iconbox warm">⏳</div><div><b>电话 / 上门确认</b><p class="muted">等待社区人员确认现场情况</p></div></div></div>
+    <div class="section-title"><h2>老人当前状态</h2><button onclick="showPage('profile')" class="link">健康档案 ›</button></div>
+    <div class="health-grid"><button class="health-card"><div class="iconbox warm">❤️</div><div class="small-title">心率</div><div class="value"><span class="num">84</span><span class="unit">次/分</span></div><div class="status warm">略快</div></button><button class="health-card"><div class="iconbox">🌬️</div><div class="small-title">呼吸</div><div class="value"><span class="num">19</span><span class="unit">次/分</span></div><div class="status">稳定</div></button><button class="health-card"><div class="iconbox warm">📡</div><div class="small-title">活动状态</div><div class="value"><span class="num">静止</span></div><div class="status warm">需确认</div></button><button class="health-card"><div class="iconbox">📶</div><div class="small-title">设备</div><div class="value"><span class="num">在线</span></div><div class="status">刚刚同步</div></button></div>
+    <div class="section-title"><h2>现场定位</h2></div>
+    <div class="hero-gray"><div class="map"><div style="position:relative;text-align:center"><div class="iconbox warm" style="margin:auto">📍</div><b style="display:block;margin-top:8px">3 栋 2 单元 401</b><p class="muted">距社区站约 420 米</p></div></div><div class="btn-grid"><button class="big-btn btn-green">🧭 导航前往</button><button class="big-btn btn-white">📷 上传现场</button></div></div>
+    <div class="hero-warm" style="margin-top:18px"><div class="row" style="align-items:flex-start"><div class="iconbox warm"><div class="yuan"><i class="head"></i><i class="body"></i><i class="eye-l"></i><i class="eye-r"></i><i class="mouth"></i></div></div><div><b style="font-size:18px">小鼋处置建议</b><p class="muted" style="margin-top:6px">建议先电话确认老人是否清醒、是否有胸闷头晕。若 2 分钟内无人接听，请立即安排上门查看。</p></div></div><div class="btn-grid"><button class="big-btn btn-warm">➤ 同步子女</button><button class="big-btn btn-white">🎙 语音记录</button></div></div>
+    <div class="section-title"><h2>处理结果</h2></div>
+    <div class="card" style="padding:16px"><div style="display:flex;flex-direction:column;gap:10px"><button class="row-card" style="min-height:70px;background:#FCFAF5"><div class="iconbox">✓</div><div class="row-main"><div class="row-title">老人安全，误触 SOS</div><div class="row-desc">已电话确认，无需上门</div></div></button><button class="row-card" style="min-height:70px;background:#FCFAF5"><div class="iconbox warm">🏠</div><div class="row-main"><div class="row-title">已安排上门查看</div><div class="row-desc">社区人员正在前往老人住所</div></div></button></div><div class="btn-grid"><button onclick="finishAlert()" class="big-btn btn-green">✓ 完成工单</button><button onclick="resetAlert()" class="big-btn btn-white">⏳ 继续跟进</button></div></div>
+  </section>
+</main>
+
+<!-- 活动管理 -->
+<main id="activity" class="page">
+  <div class="header"><div><div class="label">社区端 · 活动管理</div><h1>银龄活动</h1></div><div class="row"><button class="icon-btn">⌕</button><button class="icon-btn">🔔<span class="dot"></span></button></div></div>
+  <section class="scroll">
+    <div class="hero-green"><div class="between" style="align-items:flex-start"><div><div class="pill">📅 今日活动总览</div><p style="margin-top:15px;font-size:24px;line-height:1.35;font-weight:1000">今日 3 场活动，<br>共 42 位老人报名。</p><p class="muted" style="margin-top:8px">1 场进行中 · 1 场待签到 · 1 场已结束</p></div><div style="width:88px;height:88px;border-radius:28px;background:white;border:1px solid #D6E8D4;display:flex;align-items:center;justify-content:center;text-align:center"><div><b style="font-size:28px;color:#315943">42</b><div style="font-size:12px;font-weight:1000;color:#7A6F5D">报名人数</div></div></div></div><div class="btn-grid" style="grid-template-columns:repeat(4,1fr)"><div class="card" style="padding:8px;text-align:center"><span class="muted">活动</span><h2>3</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">签到</span><h2>28</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">待签到</span><h2 style="color:#C9822C">14</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">积分</span><h2>+560</h2></div></div></div>
+    <div class="section-title"><h2>快捷操作</h2></div><div class="quick-grid"><button class="quick-action">＋<span>新建</span></button><button class="quick-action">▣<span>签到</span></button><button class="quick-action">📣<span>通知</span></button><button class="quick-action">↓<span>导出</span></button></div>
+    <div class="section-title"><h2>进行中活动</h2><button class="link">现场管理 ›</button></div>
+    <div class="hero-warm"><div class="row"><div class="iconbox warm">☯</div><div style="flex:1"><b style="font-size:19px">银龄太极体验课</b><p class="muted">16:30-17:15 · 社区活动室 · 王社工负责</p></div><span class="tag warm">进行中</span></div><div class="btn-grid" style="grid-template-columns:repeat(3,1fr)"><div class="card" style="padding:10px;text-align:center"><span class="muted">报名</span><h2>18</h2></div><div class="card" style="padding:10px;text-align:center"><span class="muted">签到</span><h2>12</h2></div><div class="card" style="padding:10px;text-align:center"><span class="muted">待签</span><h2 style="color:#C9822C">6</h2></div></div><div class="btn-grid"><button class="big-btn btn-green">▣ 签到核销</button><button class="big-btn btn-white">👥 报名名单</button></div></div>
+    <div class="section-title"><h2>活动列表</h2><button class="link">筛选 ☰</button></div>
+    <div style="display:flex;flex-direction:column;gap:12px"><div class="row-card"><div class="iconbox warm">☯</div><div class="row-main"><div class="row-title">银龄太极体验课</div><div class="row-desc">今日 16:30 · 活动室 · 已签到 12/18</div></div><span class="tag warm">进行中</span></div><div class="row-card"><div class="iconbox">❤️</div><div class="row-main"><div class="row-title">高血压健康讲座</div><div class="row-desc">今日 19:00 · 二楼会议室 · 报名 16 人</div></div><span class="tag">待开始</span></div><div class="row-card"><div class="iconbox">💚</div><div class="row-main"><div class="row-title">银发智能手机课堂</div><div class="row-desc">明日 10:00 · 志愿者 3 人 · 报名 21 人</div></div><span class="tag">招募中</span></div></div>
+    <div class="section-title"><h2>签到管理</h2><span class="muted" style="font-weight:1000">太极课</span></div>
+    <div class="card" style="padding:16px"><div class="row"><div class="iconbox">✓</div><div style="flex:1"><b>李奶奶</b><p class="muted">子女已知情 · 参与后鼋气罐 +20</p></div><span class="tag">已签到</span></div><hr style="border:0;border-top:1px solid #EFE7D8"><div class="row"><div class="iconbox warm">👤</div><div style="flex:1"><b>张奶奶</b><p class="muted">血压偏高，建议轻量参与</p></div><span class="tag warm">待确认</span></div></div>
+    <div class="hero-gray" style="margin-top:18px"><div class="row" style="align-items:flex-start"><div class="iconbox">💬</div><div><b style="font-size:18px">活动通知模板</b><p class="muted" style="margin-top:6px">“李奶奶已报名今日太极体验课，活动结束后将同步参与记录和鼋气罐积分。”</p></div></div><div class="btn-grid"><button class="big-btn btn-green">➤ 通知家属</button><button class="big-btn btn-white">✎ 修改模板</button></div></div>
+    <div class="section-title"><h2>活动归档</h2></div>
+    <div class="health-grid"><button class="quick-card"><div class="iconbox">▤</div><b style="display:block;margin-top:12px">生成服务记录</b><p class="muted" style="font-size:13px">写入老人服务档案</p></button><button class="quick-card"><div class="iconbox warm">🎁</div><b style="display:block;margin-top:12px">发放鼋气罐</b><p class="muted" style="font-size:13px">参与老人 +20 积分</p></button></div>
+  </section>
+</main>
+
+<!-- 老人服务档案 -->
+<main id="profile" class="page">
+  <div class="header"><button onclick="showPage('dashboard')" class="icon-btn">‹</button><div style="text-align:center"><div class="label">社区端 · 服务档案</div><h1 style="font-size:27px">老人档案</h1></div><button class="icon-btn">🔔<span class="dot"></span></button></div>
+  <section class="scroll">
+    <div class="hero-green"><div class="row" style="align-items:flex-start"><div class="iconbox" style="width:76px;height:76px;border-radius:26px;font-size:38px">👤</div><div style="flex:1"><div class="pill">🛡️ 重点服务对象</div><p style="margin-top:12px;font-size:24px;font-weight:1000">李奶奶</p><p class="muted" style="line-height:1.45">72 岁 · 独居 · 高血压慢病管理 · 椿木营社区 3 栋 2 单元 401</p></div></div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:15px"><span class="tag">独居老人</span><span class="tag warm">高血压</span><span class="tag warm">重点关注</span><span class="tag">设备在线</span></div><div class="btn-grid" style="grid-template-columns:repeat(4,1fr)"><div class="card" style="padding:8px;text-align:center"><span class="muted">健康分</span><h2>89</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">告警</span><h2 style="color:#C9822C">3次</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">服务</span><h2>12次</h2></div><div class="card" style="padding:8px;text-align:center"><span class="muted">活动</span><h2>8次</h2></div></div></div>
+    <div class="section-title"><h2>快捷操作</h2></div><div class="quick-grid"><button class="quick-action">☎<span>联系</span></button><button class="quick-action">🏠<span>上门</span></button><button class="quick-action">✎<span>更新</span></button><button class="quick-action">↓<span>导出</span></button></div>
+    <div class="section-title"><h2>健康概况</h2><button class="link">详细报告 ›</button></div>
+    <div class="health-grid"><button class="health-card"><div class="iconbox">❤️</div><div class="small-title">平均心率</div><div class="value"><span class="num">76</span><span class="unit">次/分</span></div><div class="status">正常</div></button><button class="health-card"><div class="iconbox warm">💧</div><div class="small-title">平均血压</div><div class="value"><span class="num">128/82</span><span class="unit">mmHg</span></div><div class="status warm">偏高</div></button><button class="health-card"><div class="iconbox">🌙</div><div class="small-title">睡眠均值</div><div class="value"><span class="num">7.8</span><span class="unit">小时</span></div><div class="status">良好</div></button><button class="health-card"><div class="iconbox">📈</div><div class="small-title">活动状态</div><div class="value"><span class="num">稳定</span></div><div class="status">近7天正常</div></button></div>
+    <div class="section-title"><h2>近期风险记录</h2><span class="muted" style="font-weight:1000">近 30 天</span></div>
+    <div style="display:flex;flex-direction:column;gap:12px"><button onclick="showPage('alert')" class="row-card"><div class="iconbox warm">⚠</div><div class="row-main"><div class="row-title">血压轻微偏高 2 次</div><div class="row-desc">最近一次：今天 08:40 · 已提醒子女关注晚间复测</div></div><span class="tag warm">需关注</span></button><button class="row-card"><div class="iconbox">🚨</div><div class="row-main"><div class="row-title">SOS 误触 1 次</div><div class="row-desc">5 月 20 日 · 电话确认安全，无需上门</div></div><span class="tag">已处理</span></button></div>
+    <div class="section-title"><h2>服务记录</h2><button class="link">全部记录 ›</button></div>
+    <div class="card" style="padding:16px"><div class="row"><div class="iconbox">✓</div><div><b>电话回访</b><p class="muted">今天 09:10 · 确认老人状态稳定，提醒今晚复测血压</p></div></div><hr style="border:0;border-top:1px solid #EFE7D8"><div class="row"><div class="iconbox">🏠</div><div><b>上门设备检查</b><p class="muted">5 月 18 日 · 处理 SOS 按钮低电量问题</p></div></div><hr style="border:0;border-top:1px solid #EFE7D8"><div class="row"><div class="iconbox">🩺</div><div><b>慢病健康回访</b><p class="muted">5 月 15 日 · 记录高血压用药及饮食建议</p></div></div></div>
+    <div class="section-title"><h2>家属与联系人</h2></div>
+    <div class="card" style="padding:16px"><div class="row"><div class="iconbox warm">👤</div><div style="flex:1"><b>女儿</b><p class="muted">主要联系人 · 告警优先通知</p></div><button class="big-btn btn-warm" style="width:72px;height:38px;font-size:13px">联系</button></div><hr style="border:0;border-top:1px solid #EFE7D8"><div class="row"><div class="iconbox">👤</div><div style="flex:1"><b>王社工</b><p class="muted">社区责任人 · 健康回访与上门服务</p></div><button class="big-btn btn-green" style="width:72px;height:38px;font-size:13px">内部</button></div></div>
+    <div class="section-title"><h2>社区参与</h2><button onclick="showPage('activity')" class="link">活动记录 ›</button></div>
+    <div class="health-grid"><button class="quick-card"><div class="iconbox">📅</div><b style="display:block;margin-top:12px">活动参与</b><p class="muted" style="font-size:13px">本月参与 3 次</p></button><button class="quick-card"><div class="iconbox warm">🎁</div><b style="display:block;margin-top:12px">鼋气罐积分</b><p class="muted" style="font-size:13px">当前 281 分</p></button></div>
+    <div class="hero-warm" style="margin-top:18px"><div class="row" style="align-items:flex-start"><div class="iconbox warm"><div class="yuan"><i class="head"></i><i class="body"></i><i class="eye-l"></i><i class="eye-r"></i><i class="mouth"></i></div></div><div><b style="font-size:18px">小鼋长期建议</b><p class="muted" style="margin-top:6px">建议继续维持每周一次健康回访，并鼓励李奶奶持续参加低强度社区活动。</p></div></div><div class="btn-grid"><button class="big-btn btn-warm">➤ 同步建议</button><button class="big-btn btn-white">▤ 写入档案</button></div></div>
+  </section>
+</main>
+
+<nav class="bottom-nav"><div class="nav-grid">
+  <div class="nav-item active" data-target="dashboard" onclick="showPage('dashboard')"><div class="nav-icon">⌂</div><span>看板</span></div>
+  <div class="nav-item" data-target="workorders" onclick="showPage('workorders')"><div class="nav-icon">▤</div><span>工单</span></div>
+  <div class="nav-item" data-target="activity" onclick="showPage('activity')"><div class="nav-icon">📅</div><span>活动</span></div>
+  <div class="nav-item" data-target="profile" onclick="showPage('profile')"><div class="nav-icon">👤</div><span>档案</span></div>
+</div></nav>
+</div>
+
+<aside class="switcher">
+  <h3>社区端完整原型</h3>
+  <div class="group">主页面</div>
+  <button class="active" data-target="dashboard" onclick="showPage('dashboard')">首页 / 工单看板</button>
+  <button data-target="workorders" onclick="showPage('workorders')">工单列表页</button>
+  <button data-target="activity" onclick="showPage('activity')">活动管理页</button>
+  <button data-target="profile" onclick="showPage('profile')">老人服务档案页</button>
+  <div class="group">流程页面</div>
+  <button data-target="alert" onclick="showPage('alert')">告警工单详情页</button>
+  <p style="font-size:13px;line-height:1.5;color:#7A6F5D;margin-top:12px">下载后双击 index.html 即可预览。右侧按钮和底部导航均可切换页面。</p>
+</aside>
+</div>
+
+<script>
+const orderData = {
+ urgent: [
+  ['🚨','李奶奶 · SOS 求助触发','5 分钟前 · 卧室附近 · 子女已查看，社区待确认','紧急','red','#SOS-018'],
+  ['⚠','陈爷爷 · 跌倒风险告警','12 分钟前 · 客厅活动异常 · 建议电话回访','高优先','warm','#FALL-026'],
+  ['❤️','张奶奶 · 血压连续偏高','28 分钟前 · 子女未响应 · 需要社区协助确认','待回访','warm','#BP-041']
+ ],
+ visit: [
+  ['🏠','王爷爷 · 上门看护申请','今天 16:00 · 协助检查服药与居家设备','待上门','green','#VISIT-112'],
+  ['🩺','张奶奶 · 慢病健康回访','今天 15:30 · 血压复查与饮食建议记录','待回访','green','#CARE-088'],
+  ['👥','刘奶奶 · 家属协同沟通','明天 10:00 · 子女申请社区电话说明服务方案','已预约','green','#FAM-067']
+ ],
+ device: [
+  ['📡','刘奶奶 · 主设备离线','今天 11:20 · 客厅主设备 15 分钟未同步','待巡检','warm','#DEV-230'],
+  ['🔋','李奶奶 · SOS 按钮低电量','今天 08:12 · 当前电量 23%，建议家属协助','低电量','warm','#BAT-019'],
+  ['📈','赵爷爷 · 设备数据波动','昨天 20:40 · 毫米波设备需重新校准位置','待校准','green','#RADAR-052']
+ ],
+ done: [
+  ['✓','周奶奶 · 服药延迟提醒','今天 09:05 · 已联系子女确认，工单关闭','已完成','green','#MED-160'],
+  ['▤','赵爷爷 · 健康档案补录','昨天 18:20 · 已补录月度服务记录','已归档','green','#FILE-044']
+ ]
+};
+function showPage(id){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.switcher button').forEach(b=>b.classList.toggle('active',b.dataset.target===id));
+ document.querySelectorAll('.bottom-nav .nav-item').forEach(i=>i.classList.toggle('active',i.dataset.target===id));
+ if(id==='workorders') renderOrders('urgent');
+}
+function switchTab(tab){
+ ['urgent','visit','device','done'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('active',t===tab));
+ renderOrders(tab);
+}
+function toneClass(t){ return t==='red'?'red':t==='warm'?'warm':''; }
+function renderOrders(tab){
+ const list=document.getElementById('orderList'); if(!list) return;
+ list.innerHTML = orderData[tab].map(x=>`<button onclick="showPage('alert')" class="row-card" style="min-height:92px"><div class="iconbox ${toneClass(x[4])}">${x[0]}</div><div class="row-main"><div class="row-title">${x[1]}</div><div class="row-desc">${x[2]}</div><p style="margin-top:4px;font-size:12px;font-weight:800;color:#9B8B71">${x[5]}</p></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px"><span class="tag ${toneClass(x[4])}">${x[3]}</span><span class="chev">›</span></div></button>`).join('');
+}
+function finishAlert(){
+ document.getElementById('alertHero').className='hero-green';
+ document.getElementById('alertHero').innerHTML='<div class="between" style="align-items:flex-start"><div><div class="pill">✓ 工单已完成</div><p style="margin-top:15px;font-size:24px;line-height:1.35;font-weight:1000">本次 SOS 工单已闭环。</p><p class="muted" style="margin-top:8px;line-height:1.5">已记录：电话确认老人安全，并同步处理结果给子女。</p></div><div class="iconbox" style="width:88px;height:88px;border-radius:28px;font-size:42px">✓</div></div><div class="btn-grid" style="grid-template-columns:repeat(3,1fr)"><div class="card" style="padding:10px;text-align:center"><span class="muted">优先级</span><h2>紧急</h2></div><div class="card" style="padding:10px;text-align:center"><span class="muted">用时</span><h2>8分</h2></div><div class="card" style="padding:10px;text-align:center"><span class="muted">状态</span><h2>完成</h2></div></div>';
+ document.getElementById('alertState').textContent='已闭环';
+ document.getElementById('alertState').style.color='#5B8B62';
+}
+function resetAlert(){ location.reload(); }
+renderOrders('urgent');
+</script>
+</body>
+</html>

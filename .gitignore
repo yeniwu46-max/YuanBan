@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+unpackage/
+
+# Logs
+*.log
+dev-server*.out.log
+dev-server*.err.log
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+
+# Cache
+.vite/
+*.local

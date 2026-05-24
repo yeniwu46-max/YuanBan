@@ -1,0 +1,22 @@
+{
+  "name": "鼋伴伴老人端",
+  "appid": "__UNI__YUANBANBAN",
+  "description": "鼋伴伴智慧养老老人端 MVP",
+  "versionName": "0.1.0",
+  "versionCode": "1",
+  "transformPx": false,
+  "mp-weixin": {
+    "appid": "",
+    "setting": {
+      "urlCheck": false,
+      "es6": true
+    },
+    "usingComponents": true
+  },
+  "h5": {
+    "router": {
+      "mode": "hash"
+    }
+  }
+}
+

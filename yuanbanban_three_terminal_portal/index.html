@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>鼋伴伴三端协同原型总入口</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:#F5F1E8;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  color:#243A31;
+  overflow:hidden;
+}
+.bg{
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at 18% 8%,rgba(122,182,107,.22),transparent 28%),
+    radial-gradient(circle at 86% 12%,rgba(232,166,78,.20),transparent 24%),
+    radial-gradient(circle at 50% 100%,rgba(151,201,159,.14),transparent 32%);
+  pointer-events:none;
+}
+.app{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  display:grid;
+  grid-template-columns:360px 1fr;
+  gap:20px;
+  padding:22px;
+}
+.sidebar{
+  background:rgba(255,253,247,.92);
+  border:1px solid #E9E0D0;
+  border-radius:34px;
+  box-shadow:0 18px 50px rgba(38,56,47,.12);
+  padding:22px;
+  overflow:auto;
+}
+.logo-row{display:flex;align-items:center;gap:14px}
+.logo{
+  width:64px;height:64px;border-radius:24px;
+  background:#E7F3DF;border:1px solid #CBE2BF;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 2px 12px rgba(64,90,55,.10);
+}
+.yuan{position:relative;width:42px;height:42px}
+.yuan .head{position:absolute;left:22%;top:7%;width:56%;height:38%;border-radius:999px 999px 8px 8px;background:#7AB66B}
+.yuan .body{position:absolute;left:8%;top:35%;width:84%;height:45%;border-radius:999px;background:#87C977}
+.yuan .eye-l,.yuan .eye-r{position:absolute;top:47%;width:8%;height:8%;border-radius:50%;background:#26382F}
+.yuan .eye-l{left:27%}.yuan .eye-r{right:27%}
+.yuan .mouth{position:absolute;left:40%;top:63%;width:20%;height:5%;border-radius:999px;background:rgba(38,56,47,.45)}
+.kicker{font-size:14px;font-weight:900;color:#7A6F5D}
+h1{font-size:30px;line-height:1.12;margin:2px 0 0;font-weight:1000;letter-spacing:-.5px}
+.desc{margin:18px 0 0;color:#6F6658;font-size:15px;line-height:1.7}
+.section-title{font-size:14px;font-weight:1000;color:#8B7753;margin:24px 0 10px}
+.entry{
+  width:100%;
+  min-height:96px;
+  border:1px solid #EFE3CE;
+  background:white;
+  border-radius:26px;
+  box-shadow:0 5px 14px rgba(63,52,29,.06);
+  padding:16px;
+  display:flex;
+  gap:14px;
+  align-items:center;
+  text-align:left;
+  cursor:pointer;
+  margin-bottom:12px;
+  transition:.2s ease;
+}
+.entry:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(63,52,29,.10)}
+.entry.active{background:#E7F3DF;border-color:#9FCB91}
+.icon{
+  width:52px;height:52px;border-radius:19px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;flex-shrink:0;
+  background:#E6F2DF;color:#5B8B62;
+}
+.entry.family .icon{background:#FFF0D6;color:#C9822C}
+.entry.community .icon{background:#F4EFE5;color:#5B8B62}
+.entry-title{font-size:19px;font-weight:1000;color:#243A31}
+.entry-desc{font-size:13px;line-height:1.45;color:#7A6F5D;margin-top:4px}
+.tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.tag{
+  padding:6px 10px;border-radius:999px;
+  background:#F4EFE5;color:#8B7753;
+  font-size:12px;font-weight:1000;
+}
+.flow{
+  background:#FFF7E8;border:1px solid #F0D8A8;
+  border-radius:26px;padding:16px;margin-top:14px;
+}
+.flow-title{font-size:17px;font-weight:1000}
+.flow p{font-size:13px;color:#7A6F5D;line-height:1.6;margin:8px 0 0}
+.viewer{
+  position:relative;
+  background:#26382F;
+  border-radius:36px;
+  box-shadow:0 22px 60px rgba(0,0,0,.20);
+  padding:14px;
+  overflow:hidden;
+}
+.viewer-head{
+  position:absolute;
+  left:28px;right:28px;top:22px;
+  height:54px;
+  z-index:4;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  pointer-events:none;
+}
+.viewer-title{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,253,247,.94);
+  border:1px solid #E9E0D0;
+  border-radius:999px;
+  padding:8px 14px;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+.status-dot{width:10px;height:10px;border-radius:50%;background:#7AB66B}
+.viewer-title span{font-size:14px;font-weight:1000;color:#243A31}
+.open-btn{
+  pointer-events:auto;
+  height:40px;
+  padding:0 14px;
+  border:0;
+  border-radius:999px;
+  background:#7AB66B;
+  color:white;
+  font-weight:1000;
+  cursor:pointer;
+}
+iframe{
+  width:100%;
+  height:100%;
+  border:0;
+  background:#F5F1E8;
+  border-radius:26px;
+}
+.bottom-note{
+  position:absolute;
+  right:34px;
+  bottom:30px;
+  z-index:5;
+  background:rgba(255,253,247,.94);
+  border:1px solid #E9E0D0;
+  border-radius:999px;
+  padding:10px 16px;
+  font-size:13px;
+  color:#7A6F5D;
+  font-weight:900;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+@media(max-width:900px){
+  body{overflow:auto}
+  .app{height:auto;grid-template-columns:1fr}
+  .viewer{height:900px}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo">
+        <div class="yuan">
+          <i class="head"></i><i class="body"></i><i class="eye-l"></i><i class="eye-r"></i><i class="mouth"></i>
+        </div>
+      </div>
+      <div>
+        <div class="kicker">三端协同智慧养老原型</div>
+        <h1>鼋伴伴</h1>
+      </div>
+    </div>
+
+    <p class="desc">
+      面向独居及半独居老人的「老人端 + 子女端 + 社区端」协同服务系统。
+      点击下方入口，可在右侧直接预览对应端的完整 HTML 原型。
+    </p>
+
+    <div class="tag-row">
+      <span class="tag">智能感知</span>
+      <span class="tag">家庭关怀</span>
+      <span class="tag">社区工单</span>
+      <span class="tag">小鼋智能体</span>
+    </div>
+
+    <div class="section-title">原型入口</div>
+
+    <button class="entry active elder" data-file="elder.html" data-name="老人端完整原型" onclick="loadProto(this)">
+      <div class="icon">👵</div>
+      <div>
+        <div class="entry-title">老人端</div>
+        <div class="entry-desc">首页、健康、用药、SOS、陪伴、隐私、设备管理</div>
+      </div>
+    </button>
+
+    <button class="entry family" data-file="family.html" data-name="子女端完整原型" onclick="loadProto(this)">
+      <div class="icon">👨‍👩‍👧</div>
+      <div>
+        <div class="entry-title">子女端</div>
+        <div class="entry-desc">守护首页、告警详情、健康报告、关怀中心、绑定设置</div>
+      </div>
+    </button>
+
+    <button class="entry community" data-file="community.html" data-name="社区端完整原型" onclick="loadProto(this)">
+      <div class="icon">🏢</div>
+      <div>
+        <div class="entry-title">社区端</div>
+        <div class="entry-desc">工单看板、工单列表、告警详情、活动管理、老人档案</div>
+      </div>
+    </button>
+
+    <div class="flow">
+      <div class="flow-title">核心闭环</div>
+      <p>
+        设备发现异常 → 老人端温和提醒 / SOS 求助 → 子女端接收并关怀 →
+        社区端兜底响应 → 工单归档 → 健康与服务档案沉淀。
+      </p>
+    </div>
+  </aside>
+
+  <main class="viewer">
+    <div class="viewer-head">
+      <div class="viewer-title">
+        <i class="status-dot"></i>
+        <span id="viewerName">老人端完整原型</span>
+      </div>
+      <button class="open-btn" onclick="openCurrent()">新窗口打开</button>
+    </div>
+    <iframe id="viewer" src="elder.html"></iframe>
+    <div class="bottom-note">提示：右侧预览里也有各端自己的导航按钮</div>
+  </main>
+</div>
+
+<script>
+let currentFile = "elder.html";
+function loadProto(btn){
+  document.querySelectorAll(".entry").forEach(item=>item.classList.remove("active"));
+  btn.classList.add("active");
+  currentFile = btn.dataset.file;
+  document.getElementById("viewer").src = currentFile;
+  document.getElementById("viewerName").textContent = btn.dataset.name;
+}
+function openCurrent(){
+  window.open(currentFile, "_blank");
+}
+</script>
+</body>
+</html>
