@@ -133,6 +133,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app'
 import { computed, watch } from 'vue'
 import AppHeader from '@/components/AppHeader.vue'
 import BigButton from '@/components/BigButton.vue'
@@ -150,6 +151,10 @@ import type { HealthMetric } from '@/types/elder'
 
 const { elder, elderId, alertStore, guardian, report } = useFamilyElderContext()
 const recommendedActions = getRecommendedActions()
+
+onShow(() => {
+  void alertStore.hydrate(elderId.value)
+})
 
 const alert = computed(() => alertStore.activeAlert)
 const alertBelongsToCurrentElder = computed(
@@ -191,8 +196,7 @@ watch(
       guardian.setCurrentElder(alert.value.elderId)
     }
     if (alert.value.status === 'pending') {
-      alertStore.confirmAlert(id)
-      syncFamilyDerivedState()
+      void alertStore.confirmAlert(id).then(() => syncFamilyDerivedState())
     }
   },
   { immediate: true }
@@ -218,17 +222,17 @@ function toast(title: string) {
   uni.showToast({ title: `${title}（演示）`, icon: 'none' })
 }
 
-function handleResolve() {
+async function handleResolve() {
   if (!alert.value) return
-  alertStore.resolveAlert(alert.value.id)
+  await alertStore.resolveAlert(alert.value.id)
   syncFamilyDerivedState()
   uni.showToast({ title: '已记录处理结果', icon: 'none' })
   setTimeout(() => goBack('/pages/family/guardian/index'), 300)
 }
 
-function handlePending() {
+async function handlePending() {
   if (!alert.value) return
-  alertStore.markPending(alert.value.id)
+  await alertStore.markPending(alert.value.id)
   syncFamilyDerivedState()
   uni.showToast({ title: '已标记稍后处理', icon: 'none' })
   setTimeout(() => goBack('/pages/family/guardian/index'), 300)

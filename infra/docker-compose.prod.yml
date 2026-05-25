@@ -1,0 +1,39 @@
+# 1 日上线最小栈：Postgres + API（无 Redis / EMQX，降低故障面）
+# 用法: cd infra && docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-yuanbanban}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-yuanbanban}
+      POSTGRES_DB: ${POSTGRES_DB:-yuanbanban}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-yuanbanban}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    # 不映射 5432 到公网，仅容器内访问
+
+  api:
+    build:
+      context: ../services/api
+      dockerfile: Dockerfile
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-yuanbanban}:${POSTGRES_PASSWORD:-yuanbanban}@postgres:5432/${POSTGRES_DB:-yuanbanban}
+      REDIS_ENABLED: "false"
+      MQTT_ENABLED: "false"
+      RUN_SEED: "${RUN_SEED:-true}"
+      SOS_DEDUP_SECONDS: "${SOS_DEDUP_SECONDS:-300}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

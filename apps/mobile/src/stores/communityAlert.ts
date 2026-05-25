@@ -33,7 +33,7 @@ export const useCommunityAlertStore = defineStore('communityAlert', {
         step.detail = '社区人员已打开工单'
       }
     },
-    finish() {
+    async finish() {
       if (this.finished) return
       this.finished = true
       this.detail.statusLabel = '完成'
@@ -47,8 +47,8 @@ export const useCommunityAlertStore = defineStore('communityAlert', {
       }
       const dashboard = useCommunityDashboardStore()
       const workorder = useCommunityWorkorderStore()
+      await workorder.finishOrder(this.activeOrderId)
       dashboard.onWorkOrderFinished(this.activeOrderId)
-      workorder.finishOrder(this.activeOrderId)
       dashboard.syncFromWorkorderPool({ ...workorder.poolStats })
     },
     resetFollowUp() {

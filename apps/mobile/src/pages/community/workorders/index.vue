@@ -123,6 +123,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import BigButton from '@/components/BigButton.vue'
 import StatusTag from '@/components/StatusTag.vue'
@@ -140,6 +141,10 @@ import { goDetail } from '@/utils/navigate'
 
 const community = useCommunityStore()
 const workorder = useCommunityWorkorderStore()
+
+onShow(() => {
+  void workorder.fetchOrders()
+})
 
 const site = computed(() => community.site)
 const pool = computed(() => workorder.poolStats)

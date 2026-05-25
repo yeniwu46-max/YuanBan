@@ -11,8 +11,28 @@ import {
   recommendedActions,
   reportAnomalies
 } from '@/mock/family'
+import { apiRequest } from '@/services/apiClient'
 import { mockClone } from '@/services/mockClone'
 import type { AlertStatus, ApiReportPeriod, ReportPeriod } from '@/types/family'
+
+export type AlertDto = {
+  id: string
+  elder_id: string
+  type?: string
+  alert_type?: string
+  level: string
+  icon: string
+  title: string
+  description: string
+  detail: string
+  status: string
+  status_label: string
+  tag: string
+  tag_tone: string
+  timeline: Array<{ id?: string; title: string; detail: string; done: boolean; pending?: boolean }>
+  suggestion?: string
+  time_label?: string
+}
 
 function toReportPeriod(period: ApiReportPeriod): ReportPeriod {
   const map: Record<ApiReportPeriod, ReportPeriod> = {
@@ -85,4 +105,21 @@ export function getNotificationRules() {
 
 export function getRecommendedActions() {
   return mockClone(recommendedActions)
+}
+
+export function fetchAlertsApi(elderId?: string) {
+  const q = elderId ? `?elder_id=${encodeURIComponent(elderId)}` : ''
+  return apiRequest<AlertDto[]>(`/api/v1/alerts${q}`, {
+    role: 'family',
+    userId: 'family-001'
+  })
+}
+
+export function patchAlertApi(alertId: string, status: AlertStatus, statusLabel?: string) {
+  return apiRequest<AlertDto>(`/api/v1/alerts/${alertId}`, {
+    method: 'PATCH',
+    role: 'family',
+    userId: 'family-001',
+    body: { status, status_label: statusLabel }
+  })
 }

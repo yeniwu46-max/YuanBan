@@ -1,0 +1,16 @@
+# 替换为你的域名后使用: caddy run --config Caddyfile
+# API: api.example.com  H5: app.example.com
+
+{
+	email you@example.com
+}
+
+api.example.com {
+	reverse_proxy localhost:8000
+}
+
+app.example.com {
+	root * /var/www/yuanbanban-h5
+	file_server
+	try_files {path} /index.html
+}

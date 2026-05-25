@@ -94,6 +94,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import BigButton from '@/components/BigButton.vue'
 import HealthMetricCard from '@/components/HealthMetricCard.vue'
@@ -111,12 +112,17 @@ import { goDetail, goMainTab } from '@/utils/navigate'
 
 const {
   elder,
+  elderId,
   summary,
   switching,
   elderAlerts,
   report,
   alertStore
 } = useFamilyElderContext()
+
+onShow(() => {
+  void alertStore.hydrate(elderId.value)
+})
 
 const visibleAlerts = computed(() => elderAlerts.value.slice(0, 3))
 const pendingAlerts = computed(() => elderAlerts.value.filter((item) => item.status !== 'resolved'))
