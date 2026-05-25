@@ -129,17 +129,46 @@ H5：用上一版 `dist` 覆盖 `/var/www/yuanbanban-h5` 即可。
 
 ---
 
-## 8. 本地预演（无公网）
+## 8. 无 Docker 一键部署（推荐本机/答辩）
+
+**不需要 Docker Desktop**，仅需 Python 3.11+、Node/pnpm。
 
 ```powershell
-# 终端 1
+# 项目根目录
+.\scripts\deploy-no-docker.ps1 -UseApi
+```
+
+自动完成：SQLite API（8000）+ H5 静态站（8080，含 SPA 回退），并按 **WLAN IP** 写入 `VITE_API_BASE`。
+
+停止服务：
+
+```powershell
+.\scripts\stop-no-docker.ps1
+```
+
+若需放行防火墙（管理员 PowerShell）：
+
+```powershell
+netsh advfirewall firewall add rule name="Yuanbanban API 8000" dir=in action=allow protocol=TCP localport=8000
+netsh advfirewall firewall add rule name="Yuanbanban H5 8080" dir=in action=allow protocol=TCP localport=8080
+```
+
+### 公网 H5（PinMe，仅前端）
+
+```powershell
+pinme upload apps\mobile\dist\build\h5
+```
+
+PinMe 站点为 HTTPS，**无法**直接访问本机 `http://IP:8000` API；完整 SOS 联调请用同网 `http://<WLAN-IP>:8080/`。
+
+## 9. 本地开发预演
+
+```powershell
 cd services\api
 .\scripts\start-local.ps1
 
-# 终端 2
 cd apps\mobile
 # .env.development 已指向 http://localhost:8000
-# 临时启用 API: 在 .env.development 增加 VITE_USE_API=true
 pnpm dev:h5
 ```
 

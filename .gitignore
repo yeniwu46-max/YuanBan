@@ -37,3 +37,6 @@ venv/
 # Cache
 .vite/
 *.local
+
+# Local no-docker deploy PIDs
+.deploy/
