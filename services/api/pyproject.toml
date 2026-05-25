@@ -1,0 +1,27 @@
+[project]
+name = "yuanbanban-api"
+version = "0.1.0"
+description = "鼋伴伴 FastAPI backend"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "sqlalchemy>=2.0.36",
+  "alembic>=1.14.0",
+  "psycopg[binary]>=3.2.0",
+  "redis>=5.2.0",
+  "paho-mqtt>=2.1.0",
+  "pydantic-settings>=2.6.0",
+  "python-multipart>=0.0.12",
+]
+
+[project.scripts]
+yuanbanban-seed = "app.seed:main"
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]

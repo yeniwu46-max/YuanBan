@@ -27,4 +27,3 @@ const statusText = computed(() => {
   return props.metric.key === 'sleep' ? '良好' : '正常'
 })
 </script>
-

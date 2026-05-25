@@ -1,6 +1,7 @@
 import type { HealthMetric } from '@/types/elder'
 
 export type UserRole = 'elder' | 'family' | 'community'
+export type ApiReportPeriod = 'day' | 'week' | 'month'
 
 export type FamilyContactRole = 'primary' | 'secondary'
 

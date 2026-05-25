@@ -8,6 +8,7 @@
     { "path": "pages/login-guide/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/home/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/health/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/health-metric/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/bp/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/companion/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/service/index", "style": { "navigationStyle": "custom" } },
@@ -17,6 +18,9 @@
     { "path": "pages/privacy/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/health-report/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/device/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/device-detail/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/contact-detail/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/yuanqi/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/activity/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/family/login-guide/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/family/guardian/index", "style": { "navigationStyle": "custom" } },
@@ -37,4 +41,3 @@
     "backgroundTextStyle": "dark"
   }
 }
-

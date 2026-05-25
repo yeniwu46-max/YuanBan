@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { familyProfile } from '@/mock/family'
+import { getFamilyProfile } from '@/services/familyService'
 
 export const useFamilyStore = defineStore('family', {
   state: () => ({
-    profile: familyProfile
+    profile: getFamilyProfile()
   })
 })

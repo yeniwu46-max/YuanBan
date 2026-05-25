@@ -16,9 +16,9 @@
         <view class="muted welcome-copy">小鼋会陪着您，也会在需要时通知家人和社区。</view>
       </view>
       <view class="grid3 feature-grid">
-        <view class="quick center mini">🛡️<view class="quick-title">安全守护</view></view>
-        <view class="quick center mini">💚<view class="quick-title">亲情陪伴</view></view>
-        <view class="quick center mini">🎙<view class="quick-title">语音优先</view></view>
+        <view class="quick center mini"><text class="mini-icon">安</text><view class="quick-title">安全守护</view></view>
+        <view class="quick center mini"><text class="mini-icon">亲</text><view class="quick-title">亲情陪伴</view></view>
+        <view class="quick center mini"><text class="mini-icon">语</text><view class="quick-title">语音优先</view></view>
       </view>
       <BigButton class="start" @click="go('/pages/login-role/index')">开始使用 ›</BigButton>
     </view>
@@ -75,6 +75,12 @@ function go(url: string) {
 .mini {
   min-height: 88px;
   padding: 14px;
+}
+
+.mini-icon {
+  font-size: 22px;
+  font-weight: 900;
+  color: #5b8b62;
 }
 
 .start {

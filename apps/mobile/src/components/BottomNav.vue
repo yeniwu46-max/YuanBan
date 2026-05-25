@@ -2,11 +2,11 @@
   <view class="bottom-nav">
     <view class="navgrid">
       <button class="navitem" :class="{ active: active === 'home' }" @click="go('/pages/home/index')">
-        <view class="navicon">⌂</view>
+        <view class="navicon">首</view>
         <text>首页</text>
       </button>
       <button class="navitem" :class="{ active: active === 'health' }" @click="go('/pages/health/index')">
-        <view class="navicon">♡</view>
+        <view class="navicon">健</view>
         <text>健康</text>
       </button>
       <button class="navcenter" @click="go('/pages/companion/index')">
@@ -14,7 +14,7 @@
         <text>小鼋</text>
       </button>
       <button class="navitem" :class="{ active: active === 'service' }" @click="go('/pages/service/index')">
-        <view class="navicon">▣</view>
+        <view class="navicon">服</view>
         <text>服务</text>
       </button>
     </view>
@@ -72,7 +72,8 @@ function go(url: string) {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 18px;
+  font-weight: 900;
 }
 
 .navitem.active {
@@ -117,4 +118,3 @@ function go(url: string) {
   }
 }
 </style>
-

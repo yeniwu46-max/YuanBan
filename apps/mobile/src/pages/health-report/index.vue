@@ -10,17 +10,17 @@
       <view class="hero green">
         <view class="between row-top">
           <view>
-            <view class="pill">✅ 本周整体平稳</view>
-            <view class="report-copy">小鼋为您整理好了这一周的身体情况。</view>
-            <view class="muted report-desc">血压有 2 次轻微偏高，睡眠和呼吸整体良好。</view>
+            <view class="pill">{{ periodLabel }}整体平稳</view>
+            <view class="report-copy">小鼋为您整理好了这段时间的身体情况。</view>
+            <view class="muted report-desc">血压有轻微波动，睡眠和呼吸整体良好。</view>
           </view>
           <view class="score">
-            <view class="score-num">88</view>
+            <view class="score-num">{{ score }}</view>
             <view class="score-label">健康分</view>
           </view>
         </view>
         <view class="grid3 report-stats">
-          <view class="card stat-card"><view class="muted">正常天数</view><view class="h2">5 天</view></view>
+          <view class="card stat-card"><view class="muted">正常天数</view><view class="h2">{{ normalDays }}</view></view>
           <view class="card stat-card"><view class="muted">提醒次数</view><view class="h2 warn">3 次</view></view>
           <view class="card stat-card"><view class="muted">运动达标</view><view class="h2">4 天</view></view>
         </view>
@@ -29,24 +29,25 @@
         <view class="row row-top">
           <YuanMascot size="small" />
           <view>
-            <view class="h2 summary-title">小鼋总结 🔊</view>
-            <view class="muted summary-copy">您这周状态不错。周三和今天血压稍高，注意少盐、慢走，睡前可以再测一次。</view>
+            <view class="h2 summary-title">小鼋总结</view>
+            <view class="muted summary-copy">您这段时间状态不错。血压偶尔略高，注意少盐、慢走，睡前可以再测一次。</view>
           </view>
         </view>
       </view>
       <view class="section-title flush-title">
         <view class="h2">核心指标</view>
-        <button class="link">语音播报</button>
+        <button class="link" @click="health.playVoiceSummary('正在播报健康报告')">语音播报</button>
       </view>
+      <view v-if="health.voiceMessage" class="card feedback">{{ health.voiceMessage }}</view>
       <view class="grid2">
-        <HealthMetricCard :metric="metric('heartRate')" icon="❤️" />
-        <HealthMetricCard :metric="metric('breathRate')" icon="🌬️" />
-        <HealthMetricCard :metric="metric('bloodPressure')" icon="💧" />
-        <HealthMetricCard :metric="metric('sleep')" icon="🌙" />
+        <HealthMetricCard :metric="metric('heartRate')" icon="心" @click="goMetric('heartRate')" />
+        <HealthMetricCard :metric="metric('breathRate')" icon="息" @click="goMetric('breathRate')" />
+        <HealthMetricCard :metric="metric('bloodPressure')" icon="压" @click="go('/pages/bp/index')" />
+        <HealthMetricCard :metric="metric('sleep')" icon="眠" @click="goMetric('sleep')" />
       </view>
       <view class="section-title flush-title">
-        <view class="h2">本周趋势</view>
-        <button class="link">详情 ›</button>
+        <view class="h2">趋势</view>
+        <button class="link" @click="go('/pages/bp/index')">详情 ›</button>
       </view>
       <view class="card chart-card">
         <view class="trend-title">血压与睡眠变化</view>
@@ -61,16 +62,29 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import AppHeader from '@/components/AppHeader.vue'
 import HealthMetricCard from '@/components/HealthMetricCard.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import { useHealthStore } from '@/stores/health'
+import { goDetail } from '@/utils/navigate'
 import type { HealthMetric } from '@/types/elder'
 
 const health = useHealthStore()
+const periodLabel = computed(() => ({ day: '今日', week: '本周', month: '本月' }[health.reportTab]))
+const score = computed(() => ({ day: 92, week: 88, month: 90 }[health.reportTab]))
+const normalDays = computed(() => ({ day: '1 天', week: '5 天', month: '24 天' }[health.reportTab]))
 
 function metric(key: string): HealthMetric {
   return health.metricByKey(key) ?? health.metrics[0]
+}
+
+function goMetric(key: HealthMetric['key']) {
+  go(`/pages/health-metric/index?key=${key}`)
+}
+
+function go(url: string) {
+  goDetail(url)
 }
 </script>
 
@@ -142,6 +156,13 @@ function metric(key: string): HealthMetric {
   padding: 0;
 }
 
+.feedback {
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  color: #315943;
+  font-weight: 900;
+}
+
 .chart-card {
   padding: 16px;
 }
@@ -182,4 +203,3 @@ function metric(key: string): HealthMetric {
   transform: skewY(-3deg);
 }
 </style>
-

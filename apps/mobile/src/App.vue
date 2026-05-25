@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onLaunch } from '@dcloudio/uni-app'
-import { useAlertStore } from '@/stores/alert'
+import { syncFamilyDerivedState } from '@/stores/familySync'
 
 onLaunch(() => {
-  useAlertStore().initLiveStats()
+  syncFamilyDerivedState()
 })
 </script>
 

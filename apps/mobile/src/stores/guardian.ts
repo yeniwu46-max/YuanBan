@@ -1,15 +1,14 @@
 import { defineStore } from 'pinia'
-import { boundElders, guardSummaries } from '@/mock/family'
-import { useAlertStore } from '@/stores/alert'
+import { getBoundElders, getGuardSummaries } from '@/services/familyService'
 import type { BoundElder, GuardSummary } from '@/types/family'
 
 const SWITCH_DELAY_MS = 120
 
 export const useGuardianStore = defineStore('guardian', {
   state: () => ({
-    elders: boundElders,
-    summaries: guardSummaries,
-    currentElderId: boundElders[0]?.id ?? '',
+    elders: getBoundElders(),
+    summaries: getGuardSummaries(),
+    currentElderId: getBoundElders()[0]?.id ?? '',
     switching: false
   }),
   getters: {
@@ -21,20 +20,6 @@ export const useGuardianStore = defineStore('guardian', {
     }
   },
   actions: {
-    initLiveStats() {
-      this.syncRiskCounts()
-    },
-    syncRiskCounts() {
-      const alertStore = useAlertStore()
-      for (const elder of this.elders) {
-        const openCount = alertStore.alertsByElder(elder.id).filter((item) => item.status !== 'resolved').length
-        elder.riskCount = openCount
-        const summary = this.summaries.find((item) => item.elderId === elder.id)
-        if (summary) {
-          summary.riskCount = openCount
-        }
-      }
-    },
     setCurrentElder(elderId: string) {
       if (this.elders.some((item) => item.id === elderId)) {
         this.currentElderId = elderId

@@ -6,7 +6,7 @@
     </view>
     <view class="section device-card">
       <view class="hero green center">
-        <view class="qr">▣</view>
+        <view class="qr">YBB</view>
         <view class="h2 qr-title">等待设备连接</view>
         <view class="muted qr-copy">已发现附近设备：YBB-2026-01</view>
       </view>
@@ -14,7 +14,7 @@
     <view class="list">
       <ListItem icon="✓" title="网络连接" desc="家庭 Wi-Fi 已连接" :chev="false" />
       <ListItem icon="✓" title="设备发现" desc="已发现小鼋守护设备" :chev="false" />
-      <ListItem icon="🛡️" icon-tone="warm" title="安全校验" desc="正在确认绑定关系" :chev="false" />
+      <ListItem icon="安" icon-tone="warm" title="安全校验" desc="正在确认绑定关系" :chev="false" />
     </view>
     <view class="section">
       <BigButton @click="go('/pages/login-guide/index')">完成绑定 ✓</BigButton>
@@ -52,7 +52,9 @@ function go(url: string) {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 56px;
+  font-size: 42px;
+  font-weight: 900;
+  color: #315943;
 }
 
 .qr-title {
@@ -63,4 +65,3 @@ function go(url: string) {
   margin-top: 8px;
 }
 </style>
-

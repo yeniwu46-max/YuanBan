@@ -23,6 +23,21 @@ export type HealthMetric = {
   description: string
 }
 
+export type HealthMetricDetail = {
+  key: HealthMetric['key']
+  title: string
+  icon: string
+  headline: string
+  advice: string
+  trendLabel: string
+  records: Array<{
+    id: string
+    time: string
+    value: string
+    status: 'normal' | 'warning' | 'danger'
+  }>
+}
+
 export type DeviceStatus = {
   id: string
   name: string
@@ -60,3 +75,11 @@ export type CommunityActivity = {
   description: string
 }
 
+export type YuanqiTask = {
+  id: string
+  icon: string
+  title: string
+  description: string
+  points: number
+  done: boolean
+}

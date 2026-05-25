@@ -6,15 +6,16 @@
         <view class="row row-top">
           <YuanMascot size="large" heart />
           <view class="item-main">
-            <view class="pill">🔥 陪伴值 {{ companion.points }}</view>
+            <view class="pill">陪伴值 {{ companion.points }}</view>
             <view class="hero-copy">我在呢，您可以直接和我说话。</view>
             <view class="muted hero-desc">我会帮您记录心情，也可以帮您联系家人。</view>
           </view>
         </view>
         <view class="grid2 action-row">
-          <BigButton>🎙 和小鼋说话</BigButton>
-          <BigButton tone="white" @click="go('/pages/family/index')">📹 一键视频</BigButton>
+          <BigButton @click="companion.startVoiceChat()">和小鼋说话</BigButton>
+          <BigButton tone="white" @click="go('/pages/family/index')">一键视频</BigButton>
         </view>
+        <view v-if="companion.voiceState" class="card feedback">{{ companion.voiceState }}</view>
       </view>
     </view>
     <view class="section-title">
@@ -31,18 +32,18 @@
     </view>
     <view class="section">
       <view class="grid2">
-        <button class="quick" @click="go('/pages/family/index')"><view class="iconbox warm">☎</view><view class="quick-title">联系家人</view><view class="muted mini-copy">给儿女打电话</view></button>
-        <button class="quick"><view class="iconbox">🔊</view><view class="quick-title">家人留言</view><view class="muted mini-copy">听听新消息</view></button>
+        <button class="quick" @click="go('/pages/family/index')"><view class="iconbox warm">联</view><view class="quick-title">联系家人</view><view class="muted mini-copy">给儿女打电话</view></button>
+        <button class="quick" @click="companion.playFamilyMessage()"><view class="iconbox">信</view><view class="quick-title">家人留言</view><view class="muted mini-copy">听听新消息</view></button>
       </view>
     </view>
     <view class="section">
-      <view class="card yuanqi-card">
+      <button class="card yuanqi-card" @click="go('/pages/yuanqi/index')">
         <view class="between">
           <view class="row">
-            <view class="iconbox warm">🎁</view>
+            <view class="iconbox warm">罐</view>
             <view>
               <view class="h2 yuanqi-title">鼋气罐</view>
-              <view class="muted yuanqi-copy">今天还差 {{ companion.todayTotal - companion.todayDone }} 个小任务</view>
+              <view class="muted yuanqi-copy">今天还差 {{ companion.unfinishedTasks.length }} 个小任务</view>
             </view>
           </view>
           <text class="chev">›</text>
@@ -51,7 +52,10 @@
           <view class="between"><text class="progress-title">今日进度</text><text class="progress-num">{{ companion.todayDone }} / {{ companion.todayTotal }}</text></view>
           <ProgressBar :value="companion.progressPercent" />
         </view>
-      </view>
+      </button>
+    </view>
+    <view v-if="companion.messageState" class="section">
+      <view class="card feedback">{{ companion.messageState }}</view>
     </view>
     <BottomNav active="companion" />
   </view>
@@ -64,17 +68,18 @@ import BottomNav from '@/components/BottomNav.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import { useCompanionStore } from '@/stores/companion'
+import { goDetail } from '@/utils/navigate'
 
 const companion = useCompanionStore()
 const moods = [
-  { icon: '🌿', name: '安心' },
-  { icon: '😊', name: '开心' },
-  { icon: '🏠', name: '想家' },
-  { icon: '☁️', name: '低落' }
+  { icon: '安', name: '安心' },
+  { icon: '乐', name: '开心' },
+  { icon: '家', name: '想家' },
+  { icon: '低', name: '低落' }
 ]
 
 function go(url: string) {
-  uni.redirectTo({ url })
+  goDetail(url)
 }
 </script>
 
@@ -95,6 +100,13 @@ function go(url: string) {
   margin-top: 18px;
 }
 
+.feedback {
+  margin-top: 12px;
+  padding: 12px 14px;
+  color: #315943;
+  font-weight: 900;
+}
+
 .mood-now {
   font-weight: 900;
 }
@@ -109,7 +121,9 @@ function go(url: string) {
 }
 
 .yuanqi-card {
+  width: 100%;
   padding: 16px;
+  text-align: left;
 }
 
 .yuanqi-title {
@@ -136,4 +150,3 @@ function go(url: string) {
   color: #c9822c;
 }
 </style>
-

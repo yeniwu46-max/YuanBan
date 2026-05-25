@@ -1,19 +1,19 @@
 <template>
   <view class="app-page login-page">
-    <AppHeader :label="phoneLabel" :title="session.phoneTitle" back="/pages/login-role/index" />
+    <AppHeader label="手机号登录" :title="session.phoneTitle" back="/pages/login-role/index" />
     <view class="section center">
       <view class="muted">{{ phoneHint }}</view>
     </view>
     <view class="list phone-list">
-      <ListItem icon="☎" :title="phoneNumber" desc="手机号" :chev="false" />
-      <ListItem icon="🔐" title="· · · ·" desc="验证码" :chev="false">
+      <ListItem icon="机" :title="phoneNumber" desc="手机号" :chev="false" />
+      <ListItem icon="码" title="· · · ·" desc="验证码" :chev="false">
         <template #right><StatusTag label="获取" tone="warm" /></template>
       </ListItem>
     </view>
     <view class="section">
       <view class="hero warm">
         <view class="row row-top">
-          <view class="iconbox warm">🙈</view>
+          <view class="iconbox warm">隐</view>
           <view>
             <view class="h2 privacy-title">隐私保护</view>
             <view class="muted privacy-copy">{{ privacyCopy }}</view>
@@ -40,7 +40,6 @@ import { goReplace } from '@/utils/navigate'
 const session = useSessionStore()
 const family = useFamilyStore()
 
-const phoneLabel = computed(() => (session.isFamily ? '手机号登录' : '手机号登录'))
 const phoneHint = computed(() =>
   session.isFamily ? '请使用已绑定老人的家属账号登录。' : '请用家人已绑定的手机号登录。'
 )

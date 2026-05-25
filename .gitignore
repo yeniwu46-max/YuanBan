@@ -16,9 +16,21 @@ dev-server*.err.log
 .DS_Store
 Thumbs.db
 
-# Env
+# Env (keep committed .env.development for VITE_API_BASE)
 .env
-.env.*
+.env.local
+.env.*.local
+
+# Python / local API data
+services/api/data/
+*.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
 
 # Cache
 .vite/

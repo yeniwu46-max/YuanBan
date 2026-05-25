@@ -8,32 +8,32 @@
         <view class="muted sos-copy">{{ copy }}</view>
         <view v-if="sos.state === 'calling'" class="card notify-card">
           <view class="between"><text class="notify-title">通知进度</text><text class="notify-count">{{ sos.notifiedCount }} / {{ sos.targetCount }}</text></view>
-          <ProgressBar :value="66" />
+          <ProgressBar :value="Math.round((sos.notifiedCount / sos.targetCount) * 100)" />
         </view>
         <view class="grid2 sos-actions">
           <template v-if="sos.state === 'confirm'">
-            <BigButton tone="red" @click="sos.setState('calling')">☎ 立即求助</BigButton>
-            <BigButton tone="white" @click="sos.setState('cancel')">× 误触取消</BigButton>
+            <BigButton tone="red" @click="sos.setState('calling')">立即求助</BigButton>
+            <BigButton tone="white" @click="sos.setState('cancel')">误触取消</BigButton>
           </template>
           <template v-else-if="sos.state === 'calling'">
-            <BigButton @click="sos.setState('success')">✓ 模拟成功</BigButton>
+            <BigButton @click="sos.setState('success')">模拟成功</BigButton>
             <BigButton tone="white" @click="sos.setState('confirm')">取消求助</BigButton>
           </template>
           <template v-else-if="sos.state === 'success'">
-            <BigButton @click="go('/pages/family/index')">☎ 联系女儿</BigButton>
-            <BigButton tone="white" @click="go('/pages/home/index')">⌂ 回到首页</BigButton>
+            <BigButton @click="go('/pages/family/index')">联系女儿</BigButton>
+            <BigButton tone="white" @click="go('/pages/home/index')">回到首页</BigButton>
           </template>
           <template v-else>
-            <BigButton tone="red" @click="sos.setState('confirm')">🚨 重新求助</BigButton>
-            <BigButton tone="white" @click="go('/pages/home/index')">⌂ 回到首页</BigButton>
+            <BigButton tone="red" @click="sos.setState('confirm')">重新求助</BigButton>
+            <BigButton tone="white" @click="go('/pages/home/index')">回到首页</BigButton>
           </template>
         </view>
       </view>
     </view>
     <view class="list sos-list">
-      <ListItem icon="📍" title="当前位置" :desc="elder.profile.locationLabel" tag="已定位" :chev="false" />
-      <ListItem icon="📶" title="设备状态" desc="SOS 按钮与监测设备在线" tag="正常" :chev="false" />
-      <ListItem icon="👥" icon-tone="warm" title="将通知对象" desc="女儿、儿子、社区服务站" tag="3 方" tag-tone="warm" :chev="false" />
+      <ListItem icon="位" title="当前位置" :desc="elder.profile.locationLabel" tag="已定位" :chev="false" />
+      <ListItem icon="设" title="设备状态" desc="SOS 按钮与监测设备在线" tag="正常" :chev="false" />
+      <ListItem icon="联" icon-tone="warm" title="将通知对象" :desc="sos.timeline.join('、')" tag="3 方" tag-tone="warm" :chev="false" />
     </view>
     <view class="statebar">
       <button :class="{ active: sos.state === 'confirm' }" @click="sos.setState('confirm')">确认</button>
@@ -52,6 +52,7 @@ import ListItem from '@/components/ListItem.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import { useElderStore } from '@/stores/elder'
 import { useSosStore } from '@/stores/sos'
+import { goDetail } from '@/utils/navigate'
 
 const elder = useElderStore()
 const sos = useSosStore()
@@ -63,7 +64,7 @@ const heroClass = computed(() => ({
   gray: sos.state === 'cancel'
 }))
 
-const icon = computed(() => ({ confirm: '🚨', calling: '⏳', success: '✓', cancel: '🛡️' }[sos.state]))
+const icon = computed(() => ({ confirm: '!', calling: '...', success: '✓', cancel: '安' }[sos.state]))
 const title = computed(() => ({
   confirm: '需要立即求助吗？',
   calling: '正在通知家人',
@@ -78,7 +79,7 @@ const copy = computed(() => ({
 }[sos.state]))
 
 function go(url: string) {
-  uni.redirectTo({ url })
+  goDetail(url)
 }
 </script>
 
@@ -93,8 +94,9 @@ function go(url: string) {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 64px;
+  font-size: 54px;
   color: #e56b5f;
+  font-weight: 900;
 }
 
 .green .sos-icon,
@@ -162,5 +164,4 @@ function go(url: string) {
   background: #26382f;
   color: #fff;
 }
-
 </style>

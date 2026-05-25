@@ -72,6 +72,14 @@ onBeforeUnmount(() => {
   width: 100%;
   text-align: left;
   padding: 0;
+  border: 0;
+  background: transparent;
+  line-height: 1;
+  overflow: visible;
+}
+
+.switcher-btn::after {
+  border: 0;
 }
 
 .title-row {

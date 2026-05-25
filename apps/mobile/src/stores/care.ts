@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
-import { albumPhotos, careStatsList, careTasks, notificationRules } from '@/mock/family'
+import { getAlbumPhotos, getCareStatsList, getCareTasks, getNotificationRules } from '@/services/familyService'
 
 export const useCareStore = defineStore('care', {
   state: () => ({
-    statsList: careStatsList,
-    tasks: careTasks,
-    photos: albumPhotos,
-    notificationRules
+    statsList: getCareStatsList(),
+    tasks: getCareTasks(),
+    photos: getAlbumPhotos(),
+    notificationRules: getNotificationRules()
   }),
   getters: {
     statsByElder: (state) => (elderId: string) => state.statsList.find((item) => item.elderId === elderId),

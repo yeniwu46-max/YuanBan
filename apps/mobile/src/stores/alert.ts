@@ -1,18 +1,11 @@
 import { defineStore } from 'pinia'
-import { alertEvents } from '@/mock/family'
-import { useFamilyReportStore } from '@/stores/familyReport'
-import { useGuardianStore } from '@/stores/guardian'
+import { getAlerts } from '@/services/familyService'
 import type { AlertEvent, AlertStatus } from '@/types/family'
-
-function syncFamilyState(alerts: AlertEvent[]) {
-  useGuardianStore().syncRiskCounts()
-  useFamilyReportStore().syncFromAlerts(alerts)
-}
 
 export const useAlertStore = defineStore('alert', {
   state: () => ({
-    alerts: alertEvents,
-    activeAlertId: alertEvents[0]?.id ?? ''
+    alerts: getAlerts(),
+    activeAlertId: getAlerts()[0]?.id ?? ''
   }),
   getters: {
     activeAlerts: (state) => state.alerts.filter((item) => item.status !== 'resolved'),
@@ -29,9 +22,6 @@ export const useAlertStore = defineStore('alert', {
     }
   },
   actions: {
-    initLiveStats() {
-      syncFamilyState(this.alerts)
-    },
     setActiveAlert(alertId: string) {
       if (this.alerts.some((item) => item.id === alertId)) {
         this.activeAlertId = alertId
@@ -42,7 +32,6 @@ export const useAlertStore = defineStore('alert', {
       if (!target) return
       target.status = status
       target.statusLabel = statusLabel
-      syncFamilyState(this.alerts)
     },
     confirmAlert(alertId: string) {
       const target = this.alerts.find((item) => item.id === alertId)
@@ -55,7 +44,6 @@ export const useAlertStore = defineStore('alert', {
         pendingStep.pending = false
         pendingStep.detail = '刚刚 · 已确认查看'
       }
-      syncFamilyState(this.alerts)
     },
     resolveAlert(alertId: string) {
       const target = this.alerts.find((item) => item.id === alertId)
@@ -64,7 +52,6 @@ export const useAlertStore = defineStore('alert', {
       target.statusLabel = '已处理'
       target.tag = '已处理'
       target.tagTone = 'normal'
-      syncFamilyState(this.alerts)
     },
     markPending(alertId: string) {
       const target = this.alerts.find((item) => item.id === alertId)
@@ -73,7 +60,6 @@ export const useAlertStore = defineStore('alert', {
       target.statusLabel = '稍后处理'
       target.tag = '处理中'
       target.tagTone = 'warm'
-      syncFamilyState(this.alerts)
     }
   }
 })

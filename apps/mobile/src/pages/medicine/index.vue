@@ -5,12 +5,12 @@
       <view class="hero warm">
         <view class="between row-top">
           <view>
-            <view class="pill medicine-pill">⏰ 今晚 18:30 服药</view>
+            <view class="pill medicine-pill">今晚 18:30 服药</view>
             <view class="medicine-name">阿司匹林肠溶片</view>
             <view class="muted medicine-dose">每次 1 片 · 饭后服用</view>
             <view class="muted medicine-copy">小鼋会在时间到时提醒您，也会同步让家人放心。</view>
           </view>
-          <view class="iconbox warm medicine-icon">💊</view>
+          <view class="iconbox warm medicine-icon">药</view>
         </view>
         <view class="grid3 medicine-grid">
           <view class="card mini-card"><view class="muted">剂量</view><view class="h2">1 片</view></view>
@@ -21,9 +21,10 @@
     </view>
     <view class="section">
       <view class="grid2">
-        <BigButton tone="warm" @click="health.markPendingMedicineDone()">✓ 我已服药</BigButton>
-        <BigButton tone="white">⏳ 稍后提醒</BigButton>
+        <BigButton tone="warm" @click="health.markPendingMedicineDone()">我已服药</BigButton>
+        <BigButton tone="white" @click="health.delayPendingMedicine()">稍后提醒</BigButton>
       </view>
+      <view v-if="health.medicineMessage" class="card feedback">{{ health.medicineMessage }}</view>
     </view>
     <view class="section">
       <view class="hero gray">
@@ -31,17 +32,27 @@
           <YuanMascot size="small" />
           <view>
             <view class="h2 tip-title">小鼋提醒您</view>
-            <view class="muted tip-copy">这颗药建议饭后服用。服药后可以喝一点温水，不要空腹吃哦。</view>
+            <view class="muted tip-copy">这颗药建议饭后服用。服药后可以喝一点温水，不要空腹吃。</view>
           </view>
         </view>
       </view>
     </view>
     <view class="section-title">
       <view class="h2">今日药表</view>
-      <button class="link">记录</button>
+      <button class="link" @click="health.playVoiceSummary('正在播报今日药表')">播报</button>
     </view>
     <view class="list">
-      <ListItem v-for="medicine in health.medicines" :key="medicine.id" :icon="medicine.status === 'done' ? '✓' : '⏰'" :icon-tone="medicine.status === 'pending' ? 'warm' : medicine.status === 'later' ? 'gray' : ''" :title="medicine.time" :desc="medicine.name" :tag="statusText(medicine.status)" :tag-tone="medicine.status === 'pending' ? 'warm' : medicine.status === 'later' ? 'gray' : 'normal'" :chev="false" />
+      <ListItem
+        v-for="medicine in health.medicines"
+        :key="medicine.id"
+        :icon="medicine.status === 'done' ? '成' : '药'"
+        :icon-tone="medicine.status === 'pending' ? 'warm' : medicine.status === 'later' ? 'gray' : ''"
+        :title="medicine.time"
+        :desc="`${medicine.name} · ${medicine.dosage} · ${medicine.note}`"
+        :tag="statusText(medicine.status)"
+        :tag-tone="medicine.status === 'pending' ? 'warm' : medicine.status === 'later' ? 'gray' : 'normal'"
+        :chev="false"
+      />
     </view>
   </view>
 </template>
@@ -88,7 +99,8 @@ function statusText(status: string) {
   width: 84px;
   height: 84px;
   border-radius: 28px;
-  font-size: 42px;
+  font-size: 34px;
+  font-weight: 900;
 }
 
 .medicine-grid {
@@ -100,6 +112,13 @@ function statusText(status: string) {
   text-align: center;
 }
 
+.feedback {
+  margin-top: 12px;
+  padding: 12px 14px;
+  color: #315943;
+  font-weight: 900;
+}
+
 .tip-title {
   font-size: 18px;
 }
@@ -109,4 +128,3 @@ function statusText(status: string) {
   line-height: 1.45;
 }
 </style>
-

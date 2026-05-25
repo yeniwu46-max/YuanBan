@@ -46,4 +46,3 @@ defineEmits<{ click: [] }>()
   color: #243a31;
 }
 </style>
-

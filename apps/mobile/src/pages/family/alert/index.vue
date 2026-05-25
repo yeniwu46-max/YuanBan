@@ -141,13 +141,15 @@ import ListItem from '@/components/ListItem.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import AlertTimeline from '@/components/family/AlertTimeline.vue'
 import FamilyEmptyState from '@/components/family/FamilyEmptyState.vue'
-import { recommendedActions } from '@/mock/family'
+import { getRecommendedActions } from '@/services/familyService'
 import { useFamilyElderContext } from '@/composables/useFamilyElderContext'
+import { syncFamilyDerivedState } from '@/stores/familySync'
 import { goBack, goHome } from '@/utils/navigate'
 import type { AlertLevel } from '@/types/family'
 import type { HealthMetric } from '@/types/elder'
 
 const { elder, elderId, alertStore, guardian, report } = useFamilyElderContext()
+const recommendedActions = getRecommendedActions()
 
 const alert = computed(() => alertStore.activeAlert)
 const alertBelongsToCurrentElder = computed(
@@ -190,6 +192,7 @@ watch(
     }
     if (alert.value.status === 'pending') {
       alertStore.confirmAlert(id)
+      syncFamilyDerivedState()
     }
   },
   { immediate: true }
@@ -218,6 +221,7 @@ function toast(title: string) {
 function handleResolve() {
   if (!alert.value) return
   alertStore.resolveAlert(alert.value.id)
+  syncFamilyDerivedState()
   uni.showToast({ title: '已记录处理结果', icon: 'none' })
   setTimeout(() => goBack('/pages/family/guardian/index'), 300)
 }
@@ -225,6 +229,7 @@ function handleResolve() {
 function handlePending() {
   if (!alert.value) return
   alertStore.markPending(alert.value.id)
+  syncFamilyDerivedState()
   uni.showToast({ title: '已标记稍后处理', icon: 'none' })
   setTimeout(() => goBack('/pages/family/guardian/index'), 300)
 }

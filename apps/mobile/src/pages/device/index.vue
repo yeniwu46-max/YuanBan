@@ -5,11 +5,11 @@
       <view class="hero green">
         <view class="between row-top">
           <view>
-            <view class="pill">🛡️ 设备整体运行正常</view>
-            <view class="device-copy">小鼋守护设备已在线，<br />正在安心陪伴您。</view>
+            <view class="pill">设备整体运行正常</view>
+            <view class="device-copy">小鼋守护设备已在线，正在安心陪伴您。</view>
             <view class="muted device-desc">当前 {{ device.onlineCount }} 台设备在线，{{ device.warningCount }} 台设备电量偏低。</view>
           </view>
-          <view class="iconbox device-icon">📡</view>
+          <view class="iconbox device-icon">设</view>
         </view>
         <view class="grid3 device-stats">
           <view class="card stat-card"><view class="muted">在线设备</view><view class="h2">{{ device.onlineCount }} 台</view></view>
@@ -19,17 +19,26 @@
       </view>
       <view class="section-title flush-title">
         <view class="h2">我的设备</view>
-        <button class="link">设备设置 ⚙</button>
       </view>
       <view class="list flush">
-        <ListItem v-for="item in device.devices" :key="item.id" :icon="icon(item.name)" :icon-tone="item.status === 'warning' ? 'warm' : ''" :title="item.name" :desc="deviceDesc(item)" :tag="item.status === 'warning' ? '低电量' : '正常'" :tag-tone="item.status === 'warning' ? 'warm' : 'normal'" :chev="false" />
+        <ListItem
+          v-for="item in device.devices"
+          :key="item.id"
+          :icon="icon(item.name)"
+          :icon-tone="item.status === 'warning' ? 'warm' : ''"
+          :title="item.name"
+          :desc="deviceDesc(item)"
+          :tag="item.status === 'warning' ? '低电量' : item.status === 'offline' ? '离线' : '正常'"
+          :tag-tone="item.status === 'warning' ? 'warm' : item.status === 'offline' ? 'gray' : 'normal'"
+          @click="go(`/pages/device-detail/index?id=${item.id}`)"
+        />
       </view>
       <view v-if="device.lowBatteryDevice" class="hero warm device-tip">
         <view class="row row-top">
           <YuanMascot size="small" />
           <view>
             <view class="h2 tip-title">小鼋提醒</view>
-            <view class="muted tip-copy">{{ device.lowBatteryDevice.name }}电量有点低啦，建议请家人帮忙充电或更换电池。</view>
+            <view class="muted tip-copy">{{ device.lowBatteryDevice.name }}电量有点低，建议请家人帮忙充电或更换电池。</view>
           </view>
         </view>
       </view>
@@ -42,21 +51,26 @@ import AppHeader from '@/components/AppHeader.vue'
 import ListItem from '@/components/ListItem.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import { useDeviceStore } from '@/stores/device'
+import { goDetail } from '@/utils/navigate'
 import type { DeviceStatus } from '@/types/elder'
 
 const device = useDeviceStore()
 
 function icon(name: string) {
-  if (name.includes('雷达')) return '📡'
-  if (name.includes('SOS')) return '🚨'
-  if (name.includes('环境')) return '🌡️'
-  return '📟'
+  if (name.includes('雷达')) return '雷'
+  if (name.includes('SOS')) return 'SOS'
+  if (name.includes('环境')) return '境'
+  return '设'
 }
 
 function deviceDesc(item: DeviceStatus) {
   const status = item.online ? '在线' : '离线'
   const battery = item.batteryPercent ? ` · 电量 ${item.batteryPercent}%` : ''
   return `${item.location} · ${status}${battery}`
+}
+
+function go(url: string) {
+  goDetail(url)
 }
 </script>
 
@@ -77,7 +91,8 @@ function deviceDesc(item: DeviceStatus) {
   width: 88px;
   height: 88px;
   border-radius: 28px;
-  font-size: 42px;
+  font-size: 34px;
+  font-weight: 900;
 }
 
 .device-stats {
@@ -110,4 +125,3 @@ function deviceDesc(item: DeviceStatus) {
   line-height: 1.5;
 }
 </style>
-

@@ -5,11 +5,11 @@
       <view class="hero warm">
         <view class="between row-top">
           <view>
-            <view class="pill warn-pill">⚠️ 轻微偏高</view>
+            <view class="pill warn-pill">轻微偏高</view>
             <view class="bp-value">128/82 <text class="bp-unit">mmHg</text></view>
             <view class="muted bp-copy">比平时略高一点，不用紧张。建议今晚少盐、慢走，并在睡前再测一次。</view>
           </view>
-          <view class="iconbox warm bp-icon">💧</view>
+          <view class="iconbox warm bp-icon">压</view>
         </view>
         <view class="grid2 bp-cards">
           <view class="card bp-card"><view class="muted">收缩压</view><view class="bp-num">128</view><view class="status warning">略高</view></view>
@@ -19,13 +19,14 @@
     </view>
     <view class="section">
       <view class="grid2">
-        <BigButton>🎙 语音播报</BigButton>
-        <BigButton tone="white" @click="go('/pages/family/index')">☎ 告知家人</BigButton>
+        <BigButton @click="health.playVoiceSummary('小鼋提醒：今天血压略高，建议睡前复测。')">语音播报</BigButton>
+        <BigButton tone="white" @click="go('/pages/family/index')">告知家人</BigButton>
       </view>
+      <view v-if="health.voiceMessage" class="card feedback">{{ health.voiceMessage }}</view>
     </view>
     <view class="section-title">
       <view class="h2">近 7 天趋势</view>
-      <button class="link">全部记录 ›</button>
+      <button class="link" @click="go('/pages/health-report/index')">全部记录 ›</button>
     </view>
     <view class="section compact">
       <view class="card chart-card">
@@ -33,7 +34,7 @@
           <view class="line orange"></view>
           <view class="line greenline"></view>
         </view>
-        <view class="between muted legend"><text>● 收缩压</text><text>● 舒张压</text></view>
+        <view class="between muted legend"><text>收缩压</text><text>舒张压</text></view>
       </view>
     </view>
   </view>
@@ -42,9 +43,13 @@
 <script setup lang="ts">
 import AppHeader from '@/components/AppHeader.vue'
 import BigButton from '@/components/BigButton.vue'
+import { useHealthStore } from '@/stores/health'
+import { goDetail } from '@/utils/navigate'
+
+const health = useHealthStore()
 
 function go(url: string) {
-  uni.redirectTo({ url })
+  goDetail(url)
 }
 </script>
 
@@ -73,7 +78,8 @@ function go(url: string) {
   width: 84px;
   height: 84px;
   border-radius: 28px;
-  font-size: 42px;
+  font-size: 34px;
+  font-weight: 900;
 }
 
 .bp-cards {
@@ -88,6 +94,13 @@ function go(url: string) {
 .bp-num {
   margin-top: 4px;
   font-size: 28px;
+  font-weight: 900;
+}
+
+.feedback {
+  margin-top: 12px;
+  padding: 12px 14px;
+  color: #315943;
   font-weight: 900;
 }
 
@@ -130,4 +143,3 @@ function go(url: string) {
   font-weight: 900;
 }
 </style>
-

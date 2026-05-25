@@ -5,33 +5,13 @@
       <view class="muted">老人端会使用更大的文字和更简单的按钮。</view>
     </view>
     <view class="list role-list">
-      <ListItem
-        icon="👤"
-        title="我是老人"
-        desc="查看安全状态、联系家人、记录心情"
-        tag="推荐"
-        :chev="false"
-        @click="selectRole('elder')"
-      >
+      <ListItem icon="老" title="我是老人" desc="查看安全状态、联系家人、记录心情" tag="推荐" :chev="false" @click="selectRole('elder')">
         <template #right><text v-if="session.role === 'elder'" class="chev">✓</text></template>
       </ListItem>
-      <ListItem
-        icon="👪"
-        icon-tone="warm"
-        title="我是家人"
-        desc="远程关怀、接收告警、查看报告"
-        :chev="false"
-        @click="selectRole('family')"
-      >
+      <ListItem icon="家" icon-tone="warm" title="我是家人" desc="远程关怀、接收告警、查看报告" :chev="false" @click="selectRole('family')">
         <template #right><text v-if="session.role === 'family'" class="chev">✓</text></template>
       </ListItem>
-      <ListItem
-        icon="🏢"
-        title="我是社区人员"
-        desc="处理告警、服务工单、活动管理"
-        :chev="false"
-        @click="selectRole('community')"
-      >
+      <ListItem icon="社" title="我是社区人员" desc="处理告警、服务工单、活动管理" :chev="false" @click="selectRole('community')">
         <template #right><text v-if="session.role === 'community'" class="chev">✓</text></template>
       </ListItem>
     </view>

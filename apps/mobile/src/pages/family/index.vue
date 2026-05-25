@@ -5,45 +5,51 @@
       <view class="hero green">
         <view class="between row-top">
           <view>
-            <view class="pill">👥 {{ elder.onlineContactCount }} 位家人可联系</view>
+            <view class="pill">{{ elder.onlineContactCount }} 位家人可联系</view>
             <view class="family-copy">女儿现在在线，可以直接视频。</view>
             <view class="muted family-desc">小鼋也可以帮您把想说的话转成消息发给家人。</view>
           </view>
-          <view class="iconbox family-icon">👪</view>
+          <view class="iconbox family-icon">家</view>
         </view>
         <view class="grid2 action-row">
-          <BigButton>📹 一键视频</BigButton>
-          <BigButton tone="white">🎙 发语音</BigButton>
+          <BigButton @click="quickAction('video')">一键视频</BigButton>
+          <BigButton tone="white" @click="quickAction('message')">发语音</BigButton>
         </view>
       </view>
     </view>
     <view class="section-title">
       <view class="h2">我的家人</view>
-      <button class="link">添加 +</button>
+      <button class="link" @click="elder.contactActionMessage = '已进入添加家人演示流程'">添加 +</button>
     </view>
     <view class="section compact">
       <view class="grid3">
-        <button v-for="contact in elder.profile.emergencyContacts" :key="contact.id" class="quick center family-card" :class="{ selected: contact.onlineStatus === 'online' }">
-          <text class="family-avatar">{{ contact.relation === '女儿' ? '👩' : contact.relation === '儿子' ? '👨' : '👴' }}</text>
+        <button
+          v-for="contact in elder.profile.emergencyContacts"
+          :key="contact.id"
+          class="quick center family-card"
+          :class="{ selected: elder.selectedContact.id === contact.id }"
+          @click="openContact(contact.id)"
+        >
+          <text class="family-avatar">{{ contact.relation.slice(0, 1) }}</text>
           <text class="quick-title">{{ contact.relation }}</text>
-          <text class="status" :class="{ warning: contact.onlineStatus === 'busy' }">{{ contact.onlineStatus === 'busy' ? '忙碌' : '在线' }}</text>
+          <text class="status" :class="{ warning: contact.onlineStatus === 'busy' }">{{ contact.onlineStatus === 'online' ? '在线' : contact.onlineStatus === 'busy' ? '忙碌' : '离线' }}</text>
         </button>
       </view>
     </view>
     <view class="section">
       <view class="card contact-detail">
         <view class="row">
-          <view class="iconbox">👩</view>
+          <view class="iconbox">{{ elder.selectedContact.relation.slice(0, 1) }}</view>
           <view class="item-main">
-            <view class="contact-name">女儿</view>
-            <view class="muted">最近联系：{{ elder.primaryContact.lastContactAt }}</view>
+            <view class="contact-name">{{ elder.selectedContact.name }}</view>
+            <view class="muted">最近联系：{{ elder.selectedContact.lastContactAt }}</view>
           </view>
-          <StatusTag label="可联系" />
+          <StatusTag :label="elder.selectedContact.onlineStatus === 'offline' ? '离线' : '可联系'" />
         </view>
         <view class="grid3 contact-actions">
-          <BigButton tone="white" class="small-action">☎ 电话</BigButton>
-          <BigButton tone="warm" class="small-action">📹 视频</BigButton>
-          <BigButton tone="white" class="small-action">💬 消息</BigButton>
+          <BigButton tone="white" class="small-action" @click="quickAction('phone')">电话</BigButton>
+          <BigButton tone="warm" class="small-action" @click="quickAction('video')">视频</BigButton>
+          <BigButton tone="white" class="small-action" @click="quickAction('message')">消息</BigButton>
         </view>
       </view>
     </view>
@@ -53,14 +59,17 @@
           <YuanMascot size="small" />
           <view>
             <view class="h2 relay-title">小鼋帮我转述</view>
-            <view class="muted relay-copy">您可以直接说：“我今天挺好的，晚饭后想出去走走。”</view>
+            <view class="muted relay-copy">预设消息：{{ elder.relayMessage }}</view>
           </view>
         </view>
         <view class="relay-grid">
-          <BigButton tone="white">🎙 按住说话</BigButton>
-          <BigButton tone="warm">➤</BigButton>
+          <BigButton tone="white" @click="elder.contactActionMessage = '已开始录音演示'">按住说话</BigButton>
+          <BigButton tone="warm" @click="elder.sendRelayMessage()">发送</BigButton>
         </view>
       </view>
+    </view>
+    <view v-if="elder.contactActionMessage" class="section">
+      <view class="card feedback">{{ elder.contactActionMessage }}</view>
     </view>
   </view>
 </template>
@@ -71,8 +80,21 @@ import BigButton from '@/components/BigButton.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import { useElderStore } from '@/stores/elder'
+import { goDetail } from '@/utils/navigate'
 
 const elder = useElderStore()
+if (!elder.selectedContactId) {
+  elder.selectContact(elder.primaryContact.id)
+}
+
+function openContact(id: string) {
+  elder.selectContact(id)
+  goDetail(`/pages/contact-detail/index?id=${id}`)
+}
+
+function quickAction(action: 'phone' | 'video' | 'message') {
+  elder.simulateContactAction(action)
+}
 </script>
 
 <style scoped>
@@ -92,7 +114,8 @@ const elder = useElderStore()
   width: 86px;
   height: 86px;
   border-radius: 28px;
-  font-size: 42px;
+  font-size: 34px;
+  font-weight: 900;
 }
 
 .action-row {
@@ -113,6 +136,7 @@ const elder = useElderStore()
 
 .family-avatar {
   font-size: 24px;
+  font-weight: 900;
 }
 
 .contact-detail {
@@ -145,9 +169,14 @@ const elder = useElderStore()
 
 .relay-grid {
   display: grid;
-  grid-template-columns: 1fr 54px;
+  grid-template-columns: 1fr 72px;
   gap: 12px;
   margin-top: 18px;
 }
-</style>
 
+.feedback {
+  padding: 12px 14px;
+  color: #315943;
+  font-weight: 900;
+}
+</style>
