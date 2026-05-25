@@ -1,7 +1,12 @@
 const DEFAULT_BASE = 'http://localhost:8000'
 
 export function getApiBaseUrl(): string {
-  const fromEnv = (import.meta as ImportMeta & { env?: { VITE_API_BASE?: string } }).env?.VITE_API_BASE
+  const env = (import.meta as ImportMeta & { env?: { VITE_API_BASE?: string; DEV?: boolean } }).env
+  const fromEnv = env?.VITE_API_BASE
+  // Production H5: same host:port as page (LAN IP, tunnel, single-port proxy)
+  if (!env?.DEV && typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin
+  }
   return fromEnv || DEFAULT_BASE
 }
 

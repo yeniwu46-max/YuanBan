@@ -29,12 +29,13 @@ function Get-LanIp {
 }
 
 $LanIp = Get-LanIp
-$ApiBase = "http://${LanIp}:${ApiPort}"
+# Single-port mode: H5 server proxies /api -> localhost:8000 (one firewall port for phones)
+$ApiBase = "http://${LanIp}:${WebPort}"
 
 Write-Host "=== Yuanbanban (no Docker) ===" -ForegroundColor Cyan
 Write-Host "LAN IP: $LanIp"
-Write-Host "API: $ApiBase"
-Write-Host "H5:  http://${LanIp}:${WebPort}/"
+Write-Host "H5+API (one URL): http://${LanIp}:${WebPort}/"
+Write-Host "API direct:       http://${LanIp}:${ApiPort}/health"
 
 $ApiDir = Join-Path $Root "services\api"
 Push-Location $ApiDir
@@ -96,6 +97,7 @@ try {
 
 Write-Host ""
 Write-Host "Started." -ForegroundColor Green
-Write-Host "  H5 (same WiFi): http://${LanIp}:${WebPort}/"
-Write-Host "  API docs:       $ApiBase/docs"
+Write-Host "  Phone browser:  http://${LanIp}:${WebPort}/"
+Write-Host "  API docs:       http://${LanIp}:${WebPort}/docs"
+Write-Host "  If WiFi blocks phone->PC, use phone HOTSPOT: connect PC to hotspot, run this script again."
 Write-Host "  Stop:           .\scripts\stop-no-docker.ps1"
