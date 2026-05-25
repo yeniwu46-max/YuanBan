@@ -4,7 +4,7 @@ if (-not (Test-Path $PidFile)) {
   exit 0
 }
 $info = Get-Content $PidFile | ConvertFrom-Json
-foreach ($p in @($info.apiPid, $info.webPid)) {
+foreach ($p in @($info.apiPid, $info.webPid, $info.webAltPid)) {
   if ($p) { Stop-Process -Id $p -Force -ErrorAction SilentlyContinue }
 }
 Remove-Item $PidFile -Force
