@@ -56,10 +56,6 @@ function selectRole(role: UserRole) {
 }
 
 function goNext() {
-  if (session.role === 'community') {
-    uni.showToast({ title: '社区端开发中', icon: 'none' })
-    return
-  }
   goReplace('/pages/login-phone/index')
 }
 </script>

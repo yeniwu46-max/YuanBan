@@ -23,7 +23,13 @@
     { "path": "pages/family/alert/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/family/report/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/family/care/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/family/settings/index", "style": { "navigationStyle": "custom" } }
+    { "path": "pages/family/settings/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/community/login-guide/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/community/dashboard/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/community/workorders/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/community/activity/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/community/profile/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/community/alert/index", "style": { "navigationStyle": "custom" } }
   ],
   "globalStyle": {
     "navigationStyle": "custom",

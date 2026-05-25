@@ -5,6 +5,13 @@ const FAMILY_TABS = new Set([
   '/pages/family/settings/index'
 ])
 
+const COMMUNITY_TABS = new Set([
+  '/pages/community/dashboard/index',
+  '/pages/community/workorders/index',
+  '/pages/community/activity/index',
+  '/pages/community/profile/index'
+])
+
 const ELDER_TABS = new Set([
   '/pages/home/index',
   '/pages/health/index',
@@ -56,7 +63,11 @@ function runNavigate(
 
 /** 子女端 / 老人端底部 Tab 切换：清空页面栈，移动端更稳 */
 export function goMainTab(url: string) {
-  if (FAMILY_TABS.has(normalizeRoute(url)) || ELDER_TABS.has(normalizeRoute(url))) {
+  if (
+    FAMILY_TABS.has(normalizeRoute(url)) ||
+    ELDER_TABS.has(normalizeRoute(url)) ||
+    COMMUNITY_TABS.has(normalizeRoute(url))
+  ) {
     runNavigate('reLaunch', url)
     return
   }
@@ -92,4 +103,8 @@ export function goBack(fallback: string) {
 
 export function isFamilyTab(url: string) {
   return FAMILY_TABS.has(normalizeRoute(url))
+}
+
+export function isCommunityTab(url: string) {
+  return COMMUNITY_TABS.has(normalizeRoute(url))
 }

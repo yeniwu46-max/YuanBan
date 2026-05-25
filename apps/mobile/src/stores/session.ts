@@ -4,13 +4,13 @@ import type { UserRole } from '@/types/family'
 const roleHomeMap: Record<UserRole, string> = {
   elder: '/pages/home/index',
   family: '/pages/family/guardian/index',
-  community: '/pages/login-welcome/index'
+  community: '/pages/community/dashboard/index'
 }
 
 const roleAfterProfileMap: Record<UserRole, string> = {
   elder: '/pages/login-device/index',
   family: '/pages/family/login-guide/index',
-  community: '/pages/login-welcome/index'
+  community: '/pages/community/login-guide/index'
 }
 
 const rolePhoneTitleMap: Record<UserRole, string> = {
