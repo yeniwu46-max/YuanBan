@@ -45,6 +45,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import AppHeader from '@/components/AppHeader.vue'
 import BottomNav from '@/components/BottomNav.vue'
@@ -54,6 +55,11 @@ import { goDetail } from '@/utils/navigate'
 import type { HealthMetric } from '@/types/elder'
 
 const health = useHealthStore()
+
+onShow(() => {
+  void health.hydrate()
+})
+
 const listMetrics = computed<HealthMetric[]>(() =>
   ['heartRate', 'breathRate', 'bloodPressure', 'sleep', 'fallRisk']
     .map((key) => health.metricByKey(key))

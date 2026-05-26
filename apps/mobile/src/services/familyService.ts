@@ -11,9 +11,16 @@ import {
   recommendedActions,
   reportAnomalies
 } from '@/mock/family'
+import { useApiMode } from '@/config/apiMode'
 import { apiRequest } from '@/services/apiClient'
+import type { ElderDto } from '@/services/elderService'
 import { mockClone } from '@/services/mockClone'
-import type { AlertStatus, ApiReportPeriod, ReportPeriod } from '@/types/family'
+import {
+  mapAlertDto,
+  mergeBoundElderFromApi,
+  mergeGuardSummaryFromApi
+} from '@/utils/apiMappers'
+import type { AlertStatus, ApiReportPeriod, BoundElder, GuardSummary, ReportPeriod } from '@/types/family'
 
 export type AlertDto = {
   id: string
@@ -122,4 +129,52 @@ export function patchAlertApi(alertId: string, status: AlertStatus, statusLabel?
     userId: 'family-001',
     body: { status, status_label: statusLabel }
   })
+}
+
+export function fetchBoundEldersApi() {
+  return apiRequest<ElderDto[]>('/api/v1/elders', {
+    role: 'family',
+    userId: 'family-001'
+  })
+}
+
+export async function loadGuardianDataFromApi(): Promise<{
+  elders: BoundElder[]
+  summaries: GuardSummary[]
+}> {
+  const [elderDtos, alertDtos] = await Promise.all([fetchBoundEldersApi(), fetchAlertsApi()])
+  const alerts = alertDtos.map(mapAlertDto)
+  const mockElders = getBoundElders()
+  const mockSummaries = getGuardSummaries()
+
+  const elders: BoundElder[] = elderDtos.map((dto) => {
+    const template = mockElders.find((m) => m.id === dto.id) ?? mockElders[0]
+    const activeCount = alerts.filter(
+      (a) => a.elderId === dto.id && a.status !== 'resolved'
+    ).length
+    return mergeBoundElderFromApi(dto, template, activeCount)
+  })
+
+  for (const mock of mockElders) {
+    if (!elders.some((e) => e.id === mock.id)) {
+      elders.push(mockClone(mock))
+    }
+  }
+
+  const summaries = elders.map((elder) => {
+    const template = mockSummaries.find((s) => s.elderId === elder.id) ?? mockSummaries[0]
+    const activeCount = alerts.filter(
+      (a) => a.elderId === elder.id && a.status !== 'resolved'
+    ).length
+    return mergeGuardSummaryFromApi(elder, template, activeCount)
+  })
+
+  return { elders, summaries }
+}
+
+export async function hydrateGuardianData() {
+  if (!useApiMode()) {
+    return { elders: getBoundElders(), summaries: getGuardSummaries() }
+  }
+  return loadGuardianDataFromApi()
 }

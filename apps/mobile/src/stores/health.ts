@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getHealthMetricDetail, getHealthMetrics, getMedicines } from '@/services/elderService'
+import { getHealthMetricDetail, getHealthMetrics, getMedicines, hydrateHealthMetrics } from '@/services/elderService'
 import type { HealthMetric } from '@/types/elder'
 
 export const useHealthStore = defineStore('health', {
@@ -8,7 +8,8 @@ export const useHealthStore = defineStore('health', {
     medicines: getMedicines(),
     reportTab: 'week' as 'day' | 'week' | 'month',
     medicineMessage: '',
-    voiceMessage: ''
+    voiceMessage: '',
+    loading: false
   }),
   getters: {
     metricByKey: (state) => (key: string) => state.metrics.find((item) => item.key === key),
@@ -16,6 +17,16 @@ export const useHealthStore = defineStore('health', {
     pendingMedicine: (state) => state.medicines.find((item) => item.status === 'pending')
   },
   actions: {
+    async hydrate(elderId = 'elder-001') {
+      this.loading = true
+      try {
+        this.metrics = await hydrateHealthMetrics(elderId)
+      } catch {
+        uni.showToast({ title: '体征加载失败', icon: 'none' })
+      } finally {
+        this.loading = false
+      }
+    },
     setReportTab(tab: 'day' | 'week' | 'month') {
       this.reportTab = tab
     },

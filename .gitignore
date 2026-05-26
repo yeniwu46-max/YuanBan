@@ -21,6 +21,7 @@ Thumbs.db
 .env.local
 .env.*.local
 .env.production
+.env.mp-weixin
 infra/.env
 
 # Python / local API data

@@ -1,7 +1,7 @@
 {
-  "name": "鼋伴伴老人端",
+  "name": "鼋伴伴",
   "appid": "__UNI__YUANBANBAN",
-  "description": "鼋伴伴智慧养老老人端 MVP",
+  "description": "鼋伴伴智慧养老三端 MVP",
   "versionName": "0.1.0",
   "versionCode": "1",
   "transformPx": false,
@@ -9,14 +9,16 @@
     "appid": "",
     "setting": {
       "urlCheck": false,
-      "es6": true
+      "es6": true,
+      "minified": true
     },
-    "usingComponents": true
+    "usingComponents": true,
+    "lazyCodeLoading": "requiredComponents"
   },
   "h5": {
     "router": {
       "mode": "hash"
-    }
+    },
+    "title": "鼋伴伴"
   }
 }
-

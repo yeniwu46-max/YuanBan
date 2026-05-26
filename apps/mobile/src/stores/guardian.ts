@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getBoundElders, getGuardSummaries } from '@/services/familyService'
+import { getBoundElders, getGuardSummaries, hydrateGuardianData } from '@/services/familyService'
 import type { BoundElder, GuardSummary } from '@/types/family'
 
 const SWITCH_DELAY_MS = 120
@@ -9,7 +9,8 @@ export const useGuardianStore = defineStore('guardian', {
     elders: getBoundElders(),
     summaries: getGuardSummaries(),
     currentElderId: getBoundElders()[0]?.id ?? '',
-    switching: false
+    switching: false,
+    loading: false
   }),
   getters: {
     currentElder(state): BoundElder | undefined {
@@ -20,6 +21,21 @@ export const useGuardianStore = defineStore('guardian', {
     }
   },
   actions: {
+    async hydrate() {
+      this.loading = true
+      try {
+        const data = await hydrateGuardianData()
+        this.elders = data.elders
+        this.summaries = data.summaries
+        if (!this.elders.some((item) => item.id === this.currentElderId)) {
+          this.currentElderId = this.elders[0]?.id ?? ''
+        }
+      } catch {
+        uni.showToast({ title: '守护数据加载失败', icon: 'none' })
+      } finally {
+        this.loading = false
+      }
+    },
     setCurrentElder(elderId: string) {
       if (this.elders.some((item) => item.id === elderId)) {
         this.currentElderId = elderId

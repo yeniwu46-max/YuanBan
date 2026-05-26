@@ -69,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app'
 import AppHeader from '@/components/AppHeader.vue'
 import BigButton from '@/components/BigButton.vue'
 import BottomNav from '@/components/BottomNav.vue'
@@ -81,6 +82,10 @@ import type { HealthMetric } from '@/types/elder'
 
 const elder = useElderStore()
 const health = useHealthStore()
+
+onShow(() => {
+  void Promise.all([elder.hydrate(), health.hydrate()])
+})
 
 function metric(key: string): HealthMetric {
   return health.metricByKey(key) ?? health.metrics[0]

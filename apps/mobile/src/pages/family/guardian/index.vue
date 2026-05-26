@@ -108,6 +108,8 @@ import GuardScoreCard from '@/components/family/GuardScoreCard.vue'
 import QuickCareGrid from '@/components/family/QuickCareGrid.vue'
 import type { QuickCareAction } from '@/components/family/QuickCareGrid.vue'
 import { useFamilyElderContext } from '@/composables/useFamilyElderContext'
+import { useGuardianStore } from '@/stores/guardian'
+import { syncFamilyDerivedState } from '@/stores/familySync'
 import { goDetail, goMainTab } from '@/utils/navigate'
 
 const {
@@ -121,7 +123,10 @@ const {
 } = useFamilyElderContext()
 
 onShow(() => {
-  void alertStore.hydrate(elderId.value)
+  const guardian = useGuardianStore()
+  void Promise.all([guardian.hydrate(), alertStore.hydrate(elderId.value)]).then(() =>
+    syncFamilyDerivedState()
+  )
 })
 
 const visibleAlerts = computed(() => elderAlerts.value.slice(0, 3))

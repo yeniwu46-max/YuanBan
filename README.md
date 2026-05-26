@@ -37,6 +37,16 @@ API：http://localhost:8000/docs
 
 详见 [docs/deploy-demo.md](docs/deploy-demo.md)。
 
+### 微信小程序
+
+```powershell
+cd apps/mobile
+copy .env.mp-weixin.example .env.mp-weixin
+.\scripts\build-mp-weixin.ps1
+```
+
+详见 [docs/mp-weixin-setup.md](docs/mp-weixin-setup.md)。开发默认 `VITE_USE_API=true`（见 `.env.development`）。
+
 ## 目录结构
 
 ```

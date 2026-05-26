@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models import AlertEvent, Elder, HealthSnapshot, WorkOrder
+from app.models import AlertEvent, Elder, ElderBinding, HealthSnapshot, WorkOrder
 from app.schemas.api import AlertOut, AlertUpdate, ElderOut, HealthMetricOut, WorkOrderOut, WorkOrderUpdate
 from app.services.alert_service import alert_to_dict
 
@@ -13,6 +13,27 @@ router = APIRouter(prefix="/api/v1", tags=["api"])
 
 def get_role(x_role: Annotated[str | None, Header()] = None) -> str | None:
     return x_role
+
+
+def get_user_id(x_user_id: Annotated[str | None, Header(alias="X-User-Id")] = None) -> str | None:
+    return x_user_id
+
+
+@router.get("/elders", response_model=list[ElderOut])
+def list_elders(
+    db: Session = Depends(get_db),
+    role: str | None = Depends(get_role),
+    user_id: str | None = Depends(get_user_id),
+) -> list[Elder]:
+    q = db.query(Elder).order_by(Elder.id)
+    if role == "family" and user_id:
+        elder_ids = [
+            b.elder_id
+            for b in db.query(ElderBinding).filter(ElderBinding.family_user_id == user_id).all()
+        ]
+        if elder_ids:
+            q = q.filter(Elder.id.in_(elder_ids))
+    return q.all()
 
 
 @router.get("/elders/{elder_id}", response_model=ElderOut)

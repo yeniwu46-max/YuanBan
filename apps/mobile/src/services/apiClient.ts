@@ -1,10 +1,29 @@
 const DEFAULT_BASE = 'http://localhost:8000'
 
+declare const uni: {
+  request?: (options: {
+    url: string
+    method?: string
+    data?: unknown
+    header?: Record<string, string>
+    success?: (res: { statusCode: number; data: unknown }) => void
+    fail?: (err: unknown) => void
+  }) => void
+}
+
 export function getApiBaseUrl(): string {
-  const env = (import.meta as ImportMeta & { env?: { VITE_API_BASE?: string; DEV?: boolean } }).env
-  const fromEnv = env?.VITE_API_BASE
-  // Production H5: same host:port as page (LAN IP, tunnel, single-port proxy)
-  if (!env?.DEV && typeof window !== 'undefined' && window.location?.origin) {
+  const env = import.meta.env as ImportMeta['env'] & {
+    VITE_API_BASE?: string
+    DEV?: boolean
+    UNI_PLATFORM?: string
+  }
+  const fromEnv = env.VITE_API_BASE
+  if (
+    env.UNI_PLATFORM === 'h5' &&
+    !env.DEV &&
+    typeof window !== 'undefined' &&
+    window.location?.origin
+  ) {
     return window.location.origin
   }
   return fromEnv || DEFAULT_BASE
@@ -30,7 +49,7 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+function buildHeaders(options: RequestOptions): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: 'application/json'
   }
@@ -43,9 +62,46 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   if (options.userId) {
     headers['X-User-Id'] = options.userId
   }
+  return headers
+}
 
-  const res = await fetch(`${getApiBaseUrl()}${path}`, {
-    method: options.method || 'GET',
+function parseResponse<T>(status: number, data: unknown): T {
+  if (status < 200 || status >= 300) {
+    throw new ApiError(status, data)
+  }
+  if (status === 204) {
+    return undefined as T
+  }
+  return data as T
+}
+
+export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const url = `${getApiBaseUrl()}${path}`
+  const method = options.method || 'GET'
+  const headers = buildHeaders(options)
+
+  const uniRequest = typeof uni !== 'undefined' ? uni.request : undefined
+  if (uniRequest) {
+    return new Promise<T>((resolve, reject) => {
+      uniRequest({
+        url,
+        method,
+        data: options.body,
+        header: headers,
+        success: (res) => {
+          try {
+            resolve(parseResponse<T>(res.statusCode, res.data))
+          } catch (e) {
+            reject(e)
+          }
+        },
+        fail: (err) => reject(err)
+      })
+    })
+  }
+
+  const res = await fetch(url, {
+    method,
     headers,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined
   })

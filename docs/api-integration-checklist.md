@@ -4,18 +4,20 @@
 
 ## 1. 告警闭环（最高优先级）
 
-| Store / 页面 | API | 说明 |
+| Store / 页面 | API | 状态 |
 |--------------|-----|------|
-| 老人 `sos` | `POST /api/v1/simulator/trigger` `{ event_type: "sos" }` | 或直连 MQTT 后由后端消费 |
-| 子女 `alert` | `GET/PATCH /api/v1/alerts` | 列表与确认/关闭 |
-| 社区 `communityAlert` | `GET/PATCH /api/v1/work-orders` | 工单详情与完成 |
+| 老人 `sos` | `POST /api/v1/simulator/trigger` | 已接 |
+| 子女 `alert` | `GET/PATCH /api/v1/alerts` | 已接 |
+| 社区 `communityWorkorder` | `GET/PATCH /api/v1/work-orders` | 已接 |
+| 社区 `communityAlert` | 工单完成联动 | 部分 Mock 详情 |
 
 ## 2. 老人档案与体征
 
-| Store | API |
-|-------|-----|
-| `elder` | `GET /api/v1/elders/{id}` |
-| `health` | `GET /api/v1/elders/{id}/metrics/latest` |
+| Store | API | 状态 |
+|-------|-----|------|
+| `elder` | `GET /api/v1/elders/{id}` | 已接（`VITE_USE_API=true`） |
+| `health` | `GET /api/v1/elders/{id}/metrics/latest` | 已接 |
+| `guardian` | `GET /api/v1/elders` + alerts 聚合 | 已接 |
 
 ## 3. 社区工单列表
 

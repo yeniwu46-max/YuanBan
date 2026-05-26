@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getElderProfile } from '@/services/elderService'
+import { getElderProfile, hydrateElderProfile } from '@/services/elderService'
 
 export const useElderStore = defineStore('elder', {
   state: () => ({
@@ -7,7 +7,8 @@ export const useElderStore = defineStore('elder', {
     selectedContactId: '',
     contactActionMessage: '',
     relayMessage: '我今天挺好的，晚饭后想出去走走。',
-    sentRelayMessage: ''
+    sentRelayMessage: '',
+    loading: false
   }),
   getters: {
     primaryContact: (state) => state.profile.emergencyContacts[0],
@@ -18,6 +19,16 @@ export const useElderStore = defineStore('elder', {
     contactById: (state) => (id: string) => state.profile.emergencyContacts.find((item) => item.id === id)
   },
   actions: {
+    async hydrate(elderId = 'elder-001') {
+      this.loading = true
+      try {
+        this.profile = await hydrateElderProfile(elderId)
+      } catch {
+        uni.showToast({ title: '档案加载失败', icon: 'none' })
+      } finally {
+        this.loading = false
+      }
+    },
     selectContact(id: string) {
       this.selectedContactId = id
     },

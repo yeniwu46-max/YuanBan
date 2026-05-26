@@ -1,4 +1,7 @@
-import type { AlertEvent, AlertLevel, AlertStatus } from '@/types/family'
+import { elderProfile, healthMetrics as mockHealthMetrics } from '@/mock/elder'
+import type { ElderProfile, HealthMetric } from '@/types/elder'
+import type { AlertEvent, AlertLevel, AlertStatus, BoundElder, GuardSummary, SafetyStatus } from '@/types/family'
+import type { ElderDto, HealthMetricDto } from '@/services/elderService'
 import type { DashboardStats, TagTone, WorkOrder, WorkOrderStatus, WorkOrderTab } from '@/types/community'
 import type { WorkOrderDto } from '@/services/communityService'
 import type { AlertDto } from '@/services/familyService'
@@ -38,6 +41,84 @@ export function computePoolStats(orders: WorkOrder[]): DashboardStats {
     activityCount: 2,
     doneCount: done.length,
     totalCount: orders.length
+  }
+}
+
+export function mapElderDtoToProfile(dto: ElderDto): ElderProfile {
+  return {
+    id: dto.id,
+    name: dto.name,
+    age: dto.age,
+    locationLabel: dto.location_label,
+    emergencyContacts: elderProfile.emergencyContacts.map((c) => ({ ...c }))
+  }
+}
+
+export function mapHealthMetricDto(dto: HealthMetricDto): HealthMetric {
+  const status = (['normal', 'warning', 'danger'].includes(dto.status)
+    ? dto.status
+    : 'normal') as HealthMetric['status']
+  const key = dto.key as HealthMetric['key']
+  const numeric = Number(dto.value)
+  const value = Number.isFinite(numeric) && dto.value === String(numeric) ? numeric : dto.value
+  return {
+    key,
+    label: dto.label,
+    value,
+    unit: dto.unit || undefined,
+    status,
+    description: dto.description
+  }
+}
+
+export function mergeHealthMetrics(apiRows: HealthMetric[]): HealthMetric[] {
+  const keys = new Set(apiRows.map((m) => m.key))
+  const extras = mockHealthMetrics.filter((m) => !keys.has(m.key))
+  return [...apiRows, ...extras]
+}
+
+export function mergeBoundElderFromApi(
+  dto: ElderDto,
+  template: BoundElder,
+  activeAlertCount: number
+): BoundElder {
+  const safetyStatus: SafetyStatus =
+    activeAlertCount >= 2 ? 'danger' : activeAlertCount >= 1 ? 'attention' : 'safe'
+  return {
+    ...template,
+    id: dto.id,
+    name: dto.name,
+    age: dto.age,
+    locationLabel: dto.location_label,
+    riskCount: activeAlertCount,
+    safetyStatus,
+    safetyHeadline:
+      activeAlertCount > 0
+        ? `${dto.name}有 ${activeAlertCount} 条待处理提醒，建议尽快查看。`
+        : `${dto.name}今日状态良好，守护设备正常运行。`
+  }
+}
+
+export function mergeGuardSummaryFromApi(
+  elder: BoundElder,
+  template: GuardSummary,
+  activeAlertCount: number
+): GuardSummary {
+  return {
+    ...template,
+    elderId: elder.id,
+    guardScore: elder.guardScore,
+    deviceCount: elder.deviceCount,
+    riskCount: activeAlertCount,
+    medicineDonePercent: elder.medicineDonePercent,
+    lastSyncLabel: elder.lastSyncLabel,
+    activityLabel: elder.activityLabel,
+    safetyStatus: elder.safetyStatus,
+    safetyHeadline: elder.safetyHeadline,
+    companionSuggestion:
+      activeAlertCount > 0
+        ? '有待处理告警，建议先确认老人当前状态并电话问候。'
+        : template.companionSuggestion
   }
 }
 
