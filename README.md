@@ -47,6 +47,10 @@ copy .env.mp-weixin.example .env.mp-weixin
 
 详见 [docs/mp-weixin-setup.md](docs/mp-weixin-setup.md)。开发默认 `VITE_USE_API=true`（见 `.env.development`）。
 
+### 阿里云服务器
+
+公网 IP 示例：`47.102.108.137` — 部署步骤见 [docs/deploy-aliyun.md](docs/deploy-aliyun.md)。
+
 ## 目录结构
 
 ```
