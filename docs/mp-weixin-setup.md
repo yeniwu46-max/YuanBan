@@ -2,9 +2,13 @@
 
 ## 1. 配置 AppID
 
+本项目小程序 ID：**`wxc8249223ec70d85a`**（已写入 `src/manifest.json`）。
+
 1. 复制 `apps/mobile/.env.mp-weixin.example` → `.env.mp-weixin`
-2. 填入 `VITE_MP_APPID`（微信公众平台 AppID）
-3. 填入 `VITE_API_BASE`（**必须 HTTPS**，与后端一致）
+2. 确认 `VITE_MP_APPID=wxc8249223ec70d85a`
+3. 填入 `VITE_API_BASE`（**真机必须 HTTPS**，与后端一致；开发者工具调试本地 API 可暂用 `http://localhost:8000` 并勾选不校验域名）
+
+**AppSecret 仅放后端** `services/api/.env`（见 `.env.example`），不要写进小程序或提交 Git。
 
 构建脚本会尝试把 `VITE_MP_APPID` 写入 `src/manifest.json`（若为空则保持占位，开发者工具可选用测试号）。
 
