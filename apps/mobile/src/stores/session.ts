@@ -1,11 +1,6 @@
 import { defineStore } from 'pinia'
+import { configureTabBarForRole, getDefaultHomeShell } from '@/utils/tabBar'
 import type { UserRole } from '@/types/family'
-
-const roleHomeMap: Record<UserRole, string> = {
-  elder: '/pages/home/index',
-  family: '/pages/family/guardian/index',
-  community: '/pages/community/dashboard/index'
-}
 
 const roleAfterProfileMap: Record<UserRole, string> = {
   elder: '/pages/login-device/index',
@@ -28,12 +23,16 @@ export const useSessionStore = defineStore('session', {
     isFamily: (state) => state.role === 'family',
     isCommunity: (state) => state.role === 'community',
     phoneTitle: (state) => rolePhoneTitleMap[state.role],
-    homePath: (state) => roleHomeMap[state.role],
+    homePath: () => getDefaultHomeShell('elder'),
     afterProfilePath: (state) => roleAfterProfileMap[state.role]
   },
   actions: {
     setRole(role: UserRole) {
       this.role = role
+      configureTabBarForRole(role)
+    },
+    homePathForRole(role?: UserRole) {
+      return getDefaultHomeShell(role ?? this.role)
     }
   }
 })

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page">
     <AppHeader label="我的身体" title="健康总览" back="/pages/home/index" compact />
     <view class="section">
@@ -14,7 +14,7 @@
             <view class="score-label">健康分</view>
           </view>
         </view>
-        <button class="card report-link" @click="go('/pages/health-report/index')">
+        <button class="card report-link" @click="go('/pkg-elder-detail/health-report/index')">
           <text>今日报告已生成</text>
           <text class="chev">›</text>
         </button>
@@ -39,16 +39,13 @@
         :right-text="`${item.value}${item.unit ? item.unit : ''}`"
         @click="openMetric(item.key)"
       />
-    </view>
-    <BottomNav active="health" />
-  </view>
+    </view></view>
 </template>
 
 <script setup lang="ts">
 import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import AppHeader from '@/components/AppHeader.vue'
-import BottomNav from '@/components/BottomNav.vue'
 import ListItem from '@/components/ListItem.vue'
 import { useHealthStore } from '@/stores/health'
 import { goDetail } from '@/utils/navigate'
@@ -57,7 +54,7 @@ import type { HealthMetric } from '@/types/elder'
 const health = useHealthStore()
 
 onShow(() => {
-  void health.hydrate()
+  void health.hydrate('elder-001', { force: false })
 })
 
 const listMetrics = computed<HealthMetric[]>(() =>
@@ -80,10 +77,10 @@ function tagText(status: string) {
 
 function openMetric(key: HealthMetric['key']) {
   if (key === 'bloodPressure') {
-    go('/pages/bp/index')
+    go('/pkg-elder-detail/bp/index')
     return
   }
-  go(`/pages/health-metric/index?key=${key}`)
+  go(`/pkg-elder-detail/health-metric/index?key=${key}`)
 }
 
 function go(url: string) {

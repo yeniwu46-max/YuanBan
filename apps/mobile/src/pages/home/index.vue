@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page">
     <AppHeader :label="`早上好，${elder.profile.name}`" title="今天一切安好" />
     <view class="section">
@@ -12,7 +12,7 @@
           <YuanMascot heart />
         </view>
         <view class="grid2 action-row">
-          <BigButton tone="red" @click="go('/pages/sos/index')">SOS 求助</BigButton>
+          <BigButton tone="red" @click="go('/pkg-elder-detail/sos/index')">SOS 求助</BigButton>
           <BigButton tone="white" @click="health.playVoiceSummary('小鼋正在为您播报今天的健康情况')">语音唤醒</BigButton>
         </view>
         <view v-if="health.voiceMessage" class="card feedback">{{ health.voiceMessage }}</view>
@@ -34,13 +34,13 @@
 
     <view class="section-title">
       <view class="h2">今日健康</view>
-      <button class="link" @click="go('/pages/health-report/index')">查看报告 ›</button>
+      <button class="link" @click="go('/pkg-elder-detail/health-report/index')">查看报告 ›</button>
     </view>
     <view class="section compact">
       <view class="grid2">
         <HealthMetricCard :metric="metric('heartRate')" icon="心" @click="openMetric('heartRate')" />
         <HealthMetricCard :metric="metric('breathRate')" icon="息" @click="openMetric('breathRate')" />
-        <HealthMetricCard :metric="metric('medicine')" icon="药" @click="go('/pages/medicine/index')" />
+        <HealthMetricCard :metric="metric('medicine')" icon="药" @click="go('/pkg-elder-detail/medicine/index')" />
         <HealthMetricCard :metric="metric('sleep')" icon="眠" @click="openMetric('sleep')" />
       </view>
     </view>
@@ -56,7 +56,7 @@
             v-for="contact in elder.profile.emergencyContacts"
             :key="contact.id"
             class="bigbtn btnwhite family-btn"
-            @click="go(`/pages/contact-detail/index?id=${contact.id}`)"
+            @click="go(`/pkg-elder-detail/contact-detail/index?id=${contact.id}`)"
           >
             <text>{{ contact.relation }}</text>
             <text class="family-status">{{ contact.onlineStatus === 'online' ? '在线' : contact.onlineStatus === 'busy' ? '忙碌' : '离线' }}</text>
@@ -64,7 +64,6 @@
         </view>
       </view>
     </view>
-    <BottomNav active="home" />
   </view>
 </template>
 
@@ -72,7 +71,6 @@
 import { onShow } from '@dcloudio/uni-app'
 import AppHeader from '@/components/AppHeader.vue'
 import BigButton from '@/components/BigButton.vue'
-import BottomNav from '@/components/BottomNav.vue'
 import HealthMetricCard from '@/components/HealthMetricCard.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import { useElderStore } from '@/stores/elder'
@@ -84,7 +82,10 @@ const elder = useElderStore()
 const health = useHealthStore()
 
 onShow(() => {
-  void Promise.all([elder.hydrate(), health.hydrate()])
+  void Promise.all([
+    elder.hydrate('elder-001', { force: false }),
+    health.hydrate('elder-001', { force: false })
+  ])
 })
 
 function metric(key: string): HealthMetric {
@@ -92,7 +93,7 @@ function metric(key: string): HealthMetric {
 }
 
 function openMetric(key: HealthMetric['key']) {
-  go(`/pages/health-metric/index?key=${key}`)
+  go(`/pkg-elder-detail/health-metric/index?key=${key}`)
 }
 
 function go(url: string) {

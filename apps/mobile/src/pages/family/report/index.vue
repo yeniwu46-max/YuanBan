@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page family-page">
     <FamilyPageHeader label="子女端 · 报告中心" switchable />
 
@@ -120,8 +120,8 @@
             </view>
           </view>
           <view class="grid2 action-row">
-            <BigButton tone="green" @click="toast('发起视频')">📹 发起视频</BigButton>
-            <BigButton tone="white" @click="toast('电话关怀')">☎ 电话关怀</BigButton>
+            <BigButton tone="green" @click="openContact">📹 发起视频</BigButton>
+            <BigButton tone="white" @click="openContact">☎ 电话关怀</BigButton>
           </view>
         </view>
       </view>
@@ -135,19 +135,16 @@
         action-label="返回守护首页"
         @action="goHome('/pages/family/guardian/index')"
       />
-    </view>
-
-    <FamilyBottomNav active="report" />
-  </view>
+    </view></view>
 </template>
 
 <script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import BigButton from '@/components/BigButton.vue'
 import HealthMetricCard from '@/components/HealthMetricCard.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import AlertCard from '@/components/family/AlertCard.vue'
-import FamilyBottomNav from '@/components/family/FamilyBottomNav.vue'
 import FamilyEmptyState from '@/components/family/FamilyEmptyState.vue'
 import FamilyPageHeader from '@/components/family/FamilyPageHeader.vue'
 import FamilyPageSkeleton from '@/components/family/FamilyPageSkeleton.vue'
@@ -157,7 +154,11 @@ import { goDetail, goHome, goMainTab } from '@/utils/navigate'
 import type { AlertEvent, ReportAnomaly } from '@/types/family'
 
 const health = useHealthStore()
-const { switching, report, reportAnomalies, alertStore } = useFamilyElderContext()
+const { switching, report, reportAnomalies, alertStore, elderId, reportStore } = useFamilyElderContext()
+
+onShow(() => {
+  void reportStore.hydrate(elderId.value, health.reportTab, { force: false })
+})
 
 const periodPill = computed(() => {
   if (health.reportTab === 'day') return '🛡️ 今日整体平稳'
@@ -210,7 +211,7 @@ function anomalyAsAlert(item: ReportAnomaly): AlertEvent {
 function openAnomaly(item: ReportAnomaly) {
   if (item.alertId) {
     alertStore.setActiveAlert(item.alertId)
-    goDetail('/pages/family/alert/index')
+    goDetail('/pkg-family-detail/family/alert/index')
     return
   }
   toast(item.title)
@@ -218,6 +219,10 @@ function openAnomaly(item: ReportAnomaly) {
 
 function go(url: string) {
   goMainTab(url)
+}
+
+function openContact() {
+  goDetail('/pkg-elder-detail/contact-detail/index')
 }
 
 function toast(title: string) {

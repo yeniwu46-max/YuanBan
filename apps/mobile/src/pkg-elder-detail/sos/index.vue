@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page">
     <AppHeader label="安全守护" title="SOS 求助" back="/pages/home/index" compact />
     <view class="section">
@@ -20,7 +20,7 @@
             <BigButton tone="white" @click="sos.setState('confirm')">取消求助</BigButton>
           </template>
           <template v-else-if="sos.state === 'success'">
-            <BigButton @click="go('/pages/family/index')">联系女儿</BigButton>
+            <BigButton @click="go('/pkg-elder-detail/family/index')">联系女儿</BigButton>
             <BigButton tone="white" @click="go('/pages/home/index')">回到首页</BigButton>
           </template>
           <template v-else>

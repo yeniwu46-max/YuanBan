@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page family-page">
     <AppHeader
       label="子女端 · 告警处理"
@@ -37,8 +37,8 @@
 
       <view class="section">
         <view class="grid2">
-          <BigButton tone="green" @click="toast('联系老人')">☎ 联系老人</BigButton>
-          <BigButton tone="white" @click="toast('发起视频')">📹 发起视频</BigButton>
+          <BigButton tone="green" @click="openContact">☎ 联系老人</BigButton>
+          <BigButton tone="white" @click="openContact">📹 发起视频</BigButton>
         </view>
       </view>
 
@@ -82,8 +82,8 @@
             </view>
           </view>
           <view class="grid2 action-row">
-            <BigButton tone="warm" @click="toast('发送提醒')">➤ 发送提醒</BigButton>
-            <BigButton tone="white" @click="toast('语音留言')">🎙 语音留言</BigButton>
+            <BigButton tone="warm" @click="openCare">➤ 发送提醒</BigButton>
+            <BigButton tone="white" @click="openCare">🎙 语音留言</BigButton>
           </view>
         </view>
       </view>
@@ -99,7 +99,7 @@
           :icon-tone="item.iconTone"
           :title="item.title"
           :desc="item.description"
-          @click="toast(item.title)"
+          @click="openRecommendedAction(item.title)"
         />
       </view>
 
@@ -145,7 +145,7 @@ import FamilyEmptyState from '@/components/family/FamilyEmptyState.vue'
 import { getRecommendedActions } from '@/services/familyService'
 import { useFamilyElderContext } from '@/composables/useFamilyElderContext'
 import { syncFamilyDerivedState } from '@/stores/familySync'
-import { goBack, goHome } from '@/utils/navigate'
+import { goBack, goDetail, goHome } from '@/utils/navigate'
 import type { AlertLevel } from '@/types/family'
 import type { HealthMetric } from '@/types/elder'
 
@@ -216,6 +216,26 @@ function metric(key: string): HealthMetric {
 
 function go(url: string) {
   goHome(url)
+}
+
+function openContact() {
+  goDetail('/pkg-elder-detail/contact-detail/index')
+}
+
+function openCare() {
+  goHome('/pages/family/care/index')
+}
+
+function openRecommendedAction(title: string) {
+  if (title.includes('报告') || title.includes('血压') || title.includes('复测')) {
+    go('/pages/family/report/index')
+    return
+  }
+  if (title.includes('联系') || title.includes('电话') || title.includes('视频')) {
+    openContact()
+    return
+  }
+  openCare()
 }
 
 function toast(title: string) {

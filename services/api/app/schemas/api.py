@@ -7,6 +7,8 @@ from pydantic import BaseModel, Field
 UserRole = Literal["elder", "family", "community"]
 AlertStatus = Literal["pending", "viewed", "processing", "resolved"]
 WorkOrderStatus = Literal["pending", "processing", "resolved"]
+CompanionScene = Literal["chat", "mood", "health", "care"]
+CompanionSafetyLevel = Literal["normal", "attention", "emergency"]
 
 
 class HealthMetricOut(BaseModel):
@@ -25,8 +27,139 @@ class ElderOut(BaseModel):
     location_label: str
     address: str
     community_site_id: str | None = None
+    guard_score: int = 86
+    device_count: int = 0
+    online_status: str = "online"
 
     model_config = {"from_attributes": True}
+
+
+class DeviceOut(BaseModel):
+    id: str
+    elder_id: str
+    name: str
+    location: str
+    online: bool
+    battery_percent: int | None = None
+    status: str
+
+    model_config = {"from_attributes": True}
+
+
+class MedicineOut(BaseModel):
+    id: str
+    name: str
+    dose: str
+    schedule: str
+    status: str
+
+
+class MetricHistoryPoint(BaseModel):
+    recorded_at: datetime
+    value: str
+    status: str
+
+
+class ServiceSummaryOut(BaseModel):
+    abnormal_metric_count: int
+    online_device_count: int
+    total_device_count: int
+    recent_activity_label: str
+    companion_mood: str = "平稳"
+    companion_score: int = 78
+
+
+class CompanionStateOut(BaseModel):
+    mood: str = "平稳"
+    companion_score: int = 78
+    speak_hint: str = "今天记得多喝水"
+
+
+class CompanionStateUpdate(BaseModel):
+    mood: str | None = None
+    companion_score: int | None = None
+
+
+class FamilyDashboardOut(BaseModel):
+    elder_id: str
+    guard_score: int
+    health_score: int
+    active_alert_count: int
+    device_count: int
+    medicine_done_percent: int
+    safety_headline: str
+    companion_suggestion: str
+    metrics: list[HealthMetricOut] = Field(default_factory=list)
+
+
+class HealthReportOut(BaseModel):
+    elder_id: str
+    period: Literal["day", "week", "month"]
+    health_score: int
+    headline: str
+    summary: str
+    risk_count: int
+    medicine_done_percent: int
+    avg_sleep_hours: float
+    device_status_label: str
+    yuan_interpretation: str
+    family_advice: str
+    metrics: list[HealthMetricOut] = Field(default_factory=list)
+
+
+class CareTaskOut(BaseModel):
+    id: str
+    elder_id: str
+    icon: str
+    title: str
+    description: str
+    status: Literal["done", "pending"]
+    due_label: str
+
+
+class CareStatsOut(BaseModel):
+    elder_id: str
+    done_count: int
+    total_count: int
+    greeting: str
+    album_count: int
+
+
+class NotificationRuleOut(BaseModel):
+    key: str
+    label: str
+    description: str
+    enabled: bool
+
+
+class NotificationRulesUpdate(BaseModel):
+    rules: list[NotificationRuleOut]
+
+
+class CommunityDashboardOut(BaseModel):
+    pending_count: int
+    urgent_count: int
+    visit_count: int
+    activity_count: int
+    done_count: int
+    total_count: int
+    device_online_rate: int
+    service_status_label: str
+    urgent_items: list[dict[str, Any]] = Field(default_factory=list)
+    ops_metrics: list[dict[str, Any]] = Field(default_factory=list)
+    today_activity: dict[str, Any] | None = None
+    focus_elders: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class CommunityActivityOut(BaseModel):
+    id: str
+    title: str
+    time_label: str
+    location: str
+    enrolled: int
+    pending_check_in: int
+    status_label: str
+    status_tone: str
 
 
 class AlertOut(BaseModel):
@@ -79,8 +212,40 @@ class WorkOrderUpdate(BaseModel):
     tag_tone: str | None = None
 
 
+class ServiceProfileOut(BaseModel):
+    elder_id: str
+    name: str
+    age: int
+    address: str
+    guard_score: int
+    health_summary: str
+    recent_orders: list[WorkOrderOut] = Field(default_factory=list)
+    metrics: list[HealthMetricOut] = Field(default_factory=list)
+
+
 class SimulatorTrigger(BaseModel):
     event_type: Literal["sos", "fall", "vitals", "offline", "low_battery"]
     elder_id: str = "elder-001"
     device_id: str = "d3"
     location: str = "卧室"
+
+
+class CompanionChatIn(BaseModel):
+    elder_id: str = "elder-001"
+    role: UserRole = "elder"
+    message: str = Field(min_length=1, max_length=500)
+    mood: str | None = Field(default=None, max_length=24)
+    scene: CompanionScene = "chat"
+
+
+class CompanionSuggestedAction(BaseModel):
+    key: str
+    label: str
+    route: str | None = None
+
+
+class CompanionChatOut(BaseModel):
+    reply: str
+    speak_text: str
+    suggested_actions: list[CompanionSuggestedAction] = Field(default_factory=list)
+    safety_level: CompanionSafetyLevel = "normal"

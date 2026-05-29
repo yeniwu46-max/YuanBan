@@ -23,7 +23,7 @@
 
       <view class="section">
         <view class="grid2">
-          <BigButton tone="red" @click="toast('电话确认')">☎ 电话确认</BigButton>
+          <BigButton tone="red" @click="goProfile">☎ 电话确认</BigButton>
           <BigButton tone="white" @click="toast('导航上门')">🧭 导航上门</BigButton>
         </view>
       </view>
@@ -120,7 +120,7 @@
             </view>
           </view>
           <view class="grid2 action-row">
-            <BigButton tone="warm" @click="toast('同步子女')">➤ 同步子女</BigButton>
+            <BigButton tone="warm" @click="goProfile">➤ 同步子女</BigButton>
             <BigButton tone="white" @click="toast('语音记录')">🎙 语音记录</BigButton>
           </view>
         </view>

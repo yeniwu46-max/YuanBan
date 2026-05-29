@@ -6,19 +6,24 @@ import { useGuardianStore } from '@/stores/guardian'
 import { useHealthStore } from '@/stores/health'
 import { syncFamilyDerivedState } from '@/stores/familySync'
 import { useAlertStore } from '@/stores/alert'
+import { configureTabBarForRole } from '@/utils/tabBar'
+import { useSessionStore } from '@/stores/session'
 
 onLaunch(() => {
+  const session = useSessionStore()
+  configureTabBarForRole(session.role)
+
   if (useApiMode()) {
     const elder = useElderStore()
     const health = useHealthStore()
     const guardian = useGuardianStore()
-    const alert = useAlertStore()
     void Promise.all([
-      elder.hydrate(),
-      health.hydrate(),
-      guardian.hydrate(),
-      alert.hydrate()
-    ]).then(() => syncFamilyDerivedState())
+      elder.hydrate('elder-001', { force: true }),
+      health.hydrate('elder-001', { force: true }),
+      guardian.hydrate({ force: true })
+    ]).then(() => {
+      syncFamilyDerivedState()
+    })
   } else {
     syncFamilyDerivedState()
   }

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page community-page">
     <CommunityPageHeader
       label="社区端 · 服务档案"
@@ -34,12 +34,12 @@
       <view class="h2">快捷操作</view>
     </view>
     <view class="section compact-top">
-      <QuickActionGrid :actions="profileActions" @action="toast" />
+      <QuickActionGrid :actions="profileActions" @action="onProfileAction" />
     </view>
 
     <view class="section-title">
       <view class="h2">健康概况</view>
-      <button class="link" @click="toast('详细报告')">详细报告 ›</button>
+      <button class="link" @click="openReport">详细报告 ›</button>
     </view>
     <view class="section compact-top">
       <view class="grid2">
@@ -74,7 +74,7 @@
 
     <view class="section-title">
       <view class="h2">服务记录</view>
-      <button class="link" @click="toast('全部记录')">全部记录 ›</button>
+      <button class="link" @click="goMainTab('/pages/community/workorders/index')">全部记录 ›</button>
     </view>
     <view class="section compact-top">
       <view class="card service-card">
@@ -107,7 +107,7 @@
             <BigButton
               :tone="c.actionTone === 'warm' ? 'warm' : 'green'"
               class="mini-btn"
-              @click="toast(`联系${c.name}`)"
+              @click="openContact"
             >
               {{ c.actionLabel }}
             </BigButton>
@@ -147,23 +147,20 @@
           </view>
         </view>
         <view class="grid2 action-row">
-          <BigButton tone="warm" @click="toast('同步建议')">➤ 同步建议</BigButton>
+          <BigButton tone="warm" @click="goMainTab('/pages/community/workorders/index')">➤ 同步建议</BigButton>
           <BigButton tone="white" @click="toast('写入档案')">▤ 写入档案</BigButton>
         </view>
       </view>
-    </view>
-
-    <CommunityBottomNav active="profile" />
-  </view>
+    </view></view>
 </template>
 
 <script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import BigButton from '@/components/BigButton.vue'
 import HealthMetricCard from '@/components/HealthMetricCard.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
-import CommunityBottomNav from '@/components/community/CommunityBottomNav.vue'
 import CommunityPageHeader from '@/components/community/CommunityPageHeader.vue'
 import QuickActionGrid from '@/components/community/QuickActionGrid.vue'
 import { useCommunityProfileStore } from '@/stores/communityProfile'
@@ -171,6 +168,10 @@ import { goDetail, goMainTab } from '@/utils/navigate'
 
 const profileStore = useCommunityProfileStore()
 const profile = computed(() => profileStore.profile)
+
+onShow(() => {
+  void profileStore.hydrate('elder-001', { force: false })
+})
 
 const profileActions = [
   { key: 'call', icon: '☎', label: '联系' },
@@ -193,9 +194,37 @@ function toast(title?: string) {
   uni.showToast({ title: title ?? '功能演示', icon: 'none' })
 }
 
+function onProfileAction(key: string) {
+  if (key === 'call') {
+    openContact()
+    return
+  }
+  if (key === 'visit') {
+    goMainTab('/pages/community/workorders/index')
+    return
+  }
+  if (key === 'edit') {
+    openReport()
+    return
+  }
+  toast(profileActions.find((item) => item.key === key)?.label)
+}
+
+function openReport() {
+  goDetail('/pkg-elder-detail/health-report/index')
+}
+
+function openContact() {
+  goDetail('/pkg-elder-detail/contact-detail/index')
+}
+
 function openRisk(workOrderId?: string) {
-  if (workOrderId === 'wo-sos-018' || workOrderId === 'wo-bp-041') {
-    goDetail(`/pages/community/alert/index?id=wo-sos-018`)
+  if (workOrderId === 'wo-sos-018') {
+    goDetail(`/pkg-community-detail/community/alert/index?id=wo-sos-018`)
+    return
+  }
+  if (workOrderId) {
+    goMainTab('/pages/community/workorders/index')
   }
 }
 

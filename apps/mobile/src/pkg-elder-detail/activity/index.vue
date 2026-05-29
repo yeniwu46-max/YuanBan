@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page">
     <AppHeader label="社区服务" title="活动详情" back="/pages/service/index" compact />
     <view class="scroll-section">
@@ -34,7 +34,7 @@
       </view>
       <view class="grid2 activity-actions">
         <BigButton @click="joinActivity">{{ joined ? '已报名' : '报名参加' }}</BigButton>
-        <BigButton tone="white" @click="go('/pages/family/index')">通知家人</BigButton>
+        <BigButton tone="white" @click="go('/pkg-elder-detail/family/index')">通知家人</BigButton>
       </view>
       <view v-if="joined" class="card feedback">已报名成功，小鼋会在活动前提醒您。</view>
     </view>

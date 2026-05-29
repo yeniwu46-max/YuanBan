@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia'
-import { getElderProfile, hydrateElderProfile } from '@/services/elderService'
+import { elderProfile } from '@/mock/elder'
+import { hydrateElderProfile } from '@/services/elderService'
+import { mockClone } from '@/services/mockClone'
+import type { HydrateOptions } from '@/services/requestCache'
 
 export const useElderStore = defineStore('elder', {
   state: () => ({
-    profile: getElderProfile(),
+    profile: mockClone(elderProfile),
     selectedContactId: '',
     contactActionMessage: '',
     relayMessage: '我今天挺好的，晚饭后想出去走走。',
@@ -19,10 +22,10 @@ export const useElderStore = defineStore('elder', {
     contactById: (state) => (id: string) => state.profile.emergencyContacts.find((item) => item.id === id)
   },
   actions: {
-    async hydrate(elderId = 'elder-001') {
+    async hydrate(elderId = 'elder-001', options: HydrateOptions = {}) {
       this.loading = true
       try {
-        this.profile = await hydrateElderProfile(elderId)
+        this.profile = await hydrateElderProfile(elderId, options)
       } catch {
         uni.showToast({ title: '档案加载失败', icon: 'none' })
       } finally {

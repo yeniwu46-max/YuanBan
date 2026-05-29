@@ -8,11 +8,24 @@ APP_DIR="${APP_DIR:-/opt/yuanbanban}"
 API_DIR="$APP_DIR/services/api"
 EMAIL="${CERTBOT_EMAIL:-admin@wuyeni.cn}"
 
-export DEBIAN_FRONTEND=noninteractive
+install_deps() {
+  if command -v apt-get >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -qq
+    apt-get install -y -qq git python3 python3-pip python3-venv nginx certbot python3-certbot-nginx curl
+  elif command -v yum >/dev/null 2>&1; then
+    yum install -y git python3 python3-pip nginx curl
+    if ! command -v certbot >/dev/null 2>&1; then
+      yum install -y certbot python3-certbot-nginx 2>/dev/null || yum install -y epel-release && yum install -y certbot python3-certbot-nginx
+    fi
+  else
+    echo "不支持的系统：需要 apt-get 或 yum（Ubuntu/Debian/CentOS/Alibaba Cloud Linux）"
+    exit 1
+  fi
+}
 
 echo "==> 依赖"
-apt-get update -qq
-apt-get install -y -qq git python3 python3-pip nginx certbot python3-certbot-nginx curl
+install_deps
 
 echo "==> 代码"
 if [ -d "$APP_DIR/.git" ]; then
@@ -23,7 +36,7 @@ fi
 
 echo "==> API"
 cd "$API_DIR"
-pip3 install -e . -q
+pip3 install -e . -q --break-system-packages 2>/dev/null || pip3 install -e . -q
 python3 -m app.dev_setup
 
 if [ ! -f "$API_DIR/.env" ]; then
@@ -57,10 +70,18 @@ systemctl daemon-reload
 systemctl enable yuanbanban-api
 systemctl restart yuanbanban-api
 sleep 2
-curl -sf "http://127.0.0.1:8000/health" >/dev/null
+curl -sf "http://127.0.0.1:8000/health" >/dev/null || {
+  journalctl -u yuanbanban-api -n 40 --no-pager
+  exit 1
+}
 
 echo "==> Nginx (HTTP 先通，再申请证书)"
-cat >/etc/nginx/sites-available/yuanbanban-api <<EOF
+NGINX_CONF=/etc/nginx/sites-available/yuanbanban-api
+if [ ! -d /etc/nginx/sites-available ]; then
+  mkdir -p /etc/nginx/conf.d
+  NGINX_CONF=/etc/nginx/conf.d/yuanbanban-api.conf
+fi
+cat >"$NGINX_CONF" <<EOF
 server {
     listen 80;
     server_name $DOMAIN;
@@ -75,9 +96,11 @@ server {
 }
 EOF
 
-ln -sf /etc/nginx/sites-available/yuanbanban-api /etc/nginx/sites-enabled/yuanbanban-api
-rm -f /etc/nginx/sites-enabled/default
-nginx -t && systemctl reload nginx
+if [ -d /etc/nginx/sites-enabled ]; then
+  ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/yuanbanban-api
+  rm -f /etc/nginx/sites-enabled/default
+fi
+nginx -t && systemctl enable nginx && systemctl reload nginx
 
 echo "==> 检查 DNS: $DOMAIN -> 本机公网 IP"
 PUBLIC_IP=$(curl -sf ifconfig.me || curl -sf icanhazip.com)

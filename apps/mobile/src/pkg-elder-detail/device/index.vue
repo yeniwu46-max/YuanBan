@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page">
     <AppHeader label="生活帮手" title="设备管理" back="/pages/service/index" compact />
     <view class="scroll-section">
@@ -30,7 +30,7 @@
           :desc="deviceDesc(item)"
           :tag="item.status === 'warning' ? '低电量' : item.status === 'offline' ? '离线' : '正常'"
           :tag-tone="item.status === 'warning' ? 'warm' : item.status === 'offline' ? 'gray' : 'normal'"
-          @click="go(`/pages/device-detail/index?id=${item.id}`)"
+          @click="go(`/pkg-elder-detail/device-detail/index?id=${item.id}`)"
         />
       </view>
       <view v-if="device.lowBatteryDevice" class="hero warm device-tip">

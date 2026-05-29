@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     mqtt_port: int = 1883
     mqtt_topic_prefix: str = "yuanbanban"
     mqtt_enabled: bool = False
+    ai_provider: str = "dashscope"
+    ai_model: str = "qwen-plus-latest"
+    ai_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    dashscope_api_key: str = ""
     sos_dedup_seconds: int = 300
     run_seed: bool = False
 

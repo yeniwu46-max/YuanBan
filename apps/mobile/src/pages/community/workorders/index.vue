@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page community-page">
     <CommunityPageHeader label="社区端 · 工单中心" title="工单列表" />
 
@@ -17,7 +17,7 @@
       <view class="h2">工单操作</view>
     </view>
     <view class="section compact-top">
-      <QuickActionGrid :actions="woActions" @action="toast" />
+      <QuickActionGrid :actions="woActions" @action="onWorkOrderAction" />
     </view>
 
     <view class="section">
@@ -116,10 +116,7 @@
           <BigButton tone="white" @click="toast('通知值班')">💬 通知值班</BigButton>
         </view>
       </view>
-    </view>
-
-    <CommunityBottomNav active="workorders" />
-  </view>
+    </view></view>
 </template>
 
 <script setup lang="ts">
@@ -128,7 +125,6 @@ import { computed } from 'vue'
 import BigButton from '@/components/BigButton.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
-import CommunityBottomNav from '@/components/community/CommunityBottomNav.vue'
 import CommunityEmptyState from '@/components/community/CommunityEmptyState.vue'
 import CommunityPageHeader from '@/components/community/CommunityPageHeader.vue'
 import QuickActionGrid from '@/components/community/QuickActionGrid.vue'
@@ -137,7 +133,7 @@ import WorkOrderCard from '@/components/community/WorkOrderCard.vue'
 import { useCommunityStore } from '@/stores/community'
 import { useCommunityWorkorderStore } from '@/stores/communityWorkorder'
 import type { WorkOrder, WorkOrderTab } from '@/types/community'
-import { goDetail } from '@/utils/navigate'
+import { goDetail, goMainTab } from '@/utils/navigate'
 
 const community = useCommunityStore()
 const workorder = useCommunityWorkorderStore()
@@ -178,15 +174,23 @@ function setTab(tab: WorkOrderTab) {
 }
 
 function openOrder(order: WorkOrder) {
-  if (order.tab === 'urgent' && order.id === 'wo-sos-018') {
-    goDetail(`/pages/community/alert/index?id=${order.id}`)
+  if (order.tab === 'urgent') {
+    goDetail(`/pkg-community-detail/community/alert/index?id=${order.id}`)
     return
   }
-  if (order.elderId) {
-    goDetail(`/pages/community/profile/index`)
+  goDetail('/pages/community/profile/index')
+}
+
+function onWorkOrderAction(key: string) {
+  if (key === 'new') {
+    workorder.setTab('urgent')
+    toast('已切到紧急工单池')
+    goMainTab('/pages/community/workorders/index')
     return
   }
-  toast(order.title)
+  if (key === 'filter' || key === 'sort' || key === 'export') {
+    toast(woActions.find((item) => item.key === key)?.label)
+  }
 }
 
 function toast(msg?: string) {

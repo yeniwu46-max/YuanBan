@@ -90,6 +90,9 @@ export function mergeBoundElderFromApi(
     name: dto.name,
     age: dto.age,
     locationLabel: dto.location_label,
+    guardScore: dto.guard_score ?? template.guardScore,
+    deviceCount: dto.device_count ?? template.deviceCount,
+    online: dto.online_status ? dto.online_status === 'online' : template.online,
     riskCount: activeAlertCount,
     safetyStatus,
     safetyHeadline:

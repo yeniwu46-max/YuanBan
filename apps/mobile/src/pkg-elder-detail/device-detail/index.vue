@@ -1,6 +1,6 @@
-<template>
+﻿<template>
   <view class="app-page">
-    <AppHeader label="生活帮手" title="设备详情" back="/pages/device/index" compact />
+    <AppHeader label="生活帮手" title="设备详情" back="/pkg-elder-detail/device/index" compact />
     <view class="scroll-section">
       <view class="hero" :class="deviceInfo?.status === 'warning' ? 'warm' : deviceInfo?.status === 'offline' ? 'gray' : 'green'">
         <view class="between row-top">

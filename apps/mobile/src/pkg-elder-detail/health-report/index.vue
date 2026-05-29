@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page">
     <AppHeader label="我的身体" title="健康报告" back="/pages/health/index" compact />
     <view class="scroll-section">
@@ -42,12 +42,12 @@
       <view class="grid2">
         <HealthMetricCard :metric="metric('heartRate')" icon="心" @click="goMetric('heartRate')" />
         <HealthMetricCard :metric="metric('breathRate')" icon="息" @click="goMetric('breathRate')" />
-        <HealthMetricCard :metric="metric('bloodPressure')" icon="压" @click="go('/pages/bp/index')" />
+        <HealthMetricCard :metric="metric('bloodPressure')" icon="压" @click="go('/pkg-elder-detail/bp/index')" />
         <HealthMetricCard :metric="metric('sleep')" icon="眠" @click="goMetric('sleep')" />
       </view>
       <view class="section-title flush-title">
         <view class="h2">趋势</view>
-        <button class="link" @click="go('/pages/bp/index')">详情 ›</button>
+        <button class="link" @click="go('/pkg-elder-detail/bp/index')">详情 ›</button>
       </view>
       <view class="card chart-card">
         <view class="trend-title">血压与睡眠变化</view>
@@ -80,7 +80,7 @@ function metric(key: string): HealthMetric {
 }
 
 function goMetric(key: HealthMetric['key']) {
-  go(`/pages/health-metric/index?key=${key}`)
+  go(`/pkg-elder-detail/health-metric/index?key=${key}`)
 }
 
 function go(url: string) {

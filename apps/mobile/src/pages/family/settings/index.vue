@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page family-page">
     <FamilyPageHeader label="子女端 · 设置中心" title="设置与绑定" />
 
@@ -46,8 +46,8 @@
           :active="item.id === guardian.currentElderId"
           class="bound-item"
           @bind-code="toast('绑定码')"
-          @permission="toast('权限设置')"
-          @contact="toast('联系老人')"
+          @permission="openPrivacy"
+          @contact="openContact"
           @select="switchToElder(item.id)"
         />
         <view class="grid2 bind-methods">
@@ -94,7 +94,7 @@
           </view>
           <view class="grid2 action-row">
             <BigButton tone="warm" @click="toast('提醒家人')">💬 提醒家人</BigButton>
-            <BigButton tone="white" @click="toast('查看设备')">📶 查看设备</BigButton>
+            <BigButton tone="white" @click="openDevice">📶 查看设备</BigButton>
           </view>
         </view>
       </view>
@@ -103,35 +103,52 @@
         <view class="h2">隐私与权限</view>
       </view>
       <view class="list flush section-gap">
-        <ListItem icon="🔐" title="数据访问权限" desc="查看你能访问哪些老人数据" tag="已授权" :chev="false" />
-        <ListItem icon="🙈" title="隐私说明" desc="了解哪些内容不会被采集" tag="保护中" :chev="false" />
+        <ListItem icon="🔐" title="数据访问权限" desc="查看你能访问哪些老人数据" tag="已授权" @click="openPrivacy" />
+        <ListItem icon="🙈" title="隐私说明" desc="了解哪些内容不会被采集" tag="保护中" @click="openPrivacy" />
         <ListItem icon="👪" title="家庭成员管理" desc="添加兄弟姐妹或其他联系人" tag="3 人" :chev="false" />
       </view>
-    </template>
-
-    <FamilyBottomNav active="settings" />
-  </view>
+    </template></view>
 </template>
 
 <script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import BigButton from '@/components/BigButton.vue'
 import ListItem from '@/components/ListItem.vue'
 import PrivacyToggle from '@/components/PrivacyToggle.vue'
 import BoundElderCard from '@/components/family/BoundElderCard.vue'
-import FamilyBottomNav from '@/components/family/FamilyBottomNav.vue'
 import FamilyPageHeader from '@/components/family/FamilyPageHeader.vue'
 import FamilyPageSkeleton from '@/components/family/FamilyPageSkeleton.vue'
 import { useFamilyElderContext } from '@/composables/useFamilyElderContext'
 import { useFamilyStore } from '@/stores/family'
+import { hydrateNotificationRules } from '@/services/familyService'
+import { goDetail } from '@/utils/navigate'
 
 const family = useFamilyStore()
 const { guardian, elder, switching, careStore } = useFamilyElderContext()
+
+onShow(() => {
+  void hydrateNotificationRules({ force: false }).then((rules) => {
+    careStore.notificationRules = rules
+  })
+})
 
 const notificationEnabled = computed(() => careStore.notificationRules.every((item) => item.enabled))
 
 async function switchToElder(elderId: string) {
   await guardian.switchElder(elderId)
+}
+
+function openContact() {
+  goDetail('/pkg-elder-detail/contact-detail/index')
+}
+
+function openDevice() {
+  goDetail('/pkg-elder-detail/device/index')
+}
+
+function openPrivacy() {
+  goDetail('/pkg-elder-detail/privacy/index')
 }
 
 function toast(title: string) {

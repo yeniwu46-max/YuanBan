@@ -1,6 +1,6 @@
-<template>
+﻿<template>
   <view class="app-page">
-    <AppHeader label="亲情联络" title="联系人详情" back="/pages/family/index" compact />
+    <AppHeader label="亲情联络" title="联系人详情" back="/pkg-elder-detail/family/index" compact />
     <view class="scroll-section">
       <view class="hero green">
         <view class="center">

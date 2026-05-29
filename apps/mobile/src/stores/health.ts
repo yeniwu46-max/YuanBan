@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia'
-import { getHealthMetricDetail, getHealthMetrics, getMedicines, hydrateHealthMetrics } from '@/services/elderService'
+import { healthMetricDetails, healthMetrics, medicines } from '@/mock/elder'
+import { hydrateHealthMetrics } from '@/services/elderService'
+import { mockClone } from '@/services/mockClone'
+import type { HydrateOptions } from '@/services/requestCache'
 import type { HealthMetric } from '@/types/elder'
 
 export const useHealthStore = defineStore('health', {
   state: () => ({
-    metrics: getHealthMetrics(),
-    medicines: getMedicines(),
+    metrics: mockClone(healthMetrics),
+    medicines: mockClone(medicines),
     reportTab: 'week' as 'day' | 'week' | 'month',
     medicineMessage: '',
     voiceMessage: '',
@@ -13,14 +16,16 @@ export const useHealthStore = defineStore('health', {
   }),
   getters: {
     metricByKey: (state) => (key: string) => state.metrics.find((item) => item.key === key),
-    metricDetail: () => (key: HealthMetric['key']) => getHealthMetricDetail(key),
+    metricDetail: () => (key: HealthMetric['key']) => {
+      return mockClone(healthMetricDetails.find((item) => item.key === key))
+    },
     pendingMedicine: (state) => state.medicines.find((item) => item.status === 'pending')
   },
   actions: {
-    async hydrate(elderId = 'elder-001') {
+    async hydrate(elderId = 'elder-001', options: HydrateOptions = {}) {
       this.loading = true
       try {
-        this.metrics = await hydrateHealthMetrics(elderId)
+        this.metrics = await hydrateHealthMetrics(elderId, options)
       } catch {
         uni.showToast({ title: '体征加载失败', icon: 'none' })
       } finally {

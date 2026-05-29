@@ -11,6 +11,7 @@ import {
   yuanqiTasks
 } from '@/mock/elder'
 import { apiRequest } from '@/services/apiClient'
+import { cachedFetch, type HydrateOptions } from '@/services/requestCache'
 import { mockClone } from '@/services/mockClone'
 import {
   mapElderDtoToProfile,
@@ -26,6 +27,9 @@ export type ElderDto = {
   location_label: string
   address: string
   community_site_id: string | null
+  guard_score?: number
+  device_count?: number
+  online_status?: string
 }
 
 export type HealthMetricDto = {
@@ -64,6 +68,31 @@ export async function loadElderProfileFromApi(elderId = ELDER_ID): Promise<Elder
 export async function loadHealthMetricsFromApi(elderId = ELDER_ID): Promise<HealthMetric[]> {
   const dtos = await fetchElderMetricsApi(elderId)
   return mergeHealthMetrics(dtos.map(mapHealthMetricDto))
+}
+
+export function fetchElderDevicesApi(elderId = ELDER_ID) {
+  return apiRequest<
+    Array<{
+      id: string
+      elder_id: string
+      name: string
+      location: string
+      online: boolean
+      battery_percent: number | null
+      status: string
+    }>
+  >(`/api/v1/elders/${elderId}/devices`, { role: 'elder', userId: 'user-elder-001' })
+}
+
+export function fetchServiceSummaryApi(elderId = ELDER_ID) {
+  return apiRequest<{
+    abnormal_metric_count: number
+    online_device_count: number
+    total_device_count: number
+    recent_activity_label: string
+    companion_mood: string
+    companion_score: number
+  }>(`/api/v1/elders/${elderId}/service-summary`, { role: 'elder', userId: 'user-elder-001' })
 }
 
 export function getElderProfile() {
@@ -136,16 +165,20 @@ export function getSosState() {
   return sosState
 }
 
-export async function hydrateElderProfile(elderId = ELDER_ID) {
-  if (!useApiMode()) {
-    return getElderProfile()
-  }
-  return loadElderProfileFromApi(elderId)
+export async function hydrateElderProfile(elderId = ELDER_ID, options: HydrateOptions = {}) {
+  return cachedFetch(`elder:profile:${elderId}`, async () => {
+    if (!useApiMode()) {
+      return getElderProfile()
+    }
+    return loadElderProfileFromApi(elderId)
+  }, options)
 }
 
-export async function hydrateHealthMetrics(elderId = ELDER_ID) {
-  if (!useApiMode()) {
-    return getHealthMetrics()
-  }
-  return loadHealthMetricsFromApi(elderId)
+export async function hydrateHealthMetrics(elderId = ELDER_ID, options: HydrateOptions = {}) {
+  return cachedFetch(`elder:metrics:${elderId}`, async () => {
+    if (!useApiMode()) {
+      return getHealthMetrics()
+    }
+    return loadHealthMetricsFromApi(elderId)
+  }, options)
 }

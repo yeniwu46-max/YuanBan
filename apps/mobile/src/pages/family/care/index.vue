@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page family-page">
     <FamilyPageHeader label="子女端 · 关怀中心" switchable />
 
@@ -119,27 +119,28 @@
         action-label="返回守护首页"
         @action="goHome('/pages/family/guardian/index')"
       />
-    </view>
-
-    <FamilyBottomNav active="care" />
-  </view>
+    </view></view>
 </template>
 
 <script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app'
 import BigButton from '@/components/BigButton.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import CareTaskItem from '@/components/family/CareTaskItem.vue'
-import FamilyBottomNav from '@/components/family/FamilyBottomNav.vue'
 import FamilyEmptyState from '@/components/family/FamilyEmptyState.vue'
 import FamilyPageHeader from '@/components/family/FamilyPageHeader.vue'
 import FamilyPageSkeleton from '@/components/family/FamilyPageSkeleton.vue'
 import QuickCareGrid from '@/components/family/QuickCareGrid.vue'
 import type { QuickCareAction } from '@/components/family/QuickCareGrid.vue'
 import { useFamilyElderContext } from '@/composables/useFamilyElderContext'
-import { goHome, goMainTab } from '@/utils/navigate'
+import { goDetail, goHome, goMainTab } from '@/utils/navigate'
 import type { CareTaskStatus } from '@/types/family'
 
-const { switching, careStats: stats, careTasks, careStore } = useFamilyElderContext()
+const { switching, careStats: stats, careTasks, careStore, elderId } = useFamilyElderContext()
+
+onShow(() => {
+  void careStore.hydrate(elderId.value, { force: false })
+})
 
 const quickCareLabels: Record<QuickCareAction, string> = {
   video: '视频关怀',
@@ -150,6 +151,10 @@ const quickCareLabels: Record<QuickCareAction, string> = {
 }
 
 function onQuickCare(action: QuickCareAction) {
+  if (action === 'video' || action === 'phone') {
+    goDetail('/pkg-elder-detail/contact-detail/index')
+    return
+  }
   toast(quickCareLabels[action])
 }
 

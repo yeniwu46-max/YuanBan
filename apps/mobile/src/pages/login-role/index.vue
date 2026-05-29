@@ -5,13 +5,39 @@
       <view class="muted">老人端会使用更大的文字和更简单的按钮。</view>
     </view>
     <view class="list role-list">
-      <ListItem icon="老" title="我是老人" desc="查看安全状态、联系家人、记录心情" tag="推荐" :chev="false" @click="selectRole('elder')">
+      <ListItem
+        class="role-item"
+        :class="{ selected: session.role === 'elder' }"
+        icon="老"
+        title="我是老人"
+        desc="查看安全状态、联系家人、记录心情"
+        tag="推荐"
+        :chev="false"
+        @click="selectRole('elder')"
+      >
         <template #right><text v-if="session.role === 'elder'" class="chev">✓</text></template>
       </ListItem>
-      <ListItem icon="家" icon-tone="warm" title="我是家人" desc="远程关怀、接收告警、查看报告" :chev="false" @click="selectRole('family')">
+      <ListItem
+        class="role-item"
+        :class="{ selected: session.role === 'family' }"
+        icon="家"
+        icon-tone="warm"
+        title="我是家人"
+        desc="远程关怀、接收告警、查看报告"
+        :chev="false"
+        @click="selectRole('family')"
+      >
         <template #right><text v-if="session.role === 'family'" class="chev">✓</text></template>
       </ListItem>
-      <ListItem icon="社" title="我是社区人员" desc="处理告警、服务工单、活动管理" :chev="false" @click="selectRole('community')">
+      <ListItem
+        class="role-item"
+        :class="{ selected: session.role === 'community' }"
+        icon="社"
+        title="我是社区人员"
+        desc="处理告警、服务工单、活动管理"
+        :chev="false"
+        @click="selectRole('community')"
+      >
         <template #right><text v-if="session.role === 'community'" class="chev">✓</text></template>
       </ListItem>
     </view>
@@ -33,6 +59,7 @@ const session = useSessionStore()
 
 function selectRole(role: UserRole) {
   session.setRole(role)
+  goNext()
 }
 
 function goNext() {
@@ -48,5 +75,15 @@ function goNext() {
 
 .role-list {
   margin-top: 28px;
+}
+
+.role-item {
+  transition: border-color 0.16s ease, background-color 0.16s ease, transform 0.16s ease;
+}
+
+.role-item.selected {
+  border-color: #9fcb91;
+  background: #f1faec;
+  transform: translateY(-1px);
 }
 </style>

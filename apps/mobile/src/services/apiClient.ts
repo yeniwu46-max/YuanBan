@@ -14,18 +14,8 @@ declare const uni: {
 export function getApiBaseUrl(): string {
   const env = import.meta.env as ImportMeta['env'] & {
     VITE_API_BASE?: string
-    DEV?: boolean
-    UNI_PLATFORM?: string
   }
   const fromEnv = env.VITE_API_BASE
-  if (
-    env.UNI_PLATFORM === 'h5' &&
-    !env.DEV &&
-    typeof window !== 'undefined' &&
-    window.location?.origin
-  ) {
-    return window.location.origin
-  }
   return fromEnv || DEFAULT_BASE
 }
 

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page">
     <AppHeader label="我的身体" title="血压详情" back="/pages/health/index" compact />
     <view class="section">
@@ -20,13 +20,13 @@
     <view class="section">
       <view class="grid2">
         <BigButton @click="health.playVoiceSummary('小鼋提醒：今天血压略高，建议睡前复测。')">语音播报</BigButton>
-        <BigButton tone="white" @click="go('/pages/family/index')">告知家人</BigButton>
+        <BigButton tone="white" @click="go('/pkg-elder-detail/family/index')">告知家人</BigButton>
       </view>
       <view v-if="health.voiceMessage" class="card feedback">{{ health.voiceMessage }}</view>
     </view>
     <view class="section-title">
       <view class="h2">近 7 天趋势</view>
-      <button class="link" @click="go('/pages/health-report/index')">全部记录 ›</button>
+      <button class="link" @click="go('/pkg-elder-detail/health-report/index')">全部记录 ›</button>
     </view>
     <view class="section compact">
       <view class="card chart-card">

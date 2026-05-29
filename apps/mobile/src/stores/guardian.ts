@@ -1,32 +1,37 @@
 import { defineStore } from 'pinia'
-import { getBoundElders, getGuardSummaries, hydrateGuardianData } from '@/services/familyService'
-import type { BoundElder, GuardSummary } from '@/types/family'
-
-const SWITCH_DELAY_MS = 120
+import { boundElders, guardSummaries } from '@/mock/family'
+import { hydrateGuardianData } from '@/services/familyService'
+import { mockClone } from '@/services/mockClone'
+import type { HydrateOptions } from '@/services/requestCache'
+import type { AlertEvent } from '@/types/family'
+import { useAlertStore } from '@/stores/alert'
 
 export const useGuardianStore = defineStore('guardian', {
   state: () => ({
-    elders: getBoundElders(),
-    summaries: getGuardSummaries(),
-    currentElderId: getBoundElders()[0]?.id ?? '',
+    elders: mockClone(boundElders),
+    summaries: mockClone(guardSummaries),
+    currentElderId: boundElders[0]?.id ?? '',
     switching: false,
     loading: false
   }),
   getters: {
-    currentElder(state): BoundElder | undefined {
+    currentElder(state) {
       return state.elders.find((item) => item.id === state.currentElderId)
     },
-    currentSummary(state): GuardSummary | undefined {
+    currentSummary(state) {
       return state.summaries.find((item) => item.elderId === state.currentElderId)
     }
   },
   actions: {
-    async hydrate() {
+    async hydrate(options: HydrateOptions = {}) {
       this.loading = true
       try {
-        const data = await hydrateGuardianData()
+        const data = await hydrateGuardianData(options)
         this.elders = data.elders
         this.summaries = data.summaries
+        if (data.alerts) {
+          useAlertStore().setAlerts(data.alerts)
+        }
         if (!this.elders.some((item) => item.id === this.currentElderId)) {
           this.currentElderId = this.elders[0]?.id ?? ''
         }
@@ -46,7 +51,6 @@ export const useGuardianStore = defineStore('guardian', {
       if (elderId === this.currentElderId) return
 
       this.switching = true
-      await new Promise((resolve) => setTimeout(resolve, SWITCH_DELAY_MS))
       this.currentElderId = elderId
       this.switching = false
 

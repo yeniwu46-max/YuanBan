@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page family-page">
     <view class="header">
       <ElderSwitcher />
@@ -87,10 +87,7 @@
           </view>
         </view>
       </view>
-    </template>
-
-    <FamilyBottomNav active="guardian" />
-  </view>
+    </template></view>
 </template>
 
 <script setup lang="ts">
@@ -101,7 +98,6 @@ import HealthMetricCard from '@/components/HealthMetricCard.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import AlertCard from '@/components/family/AlertCard.vue'
 import ElderSwitcher from '@/components/family/ElderSwitcher.vue'
-import FamilyBottomNav from '@/components/family/FamilyBottomNav.vue'
 import FamilyEmptyState from '@/components/family/FamilyEmptyState.vue'
 import FamilyPageSkeleton from '@/components/family/FamilyPageSkeleton.vue'
 import GuardScoreCard from '@/components/family/GuardScoreCard.vue'
@@ -124,9 +120,7 @@ const {
 
 onShow(() => {
   const guardian = useGuardianStore()
-  void Promise.all([guardian.hydrate(), alertStore.hydrate(elderId.value)]).then(() =>
-    syncFamilyDerivedState()
-  )
+  void guardian.hydrate({ force: false }).then(() => syncFamilyDerivedState())
 })
 
 const visibleAlerts = computed(() => elderAlerts.value.slice(0, 3))
@@ -148,7 +142,7 @@ function go(url: string) {
 
 function openAlert(alertId: string) {
   alertStore.setActiveAlert(alertId)
-  goDetail('/pages/family/alert/index')
+  goDetail('/pkg-family-detail/family/alert/index')
 }
 
 function showAllAlerts() {
@@ -171,6 +165,14 @@ const quickCareLabels: Record<QuickCareAction, string> = {
 }
 
 function onQuickCare(action: QuickCareAction) {
+  if (action === 'video' || action === 'phone') {
+    goDetail('/pkg-elder-detail/contact-detail/index')
+    return
+  }
+  if (action === 'voice' || action === 'location') {
+    go('/pages/family/care/index')
+    return
+  }
   uni.showToast({ title: `${quickCareLabels[action]}（演示）`, icon: 'none' })
 }
 </script>

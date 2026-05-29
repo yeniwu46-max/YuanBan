@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page community-page">
     <CommunityPageHeader label="社区端 · 活动管理" title="银龄活动" />
 
@@ -17,12 +17,12 @@
       <view class="h2">快捷操作</view>
     </view>
     <view class="section compact-top">
-      <QuickActionGrid :actions="actActions" @action="toast" />
+      <QuickActionGrid :actions="actActions" @action="onActivityAction" />
     </view>
 
     <view class="section-title">
       <view class="h2">进行中活动</view>
-      <button class="link" @click="toast('现场管理')">现场管理 ›</button>
+      <button class="link" @click="focusCheckIn">现场管理 ›</button>
     </view>
     <view class="section compact-top" v-if="featured">
       <view class="hero warm featured">
@@ -40,8 +40,8 @@
           <view class="card stat-mini"><text class="muted">待签</text><text class="num warm">{{ featured.pendingCheckIn }}</text></view>
         </view>
         <view class="grid2 action-row">
-          <BigButton tone="green" @click="toast('签到核销')">▣ 签到核销</BigButton>
-          <BigButton tone="white" @click="toast('报名名单')">👥 报名名单</BigButton>
+          <BigButton tone="green" @click="focusCheckIn">▣ 签到核销</BigButton>
+          <BigButton tone="white" @click="focusCheckIn">👥 报名名单</BigButton>
         </view>
       </view>
     </view>
@@ -51,14 +51,14 @@
       <button class="link" @click="toast('筛选')">筛选 ☰</button>
     </view>
     <view class="list flush section-gap">
-      <view v-for="act in activities" :key="act.id" class="row-card static-card">
+      <button v-for="act in activities" :key="act.id" class="row-card static-card" @click="openActivity(act.id)">
         <view class="iconbox" :class="act.iconTone">{{ act.icon }}</view>
         <view class="row-main">
           <view class="row-title">{{ act.title }}</view>
           <view class="row-desc">{{ act.description }}</view>
         </view>
         <StatusTag :label="act.tag" :tone="act.tagTone === 'warm' ? 'warm' : 'normal'" />
-      </view>
+      </button>
     </view>
 
     <view class="section-title">
@@ -113,21 +113,19 @@
           <text class="muted qc-desc">参与老人 +20 积分</text>
         </button>
       </view>
-    </view>
-
-    <CommunityBottomNav active="activity" />
-  </view>
+    </view></view>
 </template>
 
 <script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import BigButton from '@/components/BigButton.vue'
 import StatusTag from '@/components/StatusTag.vue'
-import CommunityBottomNav from '@/components/community/CommunityBottomNav.vue'
 import CommunityPageHeader from '@/components/community/CommunityPageHeader.vue'
 import QuickActionGrid from '@/components/community/QuickActionGrid.vue'
 import StatsHero from '@/components/community/StatsHero.vue'
 import { useCommunityActivityStore } from '@/stores/communityActivity'
+import { goMainTab } from '@/utils/navigate'
 
 const activityStore = useCommunityActivityStore()
 
@@ -135,6 +133,10 @@ const overview = computed(() => activityStore.overview)
 const activities = computed(() => activityStore.activities)
 const checkIns = computed(() => activityStore.checkIns)
 const featured = computed(() => activities.value[0])
+
+onShow(() => {
+  void activityStore.hydrate({ force: false })
+})
 
 const actStats = computed(() => [
   { label: '活动', value: overview.value.todayCount },
@@ -152,6 +154,30 @@ const actActions = [
 
 function toast(title?: string) {
   uni.showToast({ title: title ?? '功能演示', icon: 'none' })
+}
+
+function onActivityAction(key: string) {
+  if (key === 'checkin') {
+    focusCheckIn()
+    return
+  }
+  if (key === 'notify') {
+    toast('已准备通知家属')
+    return
+  }
+  toast(actActions.find((item) => item.key === key)?.label)
+}
+
+function focusCheckIn() {
+  uni.showToast({ title: '已定位到签到管理', icon: 'none' })
+}
+
+function openActivity(activityId: string) {
+  if (activityId === 'act-taiji') {
+    focusCheckIn()
+    return
+  }
+  goMainTab('/pages/community/profile/index')
 }
 </script>
 

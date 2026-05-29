@@ -1,3 +1,13 @@
+import {
+  configureTabBarForRole,
+  getDefaultHomeShell,
+  isTabContentRoute,
+  isTabShellRoute,
+  normalizeRoute,
+  resolveShellPath
+} from '@/utils/tabBar'
+import { useSessionStore } from '@/stores/session'
+
 const FAMILY_TABS = new Set([
   '/pages/family/guardian/index',
   '/pages/family/report/index',
@@ -19,11 +29,6 @@ const ELDER_TABS = new Set([
   '/pages/service/index'
 ])
 
-function normalizeRoute(route?: string) {
-  if (!route) return ''
-  return route.startsWith('/') ? route : `/${route}`
-}
-
 export function getCurrentRoute() {
   const pages = getCurrentPages()
   const current = pages[pages.length - 1] as { route?: string } | undefined
@@ -35,7 +40,7 @@ function isSameRoute(url: string) {
 }
 
 function runNavigate(
-  primary: 'reLaunch' | 'redirectTo' | 'navigateTo',
+  primary: 'reLaunch' | 'redirectTo' | 'navigateTo' | 'switchTab',
   url: string,
   fallback: 'reLaunch' | 'redirectTo' = 'reLaunch'
 ) {
@@ -50,6 +55,10 @@ function runNavigate(
     uni.redirectTo({ url })
   }
 
+  if (primary === 'switchTab') {
+    uni.switchTab({ url, fail: onFail })
+    return
+  }
   if (primary === 'reLaunch') {
     uni.reLaunch({ url, fail: onFail })
     return
@@ -61,14 +70,16 @@ function runNavigate(
   uni.navigateTo({ url, fail: onFail })
 }
 
-/** 子女端 / 老人端底部 Tab 切换：清空页面栈，移动端更稳 */
+function resolveTabTarget(url: string): string | null {
+  const session = useSessionStore()
+  return resolveShellPath(url, session.role)
+}
+
+/** 三端底部 Tab 切换：优先 switchTab 保活 */
 export function goMainTab(url: string) {
-  if (
-    FAMILY_TABS.has(normalizeRoute(url)) ||
-    ELDER_TABS.has(normalizeRoute(url)) ||
-    COMMUNITY_TABS.has(normalizeRoute(url))
-  ) {
-    runNavigate('reLaunch', url)
+  const target = resolveTabTarget(url)
+  if (target) {
+    runNavigate('switchTab', target, 'reLaunch')
     return
   }
   runNavigate('reLaunch', url)
@@ -85,8 +96,11 @@ export function goDetail(url: string) {
 }
 
 /** 登录完成或需要重置栈时 */
-export function goHome(url: string) {
-  runNavigate('reLaunch', url)
+export function goHome(url?: string) {
+  const session = useSessionStore()
+  configureTabBarForRole(session.role)
+  const shell = url ? resolveTabTarget(url) : getDefaultHomeShell(session.role)
+  runNavigate('reLaunch', shell ?? getDefaultHomeShell(session.role))
 }
 
 /** 优先返回上一页，否则回到兜底页 */
@@ -108,3 +122,14 @@ export function isFamilyTab(url: string) {
 export function isCommunityTab(url: string) {
   return COMMUNITY_TABS.has(normalizeRoute(url))
 }
+
+export function isElderTab(url: string) {
+  return ELDER_TABS.has(normalizeRoute(url))
+}
+
+export function isAnyTabRoute(url: string) {
+  const normalized = normalizeRoute(url)
+  return isTabShellRoute(normalized) || isTabContentRoute(normalized)
+}
+
+export { configureTabBarForRole, getDefaultHomeShell }

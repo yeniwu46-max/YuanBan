@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page community-page">
     <CommunityPageHeader
       label="社区端 · 服务工作台"
@@ -29,7 +29,7 @@
     </view>
     <view class="section compact-top">
       <view class="grid2">
-        <OpsMetricCard v-for="m in ops" :key="m.key" :metric="m" @click="toast(m.title)" />
+        <OpsMetricCard v-for="m in ops" :key="m.key" :metric="m" @click="openOpsMetric(m.key)" />
       </view>
     </view>
 
@@ -71,8 +71,8 @@
           <StatusTag :label="todayActivity.statusLabel" :tone="todayActivity.statusTone === 'warm' ? 'warm' : 'normal'" />
         </view>
         <view class="grid2 action-row">
-          <BigButton tone="green" @click="toast('活动签到')">✓ 活动签到</BigButton>
-          <BigButton tone="white" @click="toast('查看名单')">▤ 查看名单</BigButton>
+          <BigButton tone="green" @click="goTab('activity')">✓ 活动签到</BigButton>
+          <BigButton tone="white" @click="goTab('activity')">▤ 查看名单</BigButton>
         </view>
       </view>
     </view>
@@ -95,17 +95,14 @@
         </view>
         <text class="chev">›</text>
       </button>
-    </view>
-
-    <CommunityBottomNav active="dashboard" />
-  </view>
+    </view></view>
 </template>
 
 <script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import BigButton from '@/components/BigButton.vue'
 import StatusTag from '@/components/StatusTag.vue'
-import CommunityBottomNav from '@/components/community/CommunityBottomNav.vue'
 import CommunityEmptyState from '@/components/community/CommunityEmptyState.vue'
 import CommunityPageHeader from '@/components/community/CommunityPageHeader.vue'
 import OpsMetricCard from '@/components/community/OpsMetricCard.vue'
@@ -126,6 +123,10 @@ const ops = computed(() => dashboard.ops)
 const urgentItems = computed(() => dashboard.urgentItems)
 const todayActivity = computed(() => dashboard.todayActivity)
 const focusList = computed(() => dashboard.focusList)
+
+onShow(() => {
+  void dashboard.hydrate({ force: false })
+})
 
 const heroStats = computed(() => [
   { label: '紧急', value: stats.value.urgentCount, tone: 'warm' },
@@ -165,7 +166,31 @@ function onQuick(key: string) {
     goTab('activity')
     return
   }
+  if (key === 'new' || key === 'visit') {
+    goTab('workorders')
+    return
+  }
+  if (key === 'device') {
+    goDetail('/pkg-elder-detail/device/index')
+    return
+  }
   toast(quickActions.find((a) => a.key === key)?.label ?? '功能演示')
+}
+
+function openOpsMetric(key: string) {
+  if (key === 'alerts') {
+    goTab('workorders')
+    return
+  }
+  if (key === 'elders') {
+    goProfile()
+    return
+  }
+  if (key === 'devices') {
+    goDetail('/pkg-elder-detail/device/index')
+    return
+  }
+  toast(ops.value.find((item) => item.key === key)?.title ?? '运营概览')
 }
 
 function goTab(tab: 'workorders' | 'activity') {
@@ -173,7 +198,7 @@ function goTab(tab: 'workorders' | 'activity') {
 }
 
 function openAlert(id: string) {
-  goDetail(`/pages/community/alert/index?id=${id}`)
+  goDetail(`/pkg-community-detail/community/alert/index?id=${id}`)
 }
 
 function goProfile() {

@@ -6,25 +6,16 @@
     { "path": "pages/login-profile/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/login-device/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/login-guide/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/tabs/tab0/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/tabs/tab1/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/tabs/tab2/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/tabs/tab3/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/home/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/health/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/health-metric/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/bp/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/companion/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/service/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/medicine/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/sos/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/family/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/privacy/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/health-report/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/device/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/device-detail/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/contact-detail/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/yuanqi/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/activity/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/family/login-guide/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/family/guardian/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/family/alert/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/family/report/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/family/care/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/family/settings/index", "style": { "navigationStyle": "custom" } },
@@ -32,9 +23,66 @@
     { "path": "pages/community/dashboard/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/community/workorders/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/community/activity/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/community/profile/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/community/alert/index", "style": { "navigationStyle": "custom" } }
+    { "path": "pages/community/profile/index", "style": { "navigationStyle": "custom" } }
   ],
+  "subPackages": [
+    {
+      "root": "pkg-elder-detail",
+      "pages": [
+        { "path": "health-metric/index", "style": { "navigationStyle": "custom" } },
+        { "path": "bp/index", "style": { "navigationStyle": "custom" } },
+        { "path": "medicine/index", "style": { "navigationStyle": "custom" } },
+        { "path": "sos/index", "style": { "navigationStyle": "custom" } },
+        { "path": "health-report/index", "style": { "navigationStyle": "custom" } },
+        { "path": "device/index", "style": { "navigationStyle": "custom" } },
+        { "path": "device-detail/index", "style": { "navigationStyle": "custom" } },
+        { "path": "contact-detail/index", "style": { "navigationStyle": "custom" } },
+        { "path": "privacy/index", "style": { "navigationStyle": "custom" } },
+        { "path": "yuanqi/index", "style": { "navigationStyle": "custom" } },
+        { "path": "activity/index", "style": { "navigationStyle": "custom" } },
+        { "path": "family/index", "style": { "navigationStyle": "custom" } }
+      ]
+    },
+    {
+      "root": "pkg-family-detail",
+      "pages": [
+        { "path": "family/alert/index", "style": { "navigationStyle": "custom" } }
+      ]
+    },
+    {
+      "root": "pkg-community-detail",
+      "pages": [
+        { "path": "community/alert/index", "style": { "navigationStyle": "custom" } }
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/tabs/tab0/index": {
+      "network": "all",
+      "packages": ["pkg-elder-detail"]
+    },
+    "pages/family/guardian/index": {
+      "network": "all",
+      "packages": ["pkg-family-detail"]
+    },
+    "pages/community/dashboard/index": {
+      "network": "all",
+      "packages": ["pkg-community-detail"]
+    }
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#9a927f",
+    "selectedColor": "#416348",
+    "backgroundColor": "#FFFDF7",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/tabs/tab0/index", "text": "首页" },
+      { "pagePath": "pages/tabs/tab1/index", "text": "健康" },
+      { "pagePath": "pages/tabs/tab2/index", "text": "小鼋" },
+      { "pagePath": "pages/tabs/tab3/index", "text": "服务" }
+    ]
+  },
   "globalStyle": {
     "navigationStyle": "custom",
     "backgroundColor": "#FFFDF7",

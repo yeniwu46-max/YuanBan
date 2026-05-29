@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="app-page">
     <AppHeader label="亲情联络" title="联系家人" back="/pages/home/index" compact />
     <view class="section">
@@ -89,7 +89,7 @@ if (!elder.selectedContactId) {
 
 function openContact(id: string) {
   elder.selectContact(id)
-  goDetail(`/pages/contact-detail/index?id=${id}`)
+  goDetail(`/pkg-elder-detail/contact-detail/index?id=${id}`)
 }
 
 function quickAction(action: 'phone' | 'video' | 'message') {

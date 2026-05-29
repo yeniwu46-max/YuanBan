@@ -1,14 +1,50 @@
 from typing import Annotated
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models import AlertEvent, Elder, ElderBinding, HealthSnapshot, WorkOrder
-from app.schemas.api import AlertOut, AlertUpdate, ElderOut, HealthMetricOut, WorkOrderOut, WorkOrderUpdate
+from app.models import AlertEvent, Device, Elder, ElderBinding, HealthSnapshot, WorkOrder
+from app.schemas.api import (
+    AlertOut,
+    AlertUpdate,
+    CompanionStateOut,
+    CompanionStateUpdate,
+    DeviceOut,
+    ElderOut,
+    HealthMetricOut,
+    MedicineOut,
+    MetricHistoryPoint,
+    ServiceSummaryOut,
+    WorkOrderOut,
+    WorkOrderUpdate,
+)
+from app.data.demo_content import COMPANION_STATE, MEDICINES
 from app.services.alert_service import alert_to_dict
 
 router = APIRouter(prefix="/api/v1", tags=["api"])
+
+
+def _elder_out(elder: Elder, db: Session) -> ElderOut:
+    devices = db.query(Device).filter(Device.elder_id == elder.id).all()
+    online = any(d.online for d in devices) if devices else True
+    unresolved = (
+        db.query(AlertEvent)
+        .filter(AlertEvent.elder_id == elder.id, AlertEvent.status != "resolved")
+        .count()
+    )
+    return ElderOut(
+        id=elder.id,
+        name=elder.name,
+        age=elder.age,
+        location_label=elder.location_label,
+        address=elder.address,
+        community_site_id=elder.community_site_id,
+        guard_score=max(60, 96 - unresolved * 8),
+        device_count=len(devices),
+        online_status="online" if online else "offline",
+    )
 
 
 def get_role(x_role: Annotated[str | None, Header()] = None) -> str | None:
@@ -24,7 +60,7 @@ def list_elders(
     db: Session = Depends(get_db),
     role: str | None = Depends(get_role),
     user_id: str | None = Depends(get_user_id),
-) -> list[Elder]:
+) -> list[ElderOut]:
     q = db.query(Elder).order_by(Elder.id)
     if role == "family" and user_id:
         elder_ids = [
@@ -33,15 +69,15 @@ def list_elders(
         ]
         if elder_ids:
             q = q.filter(Elder.id.in_(elder_ids))
-    return q.all()
+    return [_elder_out(e, db) for e in q.all()]
 
 
 @router.get("/elders/{elder_id}", response_model=ElderOut)
-def get_elder(elder_id: str, db: Session = Depends(get_db)) -> Elder:
+def get_elder(elder_id: str, db: Session = Depends(get_db)) -> ElderOut:
     elder = db.get(Elder, elder_id)
     if not elder:
         raise HTTPException(status_code=404, detail="Elder not found")
-    return elder
+    return _elder_out(elder, db)
 
 
 @router.get("/elders/{elder_id}/metrics/latest", response_model=list[HealthMetricOut])
@@ -152,3 +188,90 @@ def update_work_order(work_order_id: str, body: WorkOrderUpdate, db: Session = D
     db.commit()
     db.refresh(wo)
     return wo
+
+
+@router.get("/work-orders/{work_order_id}", response_model=WorkOrderOut)
+def get_work_order(work_order_id: str, db: Session = Depends(get_db)) -> WorkOrder:
+    wo = db.get(WorkOrder, work_order_id)
+    if not wo:
+        raise HTTPException(status_code=404, detail="Work order not found")
+    return wo
+
+
+@router.get("/elders/{elder_id}/devices", response_model=list[DeviceOut])
+def list_devices(elder_id: str, db: Session = Depends(get_db)) -> list[Device]:
+    return db.query(Device).filter(Device.elder_id == elder_id).all()
+
+
+@router.get("/elders/{elder_id}/medicines", response_model=list[MedicineOut])
+def list_medicines(elder_id: str) -> list[MedicineOut]:
+    _ = elder_id
+    return [MedicineOut(**m) for m in MEDICINES]
+
+
+@router.get("/elders/{elder_id}/metrics/{metric_key}/history", response_model=list[MetricHistoryPoint])
+def metric_history(
+    elder_id: str,
+    metric_key: str,
+    days: int = Query(7, ge=1, le=30),
+    db: Session = Depends(get_db),
+) -> list[MetricHistoryPoint]:
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+    rows = (
+        db.query(HealthSnapshot)
+        .filter(
+            HealthSnapshot.elder_id == elder_id,
+            HealthSnapshot.metric_key == metric_key,
+            HealthSnapshot.recorded_at >= since,
+        )
+        .order_by(HealthSnapshot.recorded_at.asc())
+        .all()
+    )
+    if not rows:
+        latest = (
+            db.query(HealthSnapshot)
+            .filter(HealthSnapshot.elder_id == elder_id, HealthSnapshot.metric_key == metric_key)
+            .order_by(HealthSnapshot.recorded_at.desc())
+            .first()
+        )
+        if latest:
+            rows = [latest]
+    return [
+        MetricHistoryPoint(recorded_at=r.recorded_at, value=r.value, status=r.status)
+        for r in rows
+    ]
+
+
+@router.get("/elders/{elder_id}/service-summary", response_model=ServiceSummaryOut)
+def service_summary(elder_id: str, db: Session = Depends(get_db)) -> ServiceSummaryOut:
+    metrics = get_latest_metrics(elder_id, db)
+    devices = db.query(Device).filter(Device.elder_id == elder_id).all()
+    abnormal = sum(1 for m in metrics if m.status == "warning")
+    online_count = sum(1 for d in devices if d.online)
+    companion = COMPANION_STATE.get(elder_id, {"mood": "平稳", "companion_score": 78})
+    return ServiceSummaryOut(
+        abnormal_metric_count=abnormal,
+        online_device_count=online_count,
+        total_device_count=len(devices),
+        recent_activity_label="舒缓太极课 · 今天 15:00",
+        companion_mood=companion.get("mood", "平稳"),
+        companion_score=companion.get("companion_score", 78),
+    )
+
+
+@router.get("/elders/{elder_id}/companion-state", response_model=CompanionStateOut)
+def get_companion_state(elder_id: str) -> CompanionStateOut:
+    data = COMPANION_STATE.get(elder_id, {"mood": "平稳", "companion_score": 78, "speak_hint": "今天记得多喝水"})
+    return CompanionStateOut(**data)
+
+
+@router.patch("/elders/{elder_id}/companion-state", response_model=CompanionStateOut)
+def patch_companion_state(elder_id: str, body: CompanionStateUpdate) -> CompanionStateOut:
+    current = COMPANION_STATE.setdefault(
+        elder_id, {"mood": "平稳", "companion_score": 78, "speak_hint": "今天记得多喝水"}
+    )
+    if body.mood is not None:
+        current["mood"] = body.mood
+    if body.companion_score is not None:
+        current["companion_score"] = body.companion_score
+    return CompanionStateOut(**current)

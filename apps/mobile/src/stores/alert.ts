@@ -1,17 +1,16 @@
 import { defineStore } from 'pinia'
+import { alertEvents } from '@/mock/family'
 import { useApiMode } from '@/config/apiMode'
 import { fetchAlertsApi, getAlerts, patchAlertApi } from '@/services/familyService'
+import { cachedFetch, type HydrateOptions } from '@/services/requestCache'
+import { mockClone } from '@/services/mockClone'
 import { mapAlertDto } from '@/utils/apiMappers'
 import type { AlertEvent, AlertStatus } from '@/types/family'
 
-function initialAlerts() {
-  const list = getAlerts()
-  return { alerts: list, activeAlertId: list[0]?.id ?? '' }
-}
-
 export const useAlertStore = defineStore('alert', {
   state: () => ({
-    ...initialAlerts(),
+    alerts: mockClone(alertEvents) as AlertEvent[],
+    activeAlertId: alertEvents[0]?.id ?? '',
     loading: false
   }),
   getters: {
@@ -29,7 +28,14 @@ export const useAlertStore = defineStore('alert', {
     }
   },
   actions: {
-    async hydrate(elderId?: string) {
+    setAlerts(alerts: AlertEvent[]) {
+      this.alerts = alerts
+      if (!this.alerts.some((a) => a.id === this.activeAlertId) && this.alerts[0]) {
+        this.activeAlertId = this.alerts[0].id
+      }
+    },
+    async hydrate(elderId?: string, options: HydrateOptions = {}) {
+      const cacheKey = elderId ? `alerts:${elderId}` : 'alerts:all'
       if (!useApiMode()) {
         this.alerts = getAlerts(elderId)
         if (!this.activeAlertId && this.alerts[0]) {
@@ -39,12 +45,11 @@ export const useAlertStore = defineStore('alert', {
       }
       this.loading = true
       try {
-        const dtos = await fetchAlertsApi(elderId)
-        this.alerts = dtos.map(mapAlertDto)
-        const stillActive = this.alerts.some((a) => a.id === this.activeAlertId)
-        if (!stillActive && this.alerts[0]) {
-          this.activeAlertId = this.alerts[0].id
-        }
+        const alerts = await cachedFetch(cacheKey, async () => {
+          const dtos = await fetchAlertsApi(elderId)
+          return dtos.map(mapAlertDto)
+        }, options)
+        this.setAlerts(alerts)
       } catch {
         uni.showToast({ title: '告警同步失败', icon: 'none' })
       } finally {
@@ -68,7 +73,7 @@ export const useAlertStore = defineStore('alert', {
       if (useApiMode()) {
         try {
           await patchAlertApi(alertId, 'processing', '处理中')
-          await this.hydrate(target.elderId)
+          await this.hydrate(target.elderId, { force: true })
           return
         } catch {
           uni.showToast({ title: '更新告警失败', icon: 'none' })
@@ -90,7 +95,7 @@ export const useAlertStore = defineStore('alert', {
       if (useApiMode()) {
         try {
           await patchAlertApi(alertId, 'resolved', '已处理')
-          await this.hydrate(target.elderId)
+          await this.hydrate(target.elderId, { force: true })
           return
         } catch {
           uni.showToast({ title: '关闭告警失败', icon: 'none' })
@@ -108,7 +113,7 @@ export const useAlertStore = defineStore('alert', {
       if (useApiMode()) {
         try {
           await patchAlertApi(alertId, 'processing', '稍后处理')
-          await this.hydrate(target.elderId)
+          await this.hydrate(target.elderId, { force: true })
           return
         } catch {
           uni.showToast({ title: '更新告警失败', icon: 'none' })
