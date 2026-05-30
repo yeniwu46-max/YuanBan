@@ -2,9 +2,7 @@
   <view class="hero" :class="tone">
     <view class="between row-top">
       <view class="main">
-        <view class="pill">{{ pill }}</view>
-        <view class="hero-title">{{ headline }}</view>
-        <view v-if="subtitle" class="muted hero-desc">{{ subtitle }}</view>
+        <HeroTitle :pill="pill" :title="headline" :subtitle="subtitle" :clamp="2" />
       </view>
       <view v-if="badgeValue != null && badgeValue !== ''" class="badge">
         <text class="badge-num">{{ badgeValue }}</text>
@@ -14,8 +12,8 @@
     </view>
     <view v-if="stats.length" class="stat-grid" :class="gridClass">
       <view v-for="item in stats" :key="item.label" class="card stat-mini">
-        <text class="muted">{{ item.label }}</text>
-        <text class="stat-num" :class="item.tone">{{ item.value }}</text>
+        <text class="muted text-nowrap">{{ item.label }}</text>
+        <text class="stat-num text-nowrap" :class="item.tone">{{ item.value }}</text>
       </view>
     </view>
     <slot />
@@ -24,6 +22,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import HeroTitle from '@/components/HeroTitle.vue'
 
 const props = withDefaults(defineProps<{
   tone?: 'green' | 'warm' | 'red' | 'gray'
@@ -46,18 +45,6 @@ const gridClass = computed(() => (props.gridCols === 3 ? 'cols3' : 'cols4'))
 </script>
 
 <style scoped lang="scss">
-.hero-title {
-  margin-top: 15px;
-  font-size: 24px;
-  line-height: 1.35;
-  font-weight: 1000;
-}
-
-.hero-desc {
-  margin-top: 8px;
-  line-height: 1.5;
-}
-
 .badge {
   width: 88px;
   height: 88px;

@@ -1,4 +1,5 @@
 import { useApiMode } from '@/config/apiMode'
+import { getApiAuthOptions, getPrimaryElderId } from '@/utils/authContext'
 import {
   communityActivity,
   devices,
@@ -18,7 +19,7 @@ import {
   mapHealthMetricDto,
   mergeHealthMetrics
 } from '@/utils/apiMappers'
-import type { ElderProfile, HealthMetric, SosState } from '@/types/elder'
+import type { ElderProfile, HealthMetric, MedicineReminder, SosState } from '@/types/elder'
 
 export type ElderDto = {
   id: string
@@ -30,6 +31,8 @@ export type ElderDto = {
   guard_score?: number
   device_count?: number
   online_status?: string
+  emergency_contact?: string
+  emergency_phone?: string
 }
 
 export type HealthMetricDto = {
@@ -41,50 +44,69 @@ export type HealthMetricDto = {
   description: string
 }
 
+export type DeviceDto = {
+  id: string
+  elder_id: string
+  name: string
+  location: string
+  online: boolean
+  battery_percent: number | null
+  status: string
+}
+
 let sosState: SosState = 'confirm'
 let activityJoined = false
 
-const ELDER_ID = 'elder-001'
-
-export function fetchElderApi(elderId = ELDER_ID) {
-  return apiRequest<ElderDto>(`/api/v1/elders/${elderId}`, {
-    role: 'elder',
-    userId: 'user-elder-001'
-  })
+export function fetchElderApi(elderId?: string) {
+  const id = elderId ?? getPrimaryElderId()
+  return apiRequest<ElderDto>(`/api/v1/elders/${id}`, getApiAuthOptions())
 }
 
-export function fetchElderMetricsApi(elderId = ELDER_ID) {
-  return apiRequest<HealthMetricDto[]>(`/api/v1/elders/${elderId}/metrics/latest`, {
-    role: 'elder',
-    userId: 'user-elder-001'
-  })
+export function fetchElderMetricsApi(elderId?: string) {
+  const id = elderId ?? getPrimaryElderId()
+  return apiRequest<HealthMetricDto[]>(`/api/v1/elders/${id}/metrics/latest`, getApiAuthOptions())
 }
 
-export async function loadElderProfileFromApi(elderId = ELDER_ID): Promise<ElderProfile> {
+export function fetchMetricHistoryApi(elderId: string, metricKey: string, days = 7) {
+  return apiRequest<Array<{ recorded_at: string; value: string; status: string }>>(
+    `/api/v1/elders/${elderId}/metrics/${metricKey}/history?days=${days}`,
+    getApiAuthOptions()
+  )
+}
+
+export async function loadElderProfileFromApi(elderId?: string): Promise<ElderProfile> {
   const dto = await fetchElderApi(elderId)
   return mapElderDtoToProfile(dto)
 }
 
-export async function loadHealthMetricsFromApi(elderId = ELDER_ID): Promise<HealthMetric[]> {
+export async function loadHealthMetricsFromApi(elderId?: string): Promise<HealthMetric[]> {
   const dtos = await fetchElderMetricsApi(elderId)
-  return mergeHealthMetrics(dtos.map(mapHealthMetricDto))
+  return dtos.map(mapHealthMetricDto)
 }
 
-export function fetchElderDevicesApi(elderId = ELDER_ID) {
-  return apiRequest<
-    Array<{
-      id: string
-      elder_id: string
-      name: string
-      location: string
-      online: boolean
-      battery_percent: number | null
-      status: string
-    }>
-  >(`/api/v1/elders/${elderId}/devices`, { role: 'elder', userId: 'user-elder-001' })
+export function fetchElderDevicesApi(elderId?: string) {
+  const id = elderId ?? getPrimaryElderId()
+  return apiRequest<DeviceDto[]>(`/api/v1/elders/${id}/devices`, getApiAuthOptions())
 }
 
-export function fetchServiceSummaryApi(elderId = ELDER_ID) {
+export function fetchMedicinesApi(elderId?: string) {
+  const id = elderId ?? getPrimaryElderId()
+  return apiRequest<Array<{ id: string; name: string; dose: string; schedule: string; status: string }>>(
+    `/api/v1/elders/${id}/medicines`,
+    getApiAuthOptions()
+  )
+}
+
+export function patchMedicineApi(elderId: string, medicineId: string, status: string) {
+  return apiRequest(`/api/v1/elders/${elderId}/medicines/${medicineId}`, {
+    method: 'PATCH',
+    body: { status },
+    ...getApiAuthOptions()
+  })
+}
+
+export function fetchServiceSummaryApi(elderId?: string) {
+  const id = elderId ?? getPrimaryElderId()
   return apiRequest<{
     abnormal_metric_count: number
     online_device_count: number
@@ -92,7 +114,63 @@ export function fetchServiceSummaryApi(elderId = ELDER_ID) {
     recent_activity_label: string
     companion_mood: string
     companion_score: number
-  }>(`/api/v1/elders/${elderId}/service-summary`, { role: 'elder', userId: 'user-elder-001' })
+  }>(`/api/v1/elders/${id}/service-summary`, getApiAuthOptions())
+}
+
+export function fetchCompanionStateApi(elderId?: string) {
+  const id = elderId ?? getPrimaryElderId()
+  return apiRequest<{ mood: string; companion_score: number; speak_hint: string }>(
+    `/api/v1/elders/${id}/companion-state`,
+    getApiAuthOptions()
+  )
+}
+
+export function patchCompanionStateApi(elderId: string, body: { mood?: string; companion_score?: number }) {
+  return apiRequest<{ mood: string; companion_score: number; speak_hint: string }>(
+    `/api/v1/elders/${elderId}/companion-state`,
+    {
+      method: 'PATCH',
+      body,
+      ...getApiAuthOptions()
+    }
+  )
+}
+
+export function fetchPrivacyPermissionsApi(elderId?: string) {
+  const id = elderId ?? getPrimaryElderId()
+  return apiRequest<Array<{ key: string; label: string; description: string; enabled: boolean }>>(
+    `/api/v1/elders/${id}/privacy-permissions`,
+    getApiAuthOptions()
+  )
+}
+
+export function patchPrivacyPermissionsApi(
+  elderId: string,
+  permissions: Array<{ key: string; label: string; description: string; enabled: boolean }>
+) {
+  return apiRequest<Array<{ key: string; label: string; description: string; enabled: boolean }>>(
+    `/api/v1/elders/${elderId}/privacy-permissions`,
+    {
+      method: 'PATCH',
+      body: { permissions },
+      ...getApiAuthOptions()
+    }
+  )
+}
+
+export function fetchCommunityActivityApi(activityId: string) {
+  return apiRequest<
+    Array<{
+      id: string
+      title: string
+      time_label: string
+      location: string
+      enrolled: number
+      pending_check_in: number
+      status_label: string
+      status_tone: string
+    }>
+  >('/api/v1/community/activities', getApiAuthOptions()).then((rows) => rows.find((a) => a.id === activityId) ?? null)
 }
 
 export function getElderProfile() {
@@ -165,20 +243,130 @@ export function getSosState() {
   return sosState
 }
 
-export async function hydrateElderProfile(elderId = ELDER_ID, options: HydrateOptions = {}) {
-  return cachedFetch(`elder:profile:${elderId}`, async () => {
+export async function hydrateElderProfile(elderId?: string, options: HydrateOptions = {}) {
+  const id = elderId ?? getPrimaryElderId()
+  return cachedFetch(`elder:profile:${id}`, async () => {
     if (!useApiMode()) {
       return getElderProfile()
     }
-    return loadElderProfileFromApi(elderId)
+    return loadElderProfileFromApi(id)
   }, options)
 }
 
-export async function hydrateHealthMetrics(elderId = ELDER_ID, options: HydrateOptions = {}) {
-  return cachedFetch(`elder:metrics:${elderId}`, async () => {
+export async function hydrateHealthMetrics(elderId?: string, options: HydrateOptions = {}) {
+  const id = elderId ?? getPrimaryElderId()
+  return cachedFetch(`elder:metrics:${id}`, async () => {
     if (!useApiMode()) {
       return getHealthMetrics()
     }
-    return loadHealthMetricsFromApi(elderId)
+    return loadHealthMetricsFromApi(id)
   }, options)
+}
+
+export async function hydrateMedicines(elderId?: string, options: HydrateOptions = {}) {
+  const id = elderId ?? getPrimaryElderId()
+  return cachedFetch(`elder:medicines:${id}`, async () => {
+    if (!useApiMode()) {
+      return getMedicines()
+    }
+    const rows = await fetchMedicinesApi(id)
+    return rows.map(
+      (m): MedicineReminder => ({
+        id: m.id,
+        name: m.name,
+        time: m.schedule,
+        dosage: m.dose,
+        note: '',
+        status: m.status as MedicineReminder['status']
+      })
+    )
+  }, options)
+}
+
+export async function hydrateDevices(elderId?: string, options: HydrateOptions = {}) {
+  const id = elderId ?? getPrimaryElderId()
+  return cachedFetch(`elder:devices:${id}`, async () => {
+    if (!useApiMode()) {
+      return getDevices()
+    }
+    const rows = await fetchElderDevicesApi(id)
+    return rows.map((d) => ({
+      id: d.id,
+      name: d.name,
+      location: d.location,
+      online: d.online,
+      batteryPercent: d.battery_percent ?? undefined,
+      status: d.status as 'normal' | 'warning' | 'offline'
+    }))
+  }, options)
+}
+
+export async function hydrateServiceSummary(elderId?: string, options: HydrateOptions = {}) {
+  const id = elderId ?? getPrimaryElderId()
+  return cachedFetch(`elder:service-summary:${id}`, async () => {
+    if (!useApiMode()) {
+      return {
+        abnormalMetricCount: 0,
+        onlineDeviceCount: devices.filter((d) => d.online).length,
+        totalDeviceCount: devices.length,
+        recentActivityLabel: '舒缓太极课 · 今天 15:00',
+        companionMood: '平稳',
+        companionScore: 78
+      }
+    }
+    const dto = await fetchServiceSummaryApi(id)
+    return {
+      abnormalMetricCount: dto.abnormal_metric_count,
+      onlineDeviceCount: dto.online_device_count,
+      totalDeviceCount: dto.total_device_count,
+      recentActivityLabel: dto.recent_activity_label,
+      companionMood: dto.companion_mood,
+      companionScore: dto.companion_score
+    }
+  }, options)
+}
+
+export async function hydrateCompanionState(elderId?: string, options: HydrateOptions = {}) {
+  const id = elderId ?? getPrimaryElderId()
+  return cachedFetch(`elder:companion-state:${id}`, async () => {
+    if (!useApiMode()) {
+      return {
+        mood: getYuanqiProgress().mood,
+        companionScore: getYuanqiProgress().points,
+        speakHint: '今天记得多喝水',
+        tasks: getYuanqiTasks(),
+        privacyPermissions: getPrivacyPermissions()
+      }
+    }
+    const [state, tasks, privacy] = await Promise.all([
+      fetchCompanionStateApi(id),
+      fetchCareTasksForYuanqi(id),
+      fetchPrivacyPermissionsApi(id)
+    ])
+    return {
+      mood: state.mood,
+      companionScore: state.companion_score,
+      speakHint: state.speak_hint,
+      tasks,
+      privacyPermissions: privacy.map((p) => ({
+        key: p.key,
+        title: p.label,
+        description: p.description,
+        enabled: p.enabled
+      }))
+    }
+  }, options)
+}
+
+async function fetchCareTasksForYuanqi(elderId: string) {
+  const { fetchCareTasksApi } = await import('@/services/familyService')
+  const rows = await fetchCareTasksApi(elderId)
+  return rows.map((t, index) => ({
+    id: t.id,
+    icon: t.icon.replace(/[^\u4e00-\u9fa5A-Za-z]/g, '').slice(0, 1) || '任',
+    title: t.title,
+    description: t.description,
+    points: 5 + index * 5,
+    done: t.status === 'done'
+  }))
 }

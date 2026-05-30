@@ -5,21 +5,110 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
+from app.data.demo_content import CARE_TASKS, COMMUNITY_ACTIVITIES, MEDICINES, NOTIFICATION_RULES, PRIVACY_PERMISSIONS
 from app.models import (
     AlertEvent,
+    CareTask,
+    CommunityActivity,
     CommunitySite,
+    CompanionState,
     Device,
     Elder,
     ElderBinding,
     HealthSnapshot,
+    MedicinePlan,
+    NotificationRule,
     User,
     WorkOrder,
 )
 
 
+def _seed_demo_content(db: Session, elder_id: str, family_user_id: str) -> None:
+    if not db.query(MedicinePlan).filter(MedicinePlan.elder_id == elder_id).first():
+        for m in MEDICINES:
+            db.add(
+                MedicinePlan(
+                    id=m["id"],
+                    elder_id=elder_id,
+                    name=m["name"],
+                    dose=m["dose"],
+                    schedule=m["schedule"],
+                    status=m["status"],
+                )
+            )
+
+    if not db.query(CareTask).filter(CareTask.elder_id == elder_id).first():
+        for t in CARE_TASKS:
+            if t["elder_id"] == elder_id:
+                db.add(
+                    CareTask(
+                        id=t["id"],
+                        elder_id=t["elder_id"],
+                        icon=t["icon"],
+                        title=t["title"],
+                        description=t["description"],
+                        status=t["status"],
+                        due_label=t["due_label"],
+                    )
+                )
+
+    if not db.query(NotificationRule).filter(NotificationRule.user_id == family_user_id).first():
+        for r in NOTIFICATION_RULES:
+            db.add(
+                NotificationRule(
+                    user_id=family_user_id,
+                    key=r["key"],
+                    label=r["label"],
+                    description=r["description"],
+                    enabled=r["enabled"],
+                )
+            )
+
+    elder_user_id = "user-elder-001"
+    if not db.query(NotificationRule).filter(NotificationRule.user_id == elder_user_id).first():
+        for r in PRIVACY_PERMISSIONS:
+            db.add(
+                NotificationRule(
+                    user_id=elder_user_id,
+                    key=r["key"],
+                    label=r["label"],
+                    description=r["description"],
+                    enabled=r["enabled"],
+                )
+            )
+
+    if not db.get(CompanionState, elder_id):
+        db.add(
+            CompanionState(
+                elder_id=elder_id,
+                mood="平稳",
+                companion_score=78,
+                speak_hint="今天记得多喝水，晚饭后可以散步。",
+            )
+        )
+
+    if not db.query(CommunityActivity).first():
+        for a in COMMUNITY_ACTIVITIES:
+            db.add(
+                CommunityActivity(
+                    id=a["id"],
+                    site_id="site-001",
+                    title=a["title"],
+                    time_label=a["time_label"],
+                    location=a["location"],
+                    enrolled=a["enrolled"],
+                    pending_check_in=a["pending_check_in"],
+                    status_label=a["status_label"],
+                    status_tone=a["status_tone"],
+                )
+            )
+
+
 def seed(db: Session) -> None:
     if db.get(Elder, "elder-001"):
-        print("Seed skipped: data already exists")
+        _seed_demo_content(db, "elder-001", "family-001")
+        db.commit()
+        print("Seed skipped: core data exists, demo content ensured")
         return
 
     site = CommunitySite(
@@ -34,7 +123,14 @@ def seed(db: Session) -> None:
     users = [
         User(id="user-elder-001", phone="13800000001", name="李奶奶", role="elder"),
         User(id="family-001", phone="13000000000", name="李女士", role="family"),
-        User(id="community-001", phone="13900000001", name="王社工", role="community"),
+        User(id="family-002", phone="13000000001", name="张先生", role="family"),
+        User(
+            id="community-001",
+            phone="13900000001",
+            name="王社工",
+            role="community",
+            community_site_id="site-001",
+        ),
     ]
     db.add_all(users)
 
@@ -223,6 +319,9 @@ def seed(db: Session) -> None:
         ),
     ]
     db.add_all(work_orders)
+    db.commit()
+
+    _seed_demo_content(db, "elder-001", "family-001")
     db.commit()
     print("Seed completed")
 

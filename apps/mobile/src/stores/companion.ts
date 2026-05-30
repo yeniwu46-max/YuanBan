@@ -3,10 +3,16 @@ import {
   getPrivacyPermissions,
   getYuanqiProgress,
   getYuanqiTasks,
+  hydrateCompanionState,
+  patchCompanionStateApi,
+  patchPrivacyPermissionsApi,
   updatePrivacyPermission,
   updateYuanqiTask
 } from '@/services/elderService'
+import { patchCareTaskApi } from '@/services/familyService'
 import { sendCompanionChat, type CompanionScene, type CompanionSuggestedAction } from '@/services/companionService'
+import { useApiMode } from '@/config/apiMode'
+import { getPrimaryElderId } from '@/utils/authContext'
 
 const yuanqiProgress = getYuanqiProgress()
 
@@ -37,22 +43,67 @@ export const useCompanionStore = defineStore('companion', {
     suggestedActions: [] as CompanionSuggestedAction[],
     safetyLevel: 'normal' as 'normal' | 'attention' | 'emergency',
     loading: false,
-    aiError: ''
+    moodLoading: false,
+    aiError: '',
+    hydrated: false
   }),
   getters: {
-    progressPercent: (state) => Math.round((state.todayDone / state.todayTotal) * 100),
+    progressPercent: (state) =>
+      state.todayTotal > 0 ? Math.round((state.todayDone / state.todayTotal) * 100) : 0,
     unfinishedTasks: (state) => state.tasks.filter((item) => !item.done)
   },
   actions: {
+    async hydrate(elderId?: string, options: { force?: boolean } = {}) {
+      const data = await hydrateCompanionState(elderId, options)
+      this.selectedMood = data.mood
+      this.points = data.companionScore
+      this.tasks = data.tasks
+      this.privacyPermissions = data.privacyPermissions
+      this.todayDone = data.tasks.filter((t) => t.done).length
+      this.todayTotal = Math.max(data.tasks.length, 1)
+      this.hydrated = true
+    },
     async setMood(mood: string) {
+      if (this.moodLoading) return
+      this.moodLoading = true
       this.selectedMood = mood
       this.messageState = `已记录今天心情：${mood}`
-      await this.sendMessage(`我今天感觉${mood}`, 'mood')
+      try {
+        if (useApiMode()) {
+          await patchCompanionStateApi(getPrimaryElderId(), { mood })
+        }
+        await this.sendMessage(`我今天感觉${mood}`, 'mood')
+      } catch {
+        /* keep local state */
+      } finally {
+        this.moodLoading = false
+      }
     },
-    togglePermission(key: string) {
+    async togglePermission(key: string) {
       const permission = this.privacyPermissions.find((item) => item.key === key)
       if (!permission) return
       permission.enabled = !permission.enabled
+      if (useApiMode()) {
+        try {
+          const payload = this.privacyPermissions.map((p) => ({
+            key: p.key,
+            label: p.title,
+            description: p.description,
+            enabled: p.enabled
+          }))
+          const updated = await patchPrivacyPermissionsApi(getPrimaryElderId(), payload)
+          this.privacyPermissions = updated.map((p) => ({
+            key: p.key,
+            title: p.label,
+            description: p.description,
+            enabled: p.enabled
+          }))
+        } catch {
+          permission.enabled = !permission.enabled
+          uni.showToast({ title: '隐私设置保存失败', icon: 'none' })
+        }
+        return
+      }
       updatePrivacyPermission(key, permission.enabled)
     },
     startVoiceChat() {
@@ -61,14 +112,23 @@ export const useCompanionStore = defineStore('companion', {
     playFamilyMessage() {
       this.messageState = '女儿留言：妈，晚上我再和您视频。'
     },
-    completeTask(taskId: string) {
+    async completeTask(taskId: string) {
       const task = this.tasks.find((item) => item.id === taskId)
       if (!task || task.done) return
       task.done = true
       this.points += task.points
       this.todayDone = Math.min(this.todayDone + 1, this.todayTotal)
-      this.tasks = updateYuanqiTask(taskId, true)
       this.messageState = `已完成“${task.title}”，鼋气 +${task.points}`
+      if (useApiMode()) {
+        try {
+          await patchCareTaskApi(taskId, 'done')
+          await patchCompanionStateApi(getPrimaryElderId(), { companion_score: this.points })
+        } catch {
+          uni.showToast({ title: '任务同步失败', icon: 'none' })
+        }
+        return
+      }
+      this.tasks = updateYuanqiTask(taskId, true)
     },
     setChatInput(value: string) {
       this.chatInput = value
@@ -98,7 +158,7 @@ export const useCompanionStore = defineStore('companion', {
           mood: this.selectedMood,
           scene,
           role: 'elder',
-          elder_id: 'elder-001'
+          elder_id: getPrimaryElderId()
         })
         this.chatMessages.push({
           id: `assistant-${Date.now()}`,

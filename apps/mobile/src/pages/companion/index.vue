@@ -7,8 +7,8 @@
           <YuanMascot size="large" heart />
           <view class="item-main">
             <view class="pill">陪伴值 {{ companion.points }}</view>
-            <view class="hero-copy">我在呢，您可以直接和我说话。</view>
-            <view class="muted hero-desc">我会帮您记录心情，也可以帮您联系家人。</view>
+            <view class="hero-copy text-balance">我在呢，您可以直接和我说话。</view>
+            <view class="muted hero-desc text-keep-all">我会帮您记录心情，也可以帮您联系家人。</view>
           </view>
         </view>
         <view class="grid2 action-row">
@@ -70,11 +70,11 @@
 
     <view class="section-title">
       <view class="h2">记录心情</view>
-      <view class="muted mood-now">今天：{{ companion.selectedMood }}</view>
+      <view class="muted mood-now text-nowrap">今天：{{ companion.selectedMood }}</view>
     </view>
     <view class="section compact">
       <view class="grid4">
-        <button v-for="mood in moods" :key="mood.name" class="mood" :class="{ active: companion.selectedMood === mood.name }" @click="companion.setMood(mood.name)">
+        <button v-for="mood in moods" :key="mood.name" class="mood" :class="{ active: companion.selectedMood === mood.name, 'mood--loading': companion.moodLoading && companion.selectedMood === mood.name }" :disabled="companion.moodLoading" @click="companion.setMood(mood.name)">
           <text class="mood-icon">{{ mood.icon }}</text>
           <text class="mood-label">{{ mood.name }}</text>
         </button>
@@ -115,7 +115,7 @@ import BigButton from '@/components/BigButton.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import { useCompanionStore } from '@/stores/companion'
-import { goDetail } from '@/utils/navigate'
+import { goDetail, goFromCompanionAction } from '@/utils/navigate'
 import type { CompanionScene } from '@/services/companionService'
 
 const companion = useCompanionStore()
@@ -147,13 +147,13 @@ function ask(message: string, scene: CompanionScene) {
 }
 
 function openAction(route?: string | null) {
-  if (route) {
-    go(route)
-  }
+  goFromCompanionAction(route)
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles/motion.scss';
+
 .hero-copy {
   margin-top: 12px;
   font-size: 21px;
@@ -227,6 +227,8 @@ function openAction(route?: string | null) {
   color: #315943;
   font-weight: 900;
   font-size: 13px;
+  white-space: nowrap;
+  @include pressable-sm;
 }
 
 .prompt.emergency {
@@ -258,10 +260,12 @@ function openAction(route?: string | null) {
   color: white;
   font-size: 15px;
   font-weight: 1000;
+  @include pressable-sm;
 }
 
 .send-btn[disabled] {
   opacity: 0.6;
+  &:active { transform: none !important; }
 }
 
 .error-copy {
@@ -279,6 +283,11 @@ function openAction(route?: string | null) {
   padding: 12px 6px;
   border-radius: 24px;
   gap: 9px;
+}
+
+.mood--loading {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .mood-icon {
@@ -315,6 +324,7 @@ function openAction(route?: string | null) {
 
 .suggestion-action {
   text-align: left;
+  @include pressable-sm;
 }
 
 .yuanqi-card {

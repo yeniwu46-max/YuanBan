@@ -1,10 +1,15 @@
 from app.models.entities import (
     AlertEvent,
+    CareTask,
+    CommunityActivity,
     CommunitySite,
+    CompanionState,
     Device,
     Elder,
     ElderBinding,
     HealthSnapshot,
+    MedicinePlan,
+    NotificationRule,
     User,
     WorkOrder,
 )
@@ -18,4 +23,9 @@ __all__ = [
     "AlertEvent",
     "WorkOrder",
     "HealthSnapshot",
+    "MedicinePlan",
+    "CareTask",
+    "NotificationRule",
+    "CompanionState",
+    "CommunityActivity",
 ]

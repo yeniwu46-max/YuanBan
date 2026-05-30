@@ -1,21 +1,36 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.database import get_db
+from app.core.deps import CurrentUser, get_current_user, require_elder_access
 from app.models import Elder
 from app.schemas.api import SimulatorTrigger
-from app.services.alert_service import create_alert_from_event, publish_mqtt_event, update_device_status, upsert_vitals
+from app.services.alert_service import (
+    create_alert_from_event,
+    create_low_battery_alert,
+    publish_mqtt_event,
+    update_device_status,
+    upsert_vitals,
+)
 
 router = APIRouter(prefix="/api/v1/simulator", tags=["simulator"])
 
 
 @router.post("/trigger")
-def trigger_simulator(body: SimulatorTrigger, db: Session = Depends(get_db)) -> dict:
+def trigger_simulator(
+    body: SimulatorTrigger,
+    db: Session = Depends(get_db),
+    current: CurrentUser = Depends(get_current_user),
+) -> dict:
     settings = get_settings()
+    if not settings.simulator_enabled:
+        raise HTTPException(status_code=403, detail="Simulator disabled")
+
     elder = db.get(Elder, body.elder_id)
     if not elder:
         return {"ok": False, "error": "elder not found"}
+    require_elder_access(body.elder_id, current, db)
 
     if body.event_type == "vitals":
         payload = {"heart_rate": 84, "breath_rate": 19}
@@ -37,7 +52,6 @@ def trigger_simulator(body: SimulatorTrigger, db: Session = Depends(get_db)) -> 
 
     mqtt_published = publish_mqtt_event(settings.mqtt_host, settings.mqtt_port, topic, payload)
 
-    # 本地无 MQTT 时直接写库（dev convenience）
     if body.event_type == "vitals":
         upsert_vitals(db, body.elder_id, payload)
     elif body.event_type in ("offline", "low_battery"):
@@ -47,6 +61,14 @@ def trigger_simulator(body: SimulatorTrigger, db: Session = Depends(get_db)) -> 
             online=body.event_type != "offline",
             battery=23 if body.event_type == "low_battery" else None,
         )
+        if body.event_type == "low_battery":
+            alert = create_low_battery_alert(db, elder, body.device_id, 23)
+            return {
+                "ok": True,
+                "topic": topic,
+                "mqtt_published": mqtt_published,
+                "alert_id": alert.id if alert else None,
+            }
     else:
         alert = create_alert_from_event(db, elder, body.event_type, body.device_id, body.location, payload)
         return {"ok": True, "topic": topic, "mqtt_published": mqtt_published, "alert_id": alert.id if alert else None}

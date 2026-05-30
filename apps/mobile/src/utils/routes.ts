@@ -13,7 +13,19 @@ export const ROUTES = {
   activity: '/pkg-elder-detail/activity/index',
   elderFamily: '/pkg-elder-detail/family/index',
   familyAlert: '/pkg-family-detail/family/alert/index',
-  communityAlert: '/pkg-community-detail/community/alert/index'
+  communityAlert: '/pkg-community-detail/community/alert/index',
+  home: '/pages/home/index',
+  health: '/pages/health/index',
+  companion: '/pages/companion/index',
+  service: '/pages/service/index',
+  familyGuardian: '/pages/family/guardian/index',
+  familyReport: '/pages/family/report/index',
+  familyCare: '/pages/family/care/index',
+  familySettings: '/pages/family/settings/index',
+  communityDashboard: '/pages/community/dashboard/index',
+  communityWorkorders: '/pages/community/workorders/index',
+  communityActivity: '/pages/community/activity/index',
+  communityProfile: '/pages/community/profile/index'
 } as const
 
 export function contactDetail(id?: string) {
@@ -32,6 +44,18 @@ export function communityAlert(id: string) {
   return `${ROUTES.communityAlert}?id=${id}`
 }
 
-export function familyAlert(query?: string) {
-  return query ? `${ROUTES.familyAlert}?${query}` : ROUTES.familyAlert
+export function familyAlert(alertId?: string) {
+  return alertId ? `${ROUTES.familyAlert}?id=${encodeURIComponent(alertId)}` : ROUTES.familyAlert
+}
+
+export function elderActivity(id: string) {
+  return `${ROUTES.activity}?id=${encodeURIComponent(id)}`
+}
+
+export function withQuery(path: string, params: Record<string, string | undefined>) {
+  const query = Object.entries(params)
+    .filter(([, value]) => value !== undefined && value !== '')
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value!)}`)
+    .join('&')
+  return query ? `${path}?${query}` : path
 }

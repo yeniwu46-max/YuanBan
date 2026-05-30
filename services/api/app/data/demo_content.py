@@ -46,6 +46,12 @@ NOTIFICATION_RULES = [
     {"key": "daily", "label": "每日简报", "description": "每晚 20:00 发送健康摘要", "enabled": False},
 ]
 
+PRIVACY_PERMISSIONS = [
+    {"key": "bedroomMonitor", "label": "卧室安全监测", "description": "仅识别跌倒、异常静止等安全状态", "enabled": True},
+    {"key": "familyReport", "label": "家人查看健康报告", "description": "允许家人查看心率、睡眠、血压等趋势", "enabled": True},
+    {"key": "sosLocation", "label": "SOS 时共享位置", "description": "仅在紧急求助时发送位置", "enabled": True},
+]
+
 COMMUNITY_ACTIVITIES = [
     {
         "id": "act-001",

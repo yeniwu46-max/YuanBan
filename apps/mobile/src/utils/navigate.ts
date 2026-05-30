@@ -7,6 +7,7 @@ import {
   resolveShellPath
 } from '@/utils/tabBar'
 import { useSessionStore } from '@/stores/session'
+import { communityAlert, contactDetail, deviceDetail, familyAlert, healthMetric, withQuery } from '@/utils/routes'
 
 const FAMILY_TABS = new Set([
   '/pages/family/guardian/index',
@@ -36,15 +37,16 @@ export function getCurrentRoute() {
 }
 
 function isSameRoute(url: string) {
-  return getCurrentRoute() === normalizeRoute(url)
+  return getCurrentRoute() === normalizeRoute(url.split('?')[0])
 }
 
 function runNavigate(
   primary: 'reLaunch' | 'redirectTo' | 'navigateTo' | 'switchTab',
   url: string,
-  fallback: 'reLaunch' | 'redirectTo' = 'reLaunch'
+  fallback: 'reLaunch' | 'redirectTo' = 'redirectTo'
 ) {
-  if (isSameRoute(url)) return
+  const path = url.split('?')[0] ?? url
+  if (isSameRoute(path)) return
 
   const onFail = () => {
     if (fallback === primary) return
@@ -56,7 +58,7 @@ function runNavigate(
   }
 
   if (primary === 'switchTab') {
-    uni.switchTab({ url, fail: onFail })
+    uni.switchTab({ url: path, fail: onFail })
     return
   }
   if (primary === 'reLaunch') {
@@ -92,7 +94,18 @@ export function goReplace(url: string) {
 
 /** 进入详情页：保留返回栈 */
 export function goDetail(url: string) {
-  runNavigate('navigateTo', url, 'reLaunch')
+  runNavigate('navigateTo', url, 'redirectTo')
+}
+
+/** 自动识别 Tab / 详情 / 分包 */
+export function goRoute(url: string | null | undefined) {
+  if (!url) return
+  const normalized = normalizeRoute(url.split('?')[0])
+  if (isTabShellRoute(normalized) || isTabContentRoute(normalized)) {
+    goMainTab(url)
+    return
+  }
+  goDetail(url)
 }
 
 /** 登录完成或需要重置栈时 */
@@ -115,6 +128,30 @@ export function goBack(fallback: string) {
   goHome(fallback)
 }
 
+export function goAlert(alertId: string) {
+  goDetail(familyAlert(alertId))
+}
+
+export function goWorkOrder(workOrderId: string) {
+  goDetail(communityAlert(workOrderId))
+}
+
+export function goMetric(key: string) {
+  goDetail(healthMetric(key))
+}
+
+export function goContact(id?: string) {
+  goDetail(contactDetail(id))
+}
+
+export function goDevice(id: string) {
+  goDetail(deviceDetail(id))
+}
+
+export function goFromCompanionAction(route?: string | null) {
+  goRoute(route)
+}
+
 export function isFamilyTab(url: string) {
   return FAMILY_TABS.has(normalizeRoute(url))
 }
@@ -132,4 +169,4 @@ export function isAnyTabRoute(url: string) {
   return isTabShellRoute(normalized) || isTabContentRoute(normalized)
 }
 
-export { configureTabBarForRole, getDefaultHomeShell }
+export { configureTabBarForRole, getDefaultHomeShell, withQuery }

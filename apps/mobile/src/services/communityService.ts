@@ -1,6 +1,7 @@
 import { apiRequest } from '@/services/apiClient'
 import { cachedFetch, type HydrateOptions } from '@/services/requestCache'
 import { useApiMode } from '@/config/apiMode'
+import { getApiAuthOptions } from '@/utils/authContext'
 import {
   activityOverview,
   checkInRecords,
@@ -43,29 +44,46 @@ export type WorkOrderDto = {
 
 export function listWorkOrders(tab?: string) {
   const q = tab ? `?tab=${encodeURIComponent(tab)}` : ''
-  return apiRequest<WorkOrderDto[]>(`/api/v1/work-orders${q}`, { role: 'community', userId: 'community-001' })
+  return apiRequest<WorkOrderDto[]>(`/api/v1/work-orders${q}`, getApiAuthOptions())
 }
 
 export function getWorkOrder(id: string) {
-  return apiRequest<WorkOrderDto>(`/api/v1/community/work-orders/${id}`, {
-    role: 'community',
-    userId: 'community-001'
-  })
+  return apiRequest<WorkOrderDto>(`/api/v1/community/work-orders/${id}`, getApiAuthOptions())
+}
+
+export type WorkOrderDetailDto = WorkOrderDto & {
+  elder_name: string
+  elder_age: number
+  location: string
+  timeline: Array<{ id?: string; title: string; detail: string; done: boolean; pending?: boolean }>
+  suggestion: string
+  alert_type: string
+  priority: string
+  priority_tone: string
+  elapsed_label: string
+  status_label: string
+  status_tone: string
+  trigger_time: string
+  trigger_detail: string
+}
+
+export function getWorkOrderDetail(id: string) {
+  return apiRequest<WorkOrderDetailDto>(`/api/v1/community/work-orders/${id}/detail`, getApiAuthOptions())
 }
 
 export function finishWorkOrder(id: string) {
   return apiRequest<WorkOrderDto>(`/api/v1/work-orders/${id}`, {
     method: 'PATCH',
-    role: 'community',
-    userId: 'community-001',
-    body: { status: 'resolved', tag: '已完成', tag_tone: 'green' }
+    body: { status: 'resolved', tag: '已完成', tag_tone: 'green' },
+    ...getApiAuthOptions()
   })
 }
 
 export function triggerSimulator(eventType: 'sos' | 'fall' | 'vitals' | 'offline' | 'low_battery', elderId = 'elder-001') {
   return apiRequest<{ ok: boolean; alert_id?: string }>('/api/v1/simulator/trigger', {
     method: 'POST',
-    body: { event_type: eventType, elder_id: elderId, device_id: 'd3', location: '卧室' }
+    body: { event_type: eventType, elder_id: elderId, device_id: 'd3', location: '卧室' },
+    ...getApiAuthOptions()
   })
 }
 
@@ -126,10 +144,7 @@ export async function fetchDashboard(options: HydrateOptions = {}) {
         focusList: mockClone(focusElders)
       }
     }
-    const dto = await apiRequest<DashboardDto>('/api/v1/community/dashboard', {
-      role: 'community',
-      userId: 'community-001'
-    })
+    const dto = await apiRequest<DashboardDto>('/api/v1/community/dashboard', getApiAuthOptions())
     return {
       stats: {
         pendingCount: dto.pending_count,
@@ -206,23 +221,44 @@ export async function fetchActivities(options: HydrateOptions = {}) {
         status_label: string
         status_tone: string
       }>
-    >('/api/v1/community/activities', { role: 'community', userId: 'community-001' })
+    >('/api/v1/community/activities', getApiAuthOptions())
+    const activities = rows.map(
+      (a): CommunityActivityItem => ({
+        id: a.id,
+        icon: '📅',
+        iconTone: 'normal',
+        title: a.title,
+        description: `${a.time_label} · ${a.location} · 报名 ${a.enrolled} 人`,
+        tag: a.status_label,
+        tagTone: a.status_tone as CommunityActivityItem['tagTone'],
+        enrolled: a.enrolled,
+        pendingCheckIn: a.pending_check_in
+      })
+    )
+    const primary = rows[0]
+    const checkInRows = primary
+      ? await apiRequest<
+          Array<{ id: string; name: string; time_label: string; status_label: string; status_tone: string }>
+        >(`/api/v1/community/activities/${primary.id}/check-ins`, getApiAuthOptions())
+      : []
     return {
-      overview: mockClone(activityOverview),
-      activities: rows.map(
-        (a): CommunityActivityItem => ({
-          id: a.id,
-          icon: '📅',
-          iconTone: 'normal',
-          title: a.title,
-          description: `${a.time_label} · ${a.location} · 报名 ${a.enrolled} 人`,
-          tag: a.status_label,
-          tagTone: a.status_tone as CommunityActivityItem['tagTone'],
-          enrolled: a.enrolled,
-          pendingCheckIn: a.pending_check_in
-        })
-      ),
-      checkIns: mockClone(checkInRecords)
+      overview: {
+        todayCount: rows.length,
+        totalEnrolled: rows.reduce((sum, item) => sum + item.enrolled, 0),
+        inProgressCount: rows.filter((item) => item.status_label.includes('进行')).length,
+        pendingCheckInCount: rows.reduce((sum, item) => sum + item.pending_check_in, 0),
+        endedCount: rows.filter((item) => item.status_label.includes('结束')).length,
+        checkInTotal: rows.reduce((sum, item) => sum + Math.max(item.enrolled - item.pending_check_in, 0), 0),
+        pointsLabel: `+${rows.length * 20}`
+      } satisfies ActivityOverview,
+      activities,
+      checkIns: checkInRows.map((c): CheckInRecord => ({
+        id: c.id,
+        elderName: c.name,
+        detail: c.time_label,
+        tag: c.status_label,
+        tagTone: (c.status_tone as CheckInRecord['tagTone']) ?? 'normal'
+      }))
     }
   }, options)
 }
@@ -241,27 +277,29 @@ export async function fetchServiceProfile(elderId: string, options: HydrateOptio
       health_summary: string
       recent_orders: WorkOrderDto[]
       metrics: Array<{ key: string; label: string; value: string; unit: string; status: string; description: string }>
-    }>(`/api/v1/community/service-profile?elder_id=${encodeURIComponent(elderId)}`, {
-      role: 'community',
-      userId: 'community-001'
-    })
-    const base = mockClone(elderServiceProfile)
+    }>(`/api/v1/community/service-profile?elder_id=${encodeURIComponent(elderId)}`, getApiAuthOptions())
     const { mapHealthMetricDto } = await import('@/utils/apiMappers')
     return {
-      ...base,
       elderId: dto.elder_id,
       name: dto.name,
       age: dto.age,
       address: dto.address,
+      tags: [],
       healthScore: dto.guard_score,
+      alertCount: dto.recent_orders.length,
+      serviceCount: dto.recent_orders.length,
+      activityCount: 0,
       metrics: dto.metrics.map(mapHealthMetricDto),
-      yuanSuggestion: dto.health_summary,
+      riskRecords: [],
       serviceRecords: dto.recent_orders.map((o) => ({
         id: o.id,
         icon: o.icon,
         title: o.title,
         detail: o.description
-      }))
+      })),
+      contacts: [],
+      participation: { activityLabel: '社区活动', pointsLabel: '+0' },
+      yuanSuggestion: dto.health_summary
     } satisfies ElderServiceProfile
   }, options)
 }

@@ -1,0 +1,66 @@
+// ─── 动效令牌 ────────────────────────────────────────────
+$ease-press: cubic-bezier(0.2, 0, 0, 1);
+$ease-enter: cubic-bezier(0.0, 0.0, 0.2, 1);
+$duration-press: 110ms;
+$duration-enter: 220ms;
+$scale-press: 0.965;
+$scale-press-sm: 0.975;
+
+// ─── pressable mixin ─────────────────────────────────────
+// 为任何可点击元素添加按下反馈：缩放 + 阴影收缩
+// $scale     : 按下时的缩放比例（大卡片/大按钮用 0.965，小卡片用 0.975）
+// $shadow-on : 初始 box-shadow（覆盖元素自身的阴影变量即可）
+@mixin pressable($scale: $scale-press) {
+  transition:
+    transform $duration-press $ease-press,
+    box-shadow $duration-press $ease-press,
+    background-color 150ms $ease-press;
+  will-change: transform;
+
+  &:active {
+    transform: scale(#{$scale});
+    box-shadow: 0 1px 4px rgba(63, 52, 29, 0.06) !important;
+  }
+
+  // 对已通过键盘聚焦的元素提供视觉提示（H5）
+  &:focus-visible {
+    outline: 2px solid rgba(122, 182, 107, 0.6);
+    outline-offset: 2px;
+  }
+
+  // 减少动画首选项：仅保留 opacity 过渡，不做几何变形
+  @media (prefers-reduced-motion: reduce) {
+    transition: opacity $duration-press linear, background-color 150ms linear;
+    will-change: auto;
+
+    &:active {
+      transform: none !important;
+      opacity: 0.72;
+    }
+  }
+}
+
+@mixin pressable-sm {
+  @include pressable($scale-press-sm);
+}
+
+// ─── 卡片进入动画（可选） ─────────────────────────────────
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@mixin fade-up($delay: 0ms) {
+  animation: fadeUp $duration-enter $ease-enter both;
+  animation-delay: $delay;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}

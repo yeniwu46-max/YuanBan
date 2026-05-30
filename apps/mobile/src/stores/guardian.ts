@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import { boundElders, guardSummaries } from '@/mock/family'
 import { hydrateGuardianData } from '@/services/familyService'
+import { startAlertEventStream, stopAlertEventStream } from '@/services/eventStream'
 import { mockClone } from '@/services/mockClone'
 import type { HydrateOptions } from '@/services/requestCache'
-import type { AlertEvent } from '@/types/family'
 import { useAlertStore } from '@/stores/alert'
+import { useApiMode } from '@/config/apiMode'
 
 export const useGuardianStore = defineStore('guardian', {
   state: () => ({
@@ -12,7 +13,8 @@ export const useGuardianStore = defineStore('guardian', {
     summaries: mockClone(guardSummaries),
     currentElderId: boundElders[0]?.id ?? '',
     switching: false,
-    loading: false
+    loading: false,
+    streamStarted: false
   }),
   getters: {
     currentElder(state) {
@@ -34,6 +36,12 @@ export const useGuardianStore = defineStore('guardian', {
         }
         if (!this.elders.some((item) => item.id === this.currentElderId)) {
           this.currentElderId = this.elders[0]?.id ?? ''
+        }
+        if (useApiMode() && !this.streamStarted) {
+          startAlertEventStream(() => {
+            void this.hydrate({ force: true })
+          })
+          this.streamStarted = true
         }
       } catch {
         uni.showToast({ title: '守护数据加载失败', icon: 'none' })

@@ -21,6 +21,15 @@ class Settings(BaseSettings):
     sos_dedup_seconds: int = 300
     run_seed: bool = False
 
+    # 认证
+    jwt_secret: str = "yuanbanban-dev-secret-change-in-production"
+    jwt_expire_hours: int = 168
+    auth_dev_bypass: bool = True
+    dev_otp_code: str = "123456"
+    wechat_app_id: str = ""
+    wechat_app_secret: str = ""
+    simulator_enabled: bool = True
+
     @property
     def is_sqlite(self) -> bool:
         return self.database_url.startswith("sqlite")

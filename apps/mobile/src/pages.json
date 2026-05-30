@@ -59,7 +59,19 @@
   "preloadRule": {
     "pages/tabs/tab0/index": {
       "network": "all",
-      "packages": ["pkg-elder-detail"]
+      "packages": ["pkg-elder-detail", "pkg-family-detail", "pkg-community-detail"]
+    },
+    "pages/tabs/tab1/index": {
+      "network": "all",
+      "packages": ["pkg-elder-detail", "pkg-family-detail", "pkg-community-detail"]
+    },
+    "pages/tabs/tab2/index": {
+      "network": "all",
+      "packages": ["pkg-elder-detail", "pkg-family-detail", "pkg-community-detail"]
+    },
+    "pages/tabs/tab3/index": {
+      "network": "all",
+      "packages": ["pkg-elder-detail", "pkg-family-detail", "pkg-community-detail"]
     },
     "pages/family/guardian/index": {
       "network": "all",

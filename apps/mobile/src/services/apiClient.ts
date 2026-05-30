@@ -1,4 +1,5 @@
 const DEFAULT_BASE = 'http://localhost:8000'
+const TOKEN_KEY = 'yuanbanban_access_token'
 
 declare const uni: {
   request?: (options: {
@@ -9,6 +10,9 @@ declare const uni: {
     success?: (res: { statusCode: number; data: unknown }) => void
     fail?: (err: unknown) => void
   }) => void
+  getStorageSync?: (key: string) => string
+  setStorageSync?: (key: string, value: string) => void
+  removeStorageSync?: (key: string) => void
 }
 
 export function getApiBaseUrl(): string {
@@ -26,6 +30,7 @@ export type RequestOptions = {
   body?: unknown
   role?: ApiRole
   userId?: string
+  skipAuth?: boolean
 }
 
 export class ApiError extends Error {
@@ -39,6 +44,36 @@ export class ApiError extends Error {
   }
 }
 
+export function getAccessToken(): string {
+  if (typeof uni !== 'undefined' && uni.getStorageSync) {
+    return uni.getStorageSync(TOKEN_KEY) || ''
+  }
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem(TOKEN_KEY) || ''
+  }
+  return ''
+}
+
+export function setAccessToken(token: string) {
+  if (typeof uni !== 'undefined' && uni.setStorageSync) {
+    uni.setStorageSync(TOKEN_KEY, token)
+    return
+  }
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(TOKEN_KEY, token)
+  }
+}
+
+export function clearAccessToken() {
+  if (typeof uni !== 'undefined' && uni.removeStorageSync) {
+    uni.removeStorageSync(TOKEN_KEY)
+    return
+  }
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem(TOKEN_KEY)
+  }
+}
+
 function buildHeaders(options: RequestOptions): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: 'application/json'
@@ -46,11 +81,16 @@ function buildHeaders(options: RequestOptions): Record<string, string> {
   if (options.body !== undefined) {
     headers['Content-Type'] = 'application/json'
   }
-  if (options.role) {
-    headers['X-Role'] = options.role
-  }
-  if (options.userId) {
-    headers['X-User-Id'] = options.userId
+  const token = getAccessToken()
+  if (!options.skipAuth && token) {
+    headers.Authorization = `Bearer ${token}`
+  } else if (!options.skipAuth) {
+    if (options.role) {
+      headers['X-Role'] = options.role
+    }
+    if (options.userId) {
+      headers['X-User-Id'] = options.userId
+    }
   }
   return headers
 }
@@ -63,6 +103,12 @@ function parseResponse<T>(status: number, data: unknown): T {
     return undefined as T
   }
   return data as T
+}
+
+let onUnauthorized: (() => void) | null = null
+
+export function setUnauthorizedHandler(handler: () => void) {
+  onUnauthorized = handler
 }
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -80,6 +126,10 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
         header: headers,
         success: (res) => {
           try {
+            if (res.statusCode === 401) {
+              clearAccessToken()
+              onUnauthorized?.()
+            }
             resolve(parseResponse<T>(res.statusCode, res.data))
           } catch (e) {
             reject(e)
@@ -95,6 +145,11 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     headers,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined
   })
+
+  if (res.status === 401) {
+    clearAccessToken()
+    onUnauthorized?.()
+  }
 
   if (!res.ok) {
     let detail: unknown = res.statusText
@@ -113,5 +168,5 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 }
 
 export function getHealth() {
-  return apiRequest<{ status: string; service: string }>('/health')
+  return apiRequest<{ status: string; service: string }>('/health', { skipAuth: true })
 }

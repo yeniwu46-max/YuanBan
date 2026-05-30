@@ -13,6 +13,9 @@ class User(Base):
     phone: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(64), nullable=False)
     role: Mapped[str] = mapped_column(String(16), nullable=False)  # elder | family | community
+    wechat_openid: Mapped[str | None] = mapped_column(String(128), unique=True, nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    community_site_id: Mapped[str | None] = mapped_column(String(64), ForeignKey("community_sites.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -126,3 +129,60 @@ class HealthSnapshot(Base):
     status: Mapped[str] = mapped_column(String(16), default="normal")
     description: Mapped[str] = mapped_column(Text, default="")
     recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class MedicinePlan(Base):
+    __tablename__ = "medicine_plans"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    elder_id: Mapped[str] = mapped_column(String(64), ForeignKey("elders.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    dose: Mapped[str] = mapped_column(String(64), nullable=False)
+    schedule: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), default="pending")
+
+
+class CareTask(Base):
+    __tablename__ = "care_tasks"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    elder_id: Mapped[str] = mapped_column(String(64), ForeignKey("elders.id"), nullable=False)
+    icon: Mapped[str] = mapped_column(String(8), default="📋")
+    title: Mapped[str] = mapped_column(String(128), nullable=False)
+    description: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String(16), default="pending")
+    due_label: Mapped[str] = mapped_column(String(64), default="")
+
+
+class NotificationRule(Base):
+    __tablename__ = "notification_rules"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(String(64), ForeignKey("users.id"), nullable=False)
+    key: Mapped[str] = mapped_column(String(32), nullable=False)
+    label: Mapped[str] = mapped_column(String(64), nullable=False)
+    description: Mapped[str] = mapped_column(Text, default="")
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+class CompanionState(Base):
+    __tablename__ = "companion_states"
+
+    elder_id: Mapped[str] = mapped_column(String(64), ForeignKey("elders.id"), primary_key=True)
+    mood: Mapped[str] = mapped_column(String(32), default="平稳")
+    companion_score: Mapped[int] = mapped_column(Integer, default=78)
+    speak_hint: Mapped[str] = mapped_column(Text, default="今天记得多喝水")
+
+
+class CommunityActivity(Base):
+    __tablename__ = "community_activities"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    site_id: Mapped[str | None] = mapped_column(String(64), ForeignKey("community_sites.id"))
+    title: Mapped[str] = mapped_column(String(128), nullable=False)
+    time_label: Mapped[str] = mapped_column(String(64), nullable=False)
+    location: Mapped[str] = mapped_column(String(128), nullable=False)
+    enrolled: Mapped[int] = mapped_column(Integer, default=0)
+    pending_check_in: Mapped[int] = mapped_column(Integer, default=0)
+    status_label: Mapped[str] = mapped_column(String(32), default="报名中")
+    status_tone: Mapped[str] = mapped_column(String(16), default="normal")

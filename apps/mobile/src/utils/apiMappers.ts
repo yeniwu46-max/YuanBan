@@ -50,7 +50,57 @@ export function mapElderDtoToProfile(dto: ElderDto): ElderProfile {
     name: dto.name,
     age: dto.age,
     locationLabel: dto.location_label,
-    emergencyContacts: elderProfile.emergencyContacts.map((c) => ({ ...c }))
+    emergencyContacts:
+      dto.emergency_contact && dto.emergency_phone
+        ? [
+            {
+              id: 'c1',
+              name: dto.emergency_contact,
+              relation: '紧急联系人',
+              onlineStatus: 'online' as const
+            }
+          ]
+        : elderProfile.emergencyContacts.map((c) => ({ ...c }))
+  }
+}
+
+export function elderDtoToBoundElder(dto: ElderDto, activeAlertCount: number): BoundElder {
+  const safetyStatus: SafetyStatus =
+    activeAlertCount >= 2 ? 'danger' : activeAlertCount >= 1 ? 'attention' : 'safe'
+  const guardScore = dto.guard_score ?? 86
+  return {
+    id: dto.id,
+    name: dto.name,
+    age: dto.age,
+    locationLabel: dto.location_label,
+    guardScore,
+    healthScore: Math.min(100, guardScore + 4),
+    deviceCount: dto.device_count ?? 0,
+    online: dto.online_status !== 'offline',
+    riskCount: activeAlertCount,
+    medicineDonePercent: 0,
+    lastSyncLabel: '刚刚同步',
+    activityLabel: '状态更新',
+    safetyStatus,
+    safetyHeadline:
+      activeAlertCount > 0
+        ? `${dto.name}有 ${activeAlertCount} 条待处理提醒，建议尽快查看。`
+        : `${dto.name}今日状态良好，守护设备正常运行。`
+  }
+}
+
+export function elderDtoToGuardSummary(elder: BoundElder, activeAlertCount: number): GuardSummary {
+  return {
+    elderId: elder.id,
+    guardScore: elder.guardScore,
+    deviceCount: elder.deviceCount,
+    riskCount: activeAlertCount,
+    medicineDonePercent: elder.medicineDonePercent,
+    lastSyncLabel: elder.lastSyncLabel,
+    activityLabel: elder.activityLabel,
+    safetyStatus: elder.safetyStatus,
+    safetyHeadline: elder.safetyHeadline,
+    companionSuggestion: '建议先电话确认老人是否舒适，再查看健康报告。'
   }
 }
 

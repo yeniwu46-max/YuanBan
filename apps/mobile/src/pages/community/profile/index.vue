@@ -12,8 +12,8 @@
           <view class="avatar iconbox">👤</view>
           <view class="flex1">
             <view class="pill">🛡️ 重点服务对象</view>
-            <view class="profile-name">{{ profile.name }}</view>
-            <view class="muted profile-meta">
+            <view class="profile-name text-nowrap">{{ profile.name }}</view>
+            <view class="muted profile-meta text-keep-all">
               {{ profile.age }} 岁 · 独居 · 高血压慢病管理 · {{ profile.address }}
             </view>
           </view>
@@ -22,10 +22,10 @@
           <StatusTag v-for="(t, i) in profile.tags" :key="i" :label="t.label" :tone="t.tone === 'warm' ? 'warm' : 'normal'" />
         </view>
         <view class="grid4 profile-stats">
-          <view class="card stat-mini"><text class="muted">健康分</text><text class="num">{{ profile.healthScore }}</text></view>
-          <view class="card stat-mini"><text class="muted">告警</text><text class="num warm">{{ profile.alertCount }}次</text></view>
-          <view class="card stat-mini"><text class="muted">服务</text><text class="num">{{ profile.serviceCount }}次</text></view>
-          <view class="card stat-mini"><text class="muted">活动</text><text class="num">{{ profile.activityCount }}次</text></view>
+          <view class="card stat-mini"><text class="muted text-nowrap">健康分</text><text class="num text-nowrap">{{ profile.healthScore }}</text></view>
+          <view class="card stat-mini"><text class="muted text-nowrap">告警</text><text class="num warm text-nowrap">{{ profile.alertCount }}次</text></view>
+          <view class="card stat-mini"><text class="muted text-nowrap">服务</text><text class="num text-nowrap">{{ profile.serviceCount }}次</text></view>
+          <view class="card stat-mini"><text class="muted text-nowrap">活动</text><text class="num text-nowrap">{{ profile.activityCount }}次</text></view>
         </view>
       </view>
     </view>
@@ -163,14 +163,17 @@ import StatusTag from '@/components/StatusTag.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import CommunityPageHeader from '@/components/community/CommunityPageHeader.vue'
 import QuickActionGrid from '@/components/community/QuickActionGrid.vue'
+import { useElderContext } from '@/composables/useElderContext'
+import { refreshInBackground } from '@/services/prefetch'
 import { useCommunityProfileStore } from '@/stores/communityProfile'
 import { goDetail, goMainTab } from '@/utils/navigate'
 
 const profileStore = useCommunityProfileStore()
 const profile = computed(() => profileStore.profile)
+const { elderId } = useElderContext()
 
 onShow(() => {
-  void profileStore.hydrate('elder-001', { force: false })
+  refreshInBackground(() => profileStore.hydrate(elderId.value, { force: true }))
 })
 
 const profileActions = [

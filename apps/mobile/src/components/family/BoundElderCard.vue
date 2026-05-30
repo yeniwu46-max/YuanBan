@@ -11,15 +11,16 @@
       <StatusTag :label="elder.online ? '守护中' : '需关注'" :tone="elder.online ? 'normal' : 'warm'" />
     </button>
     <view class="grid3 actions">
-      <button class="bigbtn btnwhite action-btn" @click.stop="$emit('bind-code')">▣ 绑定码</button>
-      <button class="bigbtn btnwarm action-btn" @click.stop="$emit('permission')">⚙ 权限</button>
-      <button class="bigbtn btnwhite action-btn" @click.stop="$emit('contact')">☎ 联系</button>
+      <BigButton tone="white" class="action-btn" @click.stop="$emit('bind-code')">▣ 绑定码</BigButton>
+      <BigButton tone="warm" class="action-btn" @click.stop="$emit('permission')">⚙ 权限</BigButton>
+      <BigButton tone="white" class="action-btn" @click.stop="$emit('contact')">☎ 联系</BigButton>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import BigButton from '@/components/BigButton.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import type { BoundElder } from '@/types/family'
 

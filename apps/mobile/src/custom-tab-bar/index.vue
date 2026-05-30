@@ -75,6 +75,8 @@ onShow(() => {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/motion.scss';
+
 .bottom-nav {
   position: fixed;
   left: 0;
@@ -108,6 +110,15 @@ onShow(() => {
   background: transparent;
   border: none;
   padding: 0;
+  // 文字颜色过渡（active 切换时）
+  transition: color 150ms $ease-press;
+
+  // navitem 整体不做 scale，避免布局偏移；仅 icon 背景做轻微反馈
+  &:active .navicon,
+  &:active .navyuan {
+    transform: scale(0.91);
+    transition: transform $duration-press $ease-press;
+  }
 }
 
 .navicon,
@@ -119,6 +130,7 @@ onShow(() => {
   align-items: center;
   justify-content: center;
   font-size: 22px;
+  transition: background-color 150ms $ease-press, transform $duration-press $ease-press;
 }
 
 .navitem.active {

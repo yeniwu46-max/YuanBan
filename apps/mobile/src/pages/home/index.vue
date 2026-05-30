@@ -1,13 +1,13 @@
 ﻿<template>
   <view class="app-page">
     <AppHeader :label="`早上好，${elder.profile.name}`" title="今天一切安好" />
-    <view class="section">
+    <view class="section hero-enter">
       <view class="hero green">
         <view class="between row-top">
           <view class="hero-main">
             <view class="pill">安全守护中</view>
-            <view class="hero-copy">小鼋正在陪着您，家人也能安心看到您的状态。</view>
-            <view class="muted hero-desc">设备在线 · 心率正常 · 环境正常</view>
+            <view class="hero-copy text-balance">小鼋正在陪着您，家人也能安心看到您的状态。</view>
+            <view class="muted hero-desc text-nowrap">设备在线 · 心率正常 · 环境正常</view>
           </view>
           <YuanMascot heart />
         </view>
@@ -52,15 +52,16 @@
           <view class="muted contact-sub">{{ elder.onlineContactCount }} 位家人在线</view>
         </view>
         <view class="grid3">
-          <button
+          <BigButton
             v-for="contact in elder.profile.emergencyContacts"
             :key="contact.id"
-            class="bigbtn btnwhite family-btn"
+            tone="white"
+            class="family-btn"
             @click="go(`/pkg-elder-detail/contact-detail/index?id=${contact.id}`)"
           >
             <text>{{ contact.relation }}</text>
             <text class="family-status">{{ contact.onlineStatus === 'online' ? '在线' : contact.onlineStatus === 'busy' ? '忙碌' : '离线' }}</text>
-          </button>
+          </BigButton>
         </view>
       </view>
     </view>
@@ -73,6 +74,8 @@ import AppHeader from '@/components/AppHeader.vue'
 import BigButton from '@/components/BigButton.vue'
 import HealthMetricCard from '@/components/HealthMetricCard.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
+import { useElderContext } from '@/composables/useElderContext'
+import { refreshInBackground } from '@/services/prefetch'
 import { useElderStore } from '@/stores/elder'
 import { useHealthStore } from '@/stores/health'
 import { goDetail } from '@/utils/navigate'
@@ -80,12 +83,15 @@ import type { HealthMetric } from '@/types/elder'
 
 const elder = useElderStore()
 const health = useHealthStore()
+const { elderId } = useElderContext()
 
 onShow(() => {
-  void Promise.all([
-    elder.hydrate('elder-001', { force: false }),
-    health.hydrate('elder-001', { force: false })
-  ])
+  refreshInBackground(async () => {
+    await Promise.all([
+      elder.hydrate(elderId.value, { force: true }),
+      health.hydrate(elderId.value, { force: true })
+    ])
+  })
 })
 
 function metric(key: string): HealthMetric {
@@ -166,6 +172,7 @@ function go(url: string) {
   font-size: 14px;
 }
 
+.family-btn :deep(.btn-root),
 .family-btn {
   min-height: 72px;
   font-size: 16px;
@@ -175,5 +182,6 @@ function go(url: string) {
 .family-status {
   font-size: 12px;
   color: #7a6f5d;
+  white-space: nowrap;
 }
 </style>

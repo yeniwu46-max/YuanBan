@@ -18,7 +18,7 @@ pnpm install
 pnpm dev:h5
 ```
 
-浏览器访问 http://localhost:5173/
+浏览器访问 http://127.0.0.1:5180/（专用端口，避免与其它 Vite 项目的 5173 冲突）
 
 ### 后端（无 Docker）
 

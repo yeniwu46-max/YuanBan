@@ -10,25 +10,26 @@
           <view class="row row-top">
             <view class="iconbox profile-icon">👤</view>
             <view>
-              <view class="pill">🛡️ 已绑定 {{ guardian.elders.length }} 位老人</view>
-              <view class="hero-title">当前守护对象：{{ elder?.name ?? '未选择' }}</view>
-              <view class="muted hero-desc">
-                关系：{{ family.profile.relation }} · 权限：{{ family.profile.role === 'primary' ? '主要联系人' : '次要联系人' }}
-              </view>
+              <HeroTitle
+                :pill="`🛡️ 已绑定 ${guardian.elders.length} 位老人`"
+                :title="`当前守护对象：${elder?.name ?? '未选择'}`"
+                :subtitle="`关系：${family.profile.relation} · 权限：${family.profile.role === 'primary' ? '主要联系人' : '次要联系人'}`"
+                :clamp="2"
+              />
             </view>
           </view>
           <view class="grid3 stats">
             <view class="card stat-card">
-              <text class="muted">通知规则</text>
-              <text class="stat-num">{{ notificationEnabled ? '已开启' : '已关闭' }}</text>
+              <text class="muted text-nowrap">通知规则</text>
+              <text class="stat-num text-nowrap">{{ notificationEnabled ? '已开启' : '已关闭' }}</text>
             </view>
             <view class="card stat-card">
-              <text class="muted">紧急权限</text>
-              <text class="stat-num warm">{{ family.profile.role === 'primary' ? '主要' : '次要' }}</text>
+              <text class="muted text-nowrap">紧急权限</text>
+              <text class="stat-num warm text-nowrap">{{ family.profile.role === 'primary' ? '主要' : '次要' }}</text>
             </view>
             <view class="card stat-card">
-              <text class="muted">设备协助</text>
-              <text class="stat-num">可管理</text>
+              <text class="muted text-nowrap">设备协助</text>
+              <text class="stat-num text-nowrap">可管理</text>
             </view>
           </view>
         </view>
@@ -114,6 +115,7 @@
 import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import BigButton from '@/components/BigButton.vue'
+import HeroTitle from '@/components/HeroTitle.vue'
 import ListItem from '@/components/ListItem.vue'
 import PrivacyToggle from '@/components/PrivacyToggle.vue'
 import BoundElderCard from '@/components/family/BoundElderCard.vue'
@@ -121,16 +123,13 @@ import FamilyPageHeader from '@/components/family/FamilyPageHeader.vue'
 import FamilyPageSkeleton from '@/components/family/FamilyPageSkeleton.vue'
 import { useFamilyElderContext } from '@/composables/useFamilyElderContext'
 import { useFamilyStore } from '@/stores/family'
-import { hydrateNotificationRules } from '@/services/familyService'
 import { goDetail } from '@/utils/navigate'
 
 const family = useFamilyStore()
 const { guardian, elder, switching, careStore } = useFamilyElderContext()
 
 onShow(() => {
-  void hydrateNotificationRules({ force: false }).then((rules) => {
-    careStore.notificationRules = rules
-  })
+  void careStore.hydrateNotificationRules({ force: false })
 })
 
 const notificationEnabled = computed(() => careStore.notificationRules.every((item) => item.enabled))
@@ -166,18 +165,6 @@ function toast(title: string) {
   height: 72px;
   border-radius: 26px;
   font-size: 38px;
-}
-
-.hero-title {
-  margin-top: 12px;
-  font-size: 23px;
-  line-height: 1.35;
-  font-weight: 1000;
-}
-
-.hero-desc {
-  margin-top: 8px;
-  line-height: 1.5;
 }
 
 .stats {

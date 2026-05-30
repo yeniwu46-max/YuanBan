@@ -9,9 +9,7 @@
         <view class="hero warm">
           <view class="between row-top">
             <view class="main">
-              <view class="pill warm-pill">💚 今日适合主动关怀</view>
-              <view class="hero-title">{{ stats.headline }}</view>
-              <view class="muted hero-desc">{{ stats.suggestion }}</view>
+              <HeroTitle pill="💚 今日适合主动关怀" :title="stats.headline" :subtitle="stats.suggestion" :clamp="2" />
             </view>
             <view class="iconbox warm mascot-large">
               <YuanMascot size="large" />
@@ -19,16 +17,16 @@
           </view>
           <view class="grid3 stats">
             <view class="card stat-card">
-              <text class="muted">陪伴值</text>
-              <text class="stat-num warm">{{ stats.companionPoints }}</text>
+              <text class="muted text-nowrap">陪伴值</text>
+              <text class="stat-num warm text-nowrap">{{ stats.companionPoints }}</text>
             </view>
             <view class="card stat-card">
-              <text class="muted">本周联系</text>
-              <text class="stat-num">{{ stats.weeklyContacts }}次</text>
+              <text class="muted text-nowrap">本周联系</text>
+              <text class="stat-num text-nowrap">{{ stats.weeklyContacts }}次</text>
             </view>
             <view class="card stat-card">
-              <text class="muted">相册更新</text>
-              <text class="stat-num">{{ stats.albumUpdates }}张</text>
+              <text class="muted text-nowrap">相册更新</text>
+              <text class="stat-num text-nowrap">{{ stats.albumUpdates }}张</text>
             </view>
           </view>
         </view>
@@ -98,6 +96,7 @@
           v-for="task in careTasks"
           :key="task.id"
           :task="task"
+          :completing="careStore.completingTaskId === task.id"
           @click="handleTask(task.id, task.status)"
         />
         <FamilyEmptyState
@@ -125,6 +124,7 @@
 <script setup lang="ts">
 import { onShow } from '@dcloudio/uni-app'
 import BigButton from '@/components/BigButton.vue'
+import HeroTitle from '@/components/HeroTitle.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import CareTaskItem from '@/components/family/CareTaskItem.vue'
 import FamilyEmptyState from '@/components/family/FamilyEmptyState.vue'
@@ -158,10 +158,12 @@ function onQuickCare(action: QuickCareAction) {
   toast(quickCareLabels[action])
 }
 
-function handleTask(taskId: string, status: CareTaskStatus) {
-  if (status === 'done') return
-  careStore.completeTask(taskId)
-  uni.showToast({ title: '任务已完成', icon: 'none' })
+async function handleTask(taskId: string, status: CareTaskStatus) {
+  if (status === 'done' || careStore.completingTaskId) return
+  await careStore.completeTask(taskId)
+  if (careStore.completingTaskId === null && !careStore.tasks.find(t => t.id === taskId && t.status !== 'done')) {
+    uni.showToast({ title: '任务已完成', icon: 'none' })
+  }
 }
 
 function go(url: string) {
@@ -179,21 +181,6 @@ function toast(title: string) {
   min-width: 0;
 }
 
-.warm-pill {
-  color: #8b6a33;
-}
-
-.hero-title {
-  margin-top: 15px;
-  font-size: 24px;
-  line-height: 1.35;
-  font-weight: 1000;
-}
-
-.hero-desc {
-  margin-top: 8px;
-  line-height: 1.5;
-}
 
 .mascot-large {
   width: 88px;

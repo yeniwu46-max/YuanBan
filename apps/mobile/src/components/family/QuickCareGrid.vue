@@ -39,6 +39,8 @@ const actions = computed(() => {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/motion.scss';
+
 .quick-action {
   height: 92px;
   border-radius: 24px;
@@ -53,6 +55,7 @@ const actions = computed(() => {
   font-size: 14px;
   font-weight: 1000;
   color: #315943;
+  @include pressable-sm;
 }
 
 .action-icon {
@@ -62,5 +65,6 @@ const actions = computed(() => {
 
 .action-label {
   line-height: 1;
+  white-space: nowrap;
 }
 </style>

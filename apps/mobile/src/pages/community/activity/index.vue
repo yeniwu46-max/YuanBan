@@ -35,9 +35,9 @@
           <StatusTag :label="featured.tag" :tone="featured.tagTone === 'warm' ? 'warm' : 'normal'" />
         </view>
         <view class="grid3 mini-stats">
-          <view class="card stat-mini"><text class="muted">报名</text><text class="num">{{ featured.enrolled }}</text></view>
-          <view class="card stat-mini"><text class="muted">签到</text><text class="num">{{ featured.checkedIn }}</text></view>
-          <view class="card stat-mini"><text class="muted">待签</text><text class="num warm">{{ featured.pendingCheckIn }}</text></view>
+          <view class="card stat-mini"><text class="muted text-nowrap">报名</text><text class="num text-nowrap">{{ featured.enrolled }}</text></view>
+          <view class="card stat-mini"><text class="muted text-nowrap">签到</text><text class="num text-nowrap">{{ featured.checkedIn }}</text></view>
+          <view class="card stat-mini"><text class="muted text-nowrap">待签</text><text class="num warm text-nowrap">{{ featured.pendingCheckIn }}</text></view>
         </view>
         <view class="grid2 action-row">
           <BigButton tone="green" @click="focusCheckIn">▣ 签到核销</BigButton>

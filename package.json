@@ -1,0 +1,24 @@
+{
+  "name": "yuanbanban",
+  "version": "1.0.0",
+  "description": "面向社区居家养老的「老人 / 子女 / 社区」三端协同应用：无感监测、SOS 告警、健康报告与小鼋情感陪伴。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yeniwu46-max/YuanBan.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/yeniwu46-max/YuanBan/issues"
+  },
+  "homepage": "https://github.com/yeniwu46-max/YuanBan#readme"
+}

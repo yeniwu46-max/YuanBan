@@ -1,62 +1,52 @@
 # 前端 API 对接清单
 
-`VITE_USE_API=true` 时走 REST；本地默认 Mock。
+`VITE_USE_API=true` 时使用 JWT 或开发 Header 走 REST。
 
-## 1. 告警闭环
+## 1. 认证
+
+| 能力 | API | 状态 |
+|------|-----|------|
+| 手机 OTP 登录 | `POST /api/v1/auth/phone/otp` + `verify` | 已接 |
+| 微信小程序登录 | `POST /api/v1/auth/wechat/login` | 已接 |
+| 会话恢复 | `GET /api/v1/auth/me` + localStorage token | 已接 |
+| 子女绑定老人 | `POST /api/v1/auth/bind-elder` | 已接 |
+
+## 2. 告警闭环
 
 | Store / 页面 | API | 状态 |
 |--------------|-----|------|
 | 老人 `sos` | `POST /api/v1/simulator/trigger` | 已接 |
 | 子女 `alert` | `GET/PATCH /api/v1/alerts` | 已接 |
 | 社区 `communityWorkorder` | `GET/PATCH /api/v1/work-orders` | 已接 |
-| 社区 `communityAlert` | `GET /api/v1/community/work-orders/{id}` | 已接 |
+| 社区 `communityAlert` | `GET /community/work-orders/{id}/detail` | 已接 |
+| 实时推送 | `GET /api/v1/events/stream?token=` | 已接（子女守护页） |
 
-## 2. 三端 Tab 页（12 页）
+## 3. 三端 Tab 页（12 页）
 
-| 端 | Tab 页 | API | 状态 |
-|----|--------|-----|------|
-| 老人 | home / health | `GET /elders/{id}`、`GET /metrics/latest` | 已接 |
-| 老人 | companion | `POST /companion/chat` | 已接 |
-| 老人 | service | `GET /elders/{id}/service-summary` | 已接 |
-| 子女 | guardian | `GET /elders` + `GET /alerts` + `GET /family/dashboard` | 已接 |
-| 子女 | report | `GET /family/reports?period=` | 已接 |
-| 子女 | care | `GET /family/care/tasks`、`GET /family/care/stats` | 已接 |
-| 子女 | settings | `GET/PATCH /family/notification-rules` | 已接 |
-| 社区 | dashboard | `GET /community/dashboard` | 已接 |
-| 社区 | workorders | `GET/PATCH /work-orders` | 已接 |
-| 社区 | activity | `GET /community/activities` | 已接 |
-| 社区 | profile | `GET /community/service-profile` | 已接 |
+全部已接 API，数据来自 DB（非 demo 内存）。
 
-## 3. 性能优化
-
-| 项 | 说明 | 状态 |
-|----|------|------|
-| Tab 导航 | `pages/tabs/tab0-3` + custom tabBar + `switchTab` | 已完成 |
-| 请求缓存 | `services/requestCache.ts` TTL 30s + in-flight 去重 | 已完成 |
-| 分包 | `pkg-elder-detail` / `pkg-family-detail` / `pkg-community-detail` | 已完成 |
-
-## 4. 扩展读接口（详情页）
+## 4. 详情页
 
 | 能力 | API | 状态 |
 |------|-----|------|
 | 设备列表 | `GET /elders/{id}/devices` | 已接 |
-| 用药 | `GET /elders/{id}/medicines` | 已接 |
+| 用药 | `GET/PATCH /elders/{id}/medicines/{id}` | 已接 |
 | 指标历史 | `GET /elders/{id}/metrics/{key}/history` | 已接 |
-| 陪伴状态 | `GET/PATCH /elders/{id}/companion-state` | 已接 |
+| 服务中心摘要 | `GET /elders/{id}/service-summary` | 已接 |
+| 陪伴状态 | `GET/PATCH /elders/{id}/companion-state` | 已接（DB） |
+| 通知规则 | `GET/PATCH /family/notification-rules` | 已接（DB） |
 
-## 5. 开发 Header（MVP 认证）
+## 5. 权限
 
-```http
-X-Role: family
-X-User-Id: family-001
+- JWT / `AUTH_DEV_BYPASS` Header
+- elder/alert/work-order 按 binding / 社区站过滤
+- `family-002` 未绑定访问 `elder-001` → 403
+
+## 6. 验收
+
+```powershell
+.\scripts\e2e-smoke.ps1
+cd apps/mobile && pnpm vue-tsc --noEmit
 ```
 
-正式 JWT 接入后替换。
-
-## 6. 关键文件
-
-- [`apps/mobile/src/services/apiClient.ts`](../apps/mobile/src/services/apiClient.ts)
-- [`apps/mobile/src/services/requestCache.ts`](../apps/mobile/src/services/requestCache.ts)
-- [`apps/mobile/src/utils/tabBar.ts`](../apps/mobile/src/utils/tabBar.ts)
-- [`services/api/app/routers/family.py`](../services/api/app/routers/family.py)
-- [`services/api/app/routers/community.py`](../services/api/app/routers/community.py)
+详见 [e2e-acceptance.md](./e2e-acceptance.md)

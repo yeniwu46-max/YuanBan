@@ -12,15 +12,16 @@ import {
   reportAnomalies
 } from '@/mock/family'
 import { useApiMode } from '@/config/apiMode'
+import { getApiAuthOptions } from '@/utils/authContext'
 import { apiRequest } from '@/services/apiClient'
 import { cachedFetch, type HydrateOptions } from '@/services/requestCache'
 import { mockClone } from '@/services/mockClone'
 import {
   mapElderDtoToProfile,
   mapHealthMetricDto,
-  mergeBoundElderFromApi,
-  mergeGuardSummaryFromApi,
-  mapAlertDto
+  mapAlertDto,
+  elderDtoToBoundElder,
+  elderDtoToGuardSummary
 } from '@/utils/apiMappers'
 import type { AlertStatus, ApiReportPeriod, BoundElder, GuardSummary, ReportPeriod } from '@/types/family'
 import type { ElderDto, HealthMetricDto } from '@/services/elderService'
@@ -43,6 +44,13 @@ export type AlertDto = {
   timeline: Array<{ id?: string; title: string; detail: string; done: boolean; pending?: boolean }>
   suggestion?: string
   time_label?: string
+  recommended_actions?: Array<{
+    id: string
+    icon: string
+    title: string
+    description: string
+    route?: string | null
+  }>
 }
 
 function toReportPeriod(period: ApiReportPeriod): ReportPeriod {
@@ -112,26 +120,23 @@ export function getRecommendedActions() {
 
 export function fetchAlertsApi(elderId?: string) {
   const q = elderId ? `?elder_id=${encodeURIComponent(elderId)}` : ''
-  return apiRequest<AlertDto[]>(`/api/v1/alerts${q}`, {
-    role: 'family',
-    userId: 'family-001'
-  })
+  return apiRequest<AlertDto[]>(`/api/v1/alerts${q}`, getApiAuthOptions())
+}
+
+export function fetchAlertByIdApi(alertId: string) {
+  return apiRequest<AlertDto>(`/api/v1/alerts/${alertId}`, getApiAuthOptions())
 }
 
 export function patchAlertApi(alertId: string, status: AlertStatus, statusLabel?: string) {
   return apiRequest<AlertDto>(`/api/v1/alerts/${alertId}`, {
     method: 'PATCH',
-    role: 'family',
-    userId: 'family-001',
-    body: { status, status_label: statusLabel }
+    body: { status, status_label: statusLabel },
+    ...getApiAuthOptions()
   })
 }
 
 export function fetchBoundEldersApi() {
-  return apiRequest<ElderDto[]>('/api/v1/elders', {
-    role: 'family',
-    userId: 'family-001'
-  })
+  return apiRequest<ElderDto[]>('/api/v1/elders', getApiAuthOptions())
 }
 
 export function fetchFamilyDashboardApi(elderId: string) {
@@ -145,10 +150,7 @@ export function fetchFamilyDashboardApi(elderId: string) {
     safety_headline: string
     companion_suggestion: string
     metrics: HealthMetricDto[]
-  }>(`/api/v1/family/dashboard?elder_id=${encodeURIComponent(elderId)}`, {
-    role: 'family',
-    userId: 'family-001'
-  })
+  }>(`/api/v1/family/dashboard?elder_id=${encodeURIComponent(elderId)}`, getApiAuthOptions())
 }
 
 export function fetchFamilyReportApi(elderId: string, period: ApiReportPeriod) {
@@ -165,10 +167,7 @@ export function fetchFamilyReportApi(elderId: string, period: ApiReportPeriod) {
     yuan_interpretation: string
     family_advice: string
     metrics: HealthMetricDto[]
-  }>(`/api/v1/family/reports?elder_id=${encodeURIComponent(elderId)}&period=${period}`, {
-    role: 'family',
-    userId: 'family-001'
-  })
+  }>(`/api/v1/family/reports?elder_id=${encodeURIComponent(elderId)}&period=${period}`, getApiAuthOptions())
 }
 
 export function fetchCareTasksApi(elderId: string) {
@@ -182,9 +181,22 @@ export function fetchCareTasksApi(elderId: string) {
       status: 'done' | 'pending'
       due_label: string
     }>
-  >(`/api/v1/family/care/tasks?elder_id=${encodeURIComponent(elderId)}`, {
-    role: 'family',
-    userId: 'family-001'
+  >(`/api/v1/family/care/tasks?elder_id=${encodeURIComponent(elderId)}`, getApiAuthOptions())
+}
+
+export function patchCareTaskApi(taskId: string, status: 'done' | 'pending') {
+  return apiRequest<{
+    id: string
+    elder_id: string
+    icon: string
+    title: string
+    description: string
+    status: 'done' | 'pending'
+    due_label: string
+  }>(`/api/v1/family/care/tasks/${taskId}`, {
+    method: 'PATCH',
+    body: { status },
+    ...getApiAuthOptions()
   })
 }
 
@@ -195,25 +207,18 @@ export function fetchCareStatsApi(elderId: string) {
     total_count: number
     greeting: string
     album_count: number
-  }>(`/api/v1/family/care/stats?elder_id=${encodeURIComponent(elderId)}`, {
-    role: 'family',
-    userId: 'family-001'
-  })
+  }>(`/api/v1/family/care/stats?elder_id=${encodeURIComponent(elderId)}`, getApiAuthOptions())
 }
 
 export function fetchNotificationRulesApi() {
-  return apiRequest<NotificationRuleDto[]>('/api/v1/family/notification-rules', {
-    role: 'family',
-    userId: 'family-001'
-  })
+  return apiRequest<NotificationRuleDto[]>('/api/v1/family/notification-rules', getApiAuthOptions())
 }
 
 export function patchNotificationRulesApi(rules: NotificationRuleDto[]) {
   return apiRequest<NotificationRuleDto[]>('/api/v1/family/notification-rules', {
     method: 'PATCH',
-    role: 'family',
-    userId: 'family-001',
-    body: { rules }
+    body: { rules },
+    ...getApiAuthOptions()
   })
 }
 
@@ -231,25 +236,38 @@ export async function loadGuardianDataFromApi(): Promise<{
 }> {
   const [elderDtos, alertDtos] = await Promise.all([fetchBoundEldersApi(), fetchAlertsApi()])
   const alerts = alertDtos.map(mapAlertDto)
-  const mockElders = getBoundElders()
-  const mockSummaries = getGuardSummaries()
 
-  const elders: BoundElder[] = elderDtos.map((dto) => {
-    const template = mockElders.find((m) => m.id === dto.id) ?? mockElders[0]
-    const activeCount = alerts.filter((a) => a.elderId === dto.id && a.status !== 'resolved').length
-    return mergeBoundElderFromApi(dto, template, activeCount)
+  const dashboardByElder = await Promise.all(
+    elderDtos.map(async (dto) => {
+      try {
+        return await fetchFamilyDashboardApi(dto.id)
+      } catch {
+        return null
+      }
+    })
+  )
+
+  const elders: BoundElder[] = elderDtos.map((dto, index) => {
+    const dash = dashboardByElder[index]
+    const activeCount = dash?.active_alert_count ?? alerts.filter((a) => a.elderId === dto.id && a.status !== 'resolved').length
+    const bound = elderDtoToBoundElder(dto, activeCount)
+    if (dash) {
+      bound.guardScore = dash.guard_score
+      bound.healthScore = dash.health_score
+      bound.medicineDonePercent = dash.medicine_done_percent
+      bound.safetyHeadline = dash.safety_headline
+    }
+    return bound
   })
 
-  for (const mock of mockElders) {
-    if (!elders.some((e) => e.id === mock.id)) {
-      elders.push(mockClone(mock))
+  const summaries = elders.map((elder, index) => {
+    const dash = dashboardByElder[index]
+    const summary = elderDtoToGuardSummary(elder, elder.riskCount)
+    if (dash) {
+      summary.companionSuggestion = dash.companion_suggestion
+      summary.safetyHeadline = dash.safety_headline
     }
-  }
-
-  const summaries = elders.map((elder) => {
-    const template = mockSummaries.find((s) => s.elderId === elder.id) ?? mockSummaries[0]
-    const activeCount = alerts.filter((a) => a.elderId === elder.id && a.status !== 'resolved').length
-    return mergeGuardSummaryFromApi(elder, template, activeCount)
+    return summary
   })
 
   return { elders, summaries, alerts }
@@ -302,9 +320,23 @@ export async function hydrateCareData(elderId: string, options: HydrateOptions =
           status: t.status
         })
       ),
-      photos: getAlbumPhotos()
+      photos: []
     }
   }, options)
+}
+
+export async function fetchRecommendedActionsForAlert(alertId: string) {
+  if (!useApiMode()) {
+    return getRecommendedActions()
+  }
+  const dto = await fetchAlertByIdApi(alertId)
+  return (dto.recommended_actions ?? []).map((item) => ({
+    id: item.id,
+    icon: item.icon,
+    title: item.title,
+    description: item.description,
+    route: item.route ?? undefined
+  }))
 }
 
 export async function hydrateFamilyReport(elderId: string, period: ApiReportPeriod, options: HydrateOptions = {}) {
@@ -330,7 +362,20 @@ export async function hydrateFamilyReport(elderId: string, period: ApiReportPeri
       familyAdvice: dto.family_advice,
       metrics: dto.metrics.map(mapHealthMetricDto)
     }
-    const anomalies = getReportAnomalies(elderId)
+    const anomalies =
+      dto.risk_count > 0
+        ? [
+            {
+              id: `risk-${elderId}`,
+              elderId,
+              icon: '⚠',
+              title: '体征需关注',
+              description: `检测到 ${dto.risk_count} 项指标异常`,
+              tag: '需关注',
+              tagTone: 'warm' as const
+            }
+          ]
+        : []
     return { report, anomalies }
   }, options)
 }

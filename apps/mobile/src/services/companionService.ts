@@ -1,5 +1,6 @@
 ﻿import { useApiMode } from '@/config/apiMode'
 import { apiRequest } from '@/services/apiClient'
+import { getApiAuthOptions, getPrimaryElderId } from '@/utils/authContext'
 
 export type CompanionScene = 'chat' | 'mood' | 'health' | 'care'
 export type CompanionSafetyLevel = 'normal' | 'attention' | 'emergency'
@@ -31,15 +32,14 @@ export async function sendCompanionChat(body: CompanionChatRequest): Promise<Com
   }
   return apiRequest<CompanionChatResponse>('/api/v1/companion/chat', {
     method: 'POST',
-    role: body.role ?? 'elder',
-    userId: 'user-elder-001',
     body: {
-      elder_id: body.elder_id ?? 'elder-001',
+      elder_id: body.elder_id ?? getPrimaryElderId(),
       role: body.role ?? 'elder',
       message: body.message,
       mood: body.mood ?? null,
       scene: body.scene ?? 'chat'
-    }
+    },
+    ...getApiAuthOptions()
   })
 }
 

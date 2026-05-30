@@ -7,7 +7,7 @@
           <view class="hero-main">
             <view class="pill">今日状态良好</view>
             <view class="h2 summary-title">身体指标平稳</view>
-            <view class="muted summary-copy">小鼋已为您整理今天的健康情况，有一项服药提醒待完成。</view>
+            <view class="muted summary-copy text-keep-all">小鼋已为您整理今天的健康情况，有一项服药提醒待完成。</view>
           </view>
           <view class="score">
             <view class="score-num">92</view>
@@ -47,14 +47,17 @@ import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import AppHeader from '@/components/AppHeader.vue'
 import ListItem from '@/components/ListItem.vue'
+import { useElderContext } from '@/composables/useElderContext'
+import { refreshInBackground } from '@/services/prefetch'
 import { useHealthStore } from '@/stores/health'
 import { goDetail } from '@/utils/navigate'
 import type { HealthMetric } from '@/types/elder'
 
 const health = useHealthStore()
+const { elderId } = useElderContext()
 
 onShow(() => {
-  void health.hydrate('elder-001', { force: false })
+  refreshInBackground(() => health.hydrate(elderId.value, { force: true }))
 })
 
 const listMetrics = computed<HealthMetric[]>(() =>

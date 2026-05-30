@@ -223,6 +223,7 @@ function toast(msg?: string) {
   color: #8c806c;
   font-weight: 1000;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .tab-btn.active {

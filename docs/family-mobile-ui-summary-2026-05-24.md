@@ -125,3 +125,154 @@ pnpm typecheck
 ---
 
 *本文档随 2026-05-24 子女端 uni-app UI 迭代沉淀，供团队接续开发与答辩演示使用。*
+
+---
+
+## 8. 交互规范（2026-05-30 补充）
+
+> 本章节覆盖 UI 交互升级（v2 规划）后的设计约定，适用于三端（老人 / 子女 / 社区）所有页面。
+
+### 8.1 动效令牌
+
+文件：`apps/mobile/src/styles/motion.scss`
+
+| 变量 | 值 | 用途 |
+|------|----|------|
+| `$ease-press` | `cubic-bezier(0.2,0,0,1)` | 按下弹性 |
+| `$ease-enter` | `cubic-bezier(0,0,0.2,1)` | 卡片进入 |
+| `$duration-press` | `110ms` | 按动时长 |
+| `$duration-enter` | `220ms` | 进入动画时长 |
+| `$scale-press` | `0.965` | 大按钮/卡片按下缩放 |
+| `$scale-press-sm` | `0.975` | 小按钮/icon 按下缩放 |
+
+**使用约定：**
+- 主 CTA（BigButton）、列表卡片（`.item`、`.quick`）使用 `@include pressable`（scale 0.965）
+- 图标按钮（`.iconbtn`）、小芯片（`.tabbar-btn`）、send-btn、prompt 使用 `@include pressable-sm`（scale 0.975）
+- Tab 导航仅对图标元素做 transform，不改变整行高度
+- 已在 `@media (prefers-reduced-motion: reduce)` 中降级为 opacity 过渡
+
+### 8.2 排版工具类
+
+全局可用，来自 `styles.scss`：
+
+| Class | 效果 | 适用场景 |
+|-------|------|---------|
+| `.text-nowrap` | 单行 + ellipsis | pill、Tab label、stat label、告警标题、快捷入口 |
+| `.text-balance` | `text-wrap: balance` + fallback | 欢迎语、hero 短标题（1-2 句） |
+| `.text-keep-all` | `word-break: keep-all` | 描述文案、解读段落、聊天气泡说明 |
+| `.title-row` | flex 行 + min-width:0 | section 标题行，防标题文字溢出 |
+| `.metric-inline` | flex nowrap 指标行 | 数值 + 单位并排，防换行 |
+
+**分场景溢出策略：**
+- **单行**：pill、Tab、stat label（≤6 字）、告警标题 → `text-nowrap`
+- **最多 2 行**：欢迎语、报告/守护 headline → `HeroTitle` 组件（`clamp=2`，默认值）
+- **自然换行**：desc、解读文案 → `text-keep-all`（中文词内不断行）
+
+### 8.3 HeroTitle 组件
+
+文件：`apps/mobile/src/components/HeroTitle.vue`
+
+```vue
+<HeroTitle
+  title="标题文字"
+  subtitle="副标题（可选）"
+  pill="💚 pill文案（可选）"
+  pill-class="warm-pill"
+  :clamp="2"
+  :nowrap="false"
+/>
+```
+
+| Prop | 类型 | 说明 |
+|------|------|------|
+| `title` | `string` | 必填，主标题 |
+| `subtitle` | `string?` | 副标题（muted，1.5行高） |
+| `pill` | `string?` | pill 文案 |
+| `pill-class` | `string?` | pill 颜色变体：`red-pill`、`warm-pill` |
+| `nowrap` | `boolean` | 强制单行 + ellipsis（告警场景） |
+| `clamp` | `1\|2` | 最大行数（默认 2） |
+
+**已替换的页面：** GuardScoreCard、StatsHero、family/report、family/care、family/settings、family/alert
+
+### 8.4 BigButton 规范
+
+文件：`apps/mobile/src/components/BigButton.vue`
+
+```vue
+<BigButton
+  tone="green"
+  :loading="store.submitting"
+  :disabled="false"
+  @click="doAction"
+>
+  按钮文字
+</BigButton>
+```
+
+| Prop | 值 | 说明 |
+|------|----|------|
+| `tone` | `green`（默认）/ `red` / `warm` / `white` | 颜色变体 |
+| `loading` | `boolean` | 显示 spinner + 「处理中…」，自动禁用重复点击 |
+| `disabled` | `boolean` | 半透明，不可点击 |
+
+**loading 接线的关键操作：**
+
+| 操作 | Store 字段 | 绑定方式 |
+|------|-----------|---------|
+| SOS 上报 | `sos.triggering` | `:loading="sos.triggering"` |
+| 关怀任务完成 | `care.completingTaskId` | `CareTaskItem` `:completing` prop |
+| 切换 mood | `companion.moodLoading` | mood 按钮 `:disabled` + `.mood--loading` |
+
+**原则：** loading 与 `uni.showToast` 互斥；失败后 loading 复位，按钮恢复可点。
+
+### 8.5 可点击面分级
+
+| 级别 | 元素 | Mixin |
+|------|------|-------|
+| 主 CTA | BigButton（green/red/warm） | 组件内置 `pressable` |
+| 次要 CTA | BigButton（white）、快捷按钮（`.quick`） | `pressable` / `pressable-sm` |
+| 列表卡片 | `button.item`、`button.row-card`、`.quick-card` | `pressable` / `pressable-sm` |
+| 图标/Tab | `.iconbtn`、`.tabbar-btn`、`.mood`、prompt | `pressable-sm` |
+| 静态展示 | `view.row-card.static`、纯文字区 | 不加 |
+
+### 8.6 跨端 CSS 兼容说明
+
+| 属性 | H5 | 微信小程序 |
+|------|----|-----------|
+| `text-wrap: balance` | ✅ 支持 | ❌ 不支持，已加 `overflow-wrap: break-word` fallback |
+| `will-change: transform` | ✅ | 忽略，不影响功能 |
+| `:deep()` 穿透 | ✅ | ✅ |
+| `<component :is>` 动态组件 | ✅ | ❌ 已知限制，TabShell.vue 小程序 build 会报错（待重构为条件渲染） |
+
+### 8.7 手动验收清单
+
+按角色各抽 2 个 Tab 检查：
+
+**老人端**
+- [ ] 首页 hero「和小鼋说话」按钮按下有 scale 反馈
+- [ ] 联系家人卡片 3 个按钮按下有反馈
+- [ ] companion 页 mood 按钮切换时出现 disabled 状态（处理中）
+- [ ] companion 页 prompt 按下有反馈；send-btn 有反馈
+- [ ] 320px：mood label、quick-title 无单字换行
+- [ ] 390px：hero-copy 最多 2 行
+
+**子女端**
+- [ ] 守护首页列表项按下有 scale 反馈
+- [ ] 告警标题单行 ellipsis（长标题）
+- [ ] 报告页日/周/月 Tab 单行不换行
+- [ ] 关怀任务点击「完成」出现 spinner，完成后恢复
+- [ ] 设置页 stat card（通知规则/紧急权限/设备协助）单行
+
+**社区端**
+- [ ] 工单列表按下有 scale 反馈
+- [ ] QuickActionGrid 格子按下有反馈
+- [ ] 档案页 stat（健康分/告警/服务/活动）单行不换行
+- [ ] 工单分类 Tab 单行不换行
+
+**SOS 专项**
+- [ ] SOS 页「立即求助」点击后出现「处理中…」spinner，且「误触取消」变为 disabled
+- [ ] 触发成功后 loading 消失，不可重复触发
+
+**技术门禁**
+- [ ] `pnpm vue-tsc --noEmit` → exit 0 ✅
+- [ ] `pnpm build:mp-weixin` → 已知限制：TabShell.vue 动态组件在小程序中不支持（待修复）；其余 SCSS/TS 无报错

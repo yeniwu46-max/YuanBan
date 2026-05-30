@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.dev_setup import ensure_local_database
 from app.mqtt.subscriber import mqtt_subscriber
-from app.routers import api, community, companion, family, simulator
+from app.routers import api, auth, community, companion, events, family, simulator
 
 logger = logging.getLogger(__name__)
 
@@ -32,11 +32,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(api.router)
 app.include_router(companion.router)
 app.include_router(family.router)
 app.include_router(community.router)
 app.include_router(simulator.router)
+app.include_router(events.router)
 
 
 @app.get("/health")

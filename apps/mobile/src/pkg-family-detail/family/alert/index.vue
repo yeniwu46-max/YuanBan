@@ -12,9 +12,13 @@
         <view class="hero red">
           <view class="between row-top">
             <view class="main">
-              <view class="pill red-pill">{{ levelPill }}</view>
-              <view class="hero-title">{{ elder.name }}{{ alert.title }}，建议今晚关注。</view>
-              <view class="muted hero-desc">{{ alert.detail }}</view>
+              <HeroTitle
+                :pill="levelPill"
+                pill-class="red-pill"
+                :title="`${elder.name} · ${alert.title}`"
+                :subtitle="alert.detail"
+                nowrap
+              />
             </view>
             <view class="iconbox red alert-icon">{{ alert.icon }}</view>
           </view>
@@ -96,10 +100,9 @@
           v-for="item in recommendedActions"
           :key="item.id"
           :icon="item.icon"
-          :icon-tone="item.iconTone"
           :title="item.title"
           :desc="item.description"
-          @click="openRecommendedAction(item.title)"
+          @click="openRecommendedAction(item)"
         />
       </view>
 
@@ -133,27 +136,40 @@
 </template>
 
 <script setup lang="ts">
-import { onShow } from '@dcloudio/uni-app'
-import { computed, watch } from 'vue'
+import { onShow, onLoad } from '@dcloudio/uni-app'
+import { computed, ref, watch } from 'vue'
 import AppHeader from '@/components/AppHeader.vue'
 import BigButton from '@/components/BigButton.vue'
+import HeroTitle from '@/components/HeroTitle.vue'
 import HealthMetricCard from '@/components/HealthMetricCard.vue'
 import ListItem from '@/components/ListItem.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import AlertTimeline from '@/components/family/AlertTimeline.vue'
 import FamilyEmptyState from '@/components/family/FamilyEmptyState.vue'
-import { getRecommendedActions } from '@/services/familyService'
+import { fetchRecommendedActionsForAlert, getRecommendedActions } from '@/services/familyService'
 import { useFamilyElderContext } from '@/composables/useFamilyElderContext'
 import { syncFamilyDerivedState } from '@/stores/familySync'
-import { goBack, goDetail, goHome } from '@/utils/navigate'
+import { goBack, goDetail, goHome, goRoute } from '@/utils/navigate'
 import type { AlertLevel } from '@/types/family'
 import type { HealthMetric } from '@/types/elder'
 
 const { elder, elderId, alertStore, guardian, report } = useFamilyElderContext()
-const recommendedActions = getRecommendedActions()
+const recommendedActions = ref(getRecommendedActions())
+
+onLoad((query) => {
+  if (query?.id) {
+    alertStore.setActiveAlert(String(query.id))
+  }
+})
 
 onShow(() => {
-  void alertStore.hydrate(elderId.value)
+  void alertStore.hydrate(elderId.value, { force: true })
+  const activeId = alertStore.activeAlertId
+  if (activeId) {
+    void fetchRecommendedActionsForAlert(activeId).then((items) => {
+      recommendedActions.value = items
+    })
+  }
 })
 
 const alert = computed(() => alertStore.activeAlert)
@@ -226,12 +242,16 @@ function openCare() {
   goHome('/pages/family/care/index')
 }
 
-function openRecommendedAction(title: string) {
-  if (title.includes('报告') || title.includes('血压') || title.includes('复测')) {
+function openRecommendedAction(item: { title: string; route?: string }) {
+  if (item.route) {
+    goRoute(item.route)
+    return
+  }
+  if (item.title.includes('报告') || item.title.includes('血压') || item.title.includes('复测')) {
     go('/pages/family/report/index')
     return
   }
-  if (title.includes('联系') || title.includes('电话') || title.includes('视频')) {
+  if (item.title.includes('联系') || item.title.includes('电话') || item.title.includes('视频')) {
     openContact()
     return
   }
@@ -265,21 +285,7 @@ async function handlePending() {
   min-width: 0;
 }
 
-.red-pill {
-  color: #e56b5f;
-}
 
-.hero-title {
-  margin-top: 15px;
-  font-size: 24px;
-  line-height: 1.35;
-  font-weight: 1000;
-}
-
-.hero-desc {
-  margin-top: 8px;
-  line-height: 1.5;
-}
 
 .alert-icon {
   width: 88px;

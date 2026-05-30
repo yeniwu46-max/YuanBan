@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent } from 'vue'
-import { useSessionStore } from '@/stores/session'
+import TabShell from '@/components/TabShell.vue'
+import CompanionPage from '@/pages/companion/index.vue'
+import CarePage from '@/pages/family/care/index.vue'
+import ActivityPage from '@/pages/community/activity/index.vue'
 
-const session = useSessionStore()
-
-const PageView = computed(() => {
-  const loaders = {
-    elder: () => import('@/pages/companion/index.vue'),
-    family: () => import('@/pages/family/care/index.vue'),
-    community: () => import('@/pages/community/activity/index.vue')
-  } as const
-  return defineAsyncComponent(loaders[session.role])
-})
+const views = {
+  elder: CompanionPage,
+  family: CarePage,
+  community: ActivityPage
+} as const
 </script>
 
 <template>
-  <component :is="PageView" />
+  <TabShell :views="views" />
 </template>

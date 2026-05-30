@@ -12,13 +12,13 @@
         <YuanMascot size="xlarge" heart />
       </view>
       <view class="center">
-        <view class="h1 welcome-title">让守护更安心，<br />让陪伴更有温度。</view>
-        <view class="muted welcome-copy">小鼋会陪着您，也会在需要时通知家人和社区。</view>
+        <view class="h1 welcome-title text-balance">让守护更安心，让陪伴更有温度。</view>
+        <view class="muted welcome-copy text-keep-all">小鼋会陪着您，也会在需要时通知家人和社区。</view>
       </view>
       <view class="grid3 feature-grid">
-        <view class="quick center mini"><text class="mini-icon">安</text><view class="quick-title">安全守护</view></view>
-        <view class="quick center mini"><text class="mini-icon">亲</text><view class="quick-title">亲情陪伴</view></view>
-        <view class="quick center mini"><text class="mini-icon">语</text><view class="quick-title">语音优先</view></view>
+        <view class="quick center mini"><text class="mini-icon">安</text><view class="quick-title text-nowrap">安全守护</view></view>
+        <view class="quick center mini"><text class="mini-icon">亲</text><view class="quick-title text-nowrap">亲情陪伴</view></view>
+        <view class="quick center mini"><text class="mini-icon">语</text><view class="quick-title text-nowrap">语音优先</view></view>
       </view>
       <BigButton class="start" @click="go('/pages/login-role/index')">开始使用 ›</BigButton>
     </view>

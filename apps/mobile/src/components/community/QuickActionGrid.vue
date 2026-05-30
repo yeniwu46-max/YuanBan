@@ -15,7 +15,9 @@ defineProps<{
 defineEmits<{ action: [key: string] }>()
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles/motion.scss';
+
 .quick-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -36,6 +38,7 @@ defineEmits<{ action: [key: string] }>()
   font-size: 14px;
   font-weight: 1000;
   color: #315943;
+  @include pressable-sm;
 }
 
 .qa-icon {

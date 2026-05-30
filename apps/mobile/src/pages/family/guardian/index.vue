@@ -92,6 +92,7 @@
 
 <script setup lang="ts">
 import { onShow } from '@dcloudio/uni-app'
+import { refreshInBackground } from '@/services/prefetch'
 import { computed } from 'vue'
 import BigButton from '@/components/BigButton.vue'
 import HealthMetricCard from '@/components/HealthMetricCard.vue'
@@ -120,7 +121,10 @@ const {
 
 onShow(() => {
   const guardian = useGuardianStore()
-  void guardian.hydrate({ force: false }).then(() => syncFamilyDerivedState())
+  refreshInBackground(async () => {
+    await guardian.hydrate({ force: true })
+    syncFamilyDerivedState()
+  })
 })
 
 const visibleAlerts = computed(() => elderAlerts.value.slice(0, 3))

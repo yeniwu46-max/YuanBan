@@ -10,6 +10,8 @@ defineEmits<{ 'update:modelValue': [value: boolean] }>()
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/motion.scss';
+
 .toggle {
   position: relative;
   width: 56px;
@@ -17,6 +19,16 @@ defineEmits<{ 'update:modelValue': [value: boolean] }>()
   border-radius: 999px;
   background: #d9d2c3;
   flex-shrink: 0;
+  transition: background-color 200ms $ease-press, transform $duration-press $ease-press;
+
+  &:active {
+    transform: scale(0.93);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: background-color 200ms linear;
+    &:active { transform: none; }
+  }
 }
 
 .toggle.on {
@@ -32,6 +44,11 @@ defineEmits<{ 'update:modelValue': [value: boolean] }>()
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: left 200ms $ease-press;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: left 200ms linear;
+  }
 }
 
 .toggle.on view {

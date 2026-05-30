@@ -30,6 +30,8 @@ class ElderOut(BaseModel):
     guard_score: int = 86
     device_count: int = 0
     online_status: str = "online"
+    emergency_contact: str = ""
+    emergency_phone: str = ""
 
     model_config = {"from_attributes": True}
 
@@ -90,6 +92,9 @@ class FamilyDashboardOut(BaseModel):
     safety_headline: str
     companion_suggestion: str
     metrics: list[HealthMetricOut] = Field(default_factory=list)
+    elder_name: str = ""
+    elder_location: str = ""
+    online_status: str = "online"
 
 
 class HealthReportOut(BaseModel):
@@ -115,6 +120,37 @@ class CareTaskOut(BaseModel):
     description: str
     status: Literal["done", "pending"]
     due_label: str
+
+
+class CareTaskUpdate(BaseModel):
+    status: Literal["done", "pending"]
+
+
+class RecommendedActionOut(BaseModel):
+    id: str
+    icon: str
+    title: str
+    description: str
+    route: str | None = None
+
+
+class PrivacyPermissionOut(BaseModel):
+    key: str
+    label: str
+    description: str
+    enabled: bool
+
+
+class PrivacyPermissionsUpdate(BaseModel):
+    permissions: list[PrivacyPermissionOut]
+
+
+class ActivityCheckInOut(BaseModel):
+    id: str
+    name: str
+    time_label: str
+    status_label: str
+    status_tone: str = "normal"
 
 
 class CareStatsOut(BaseModel):
@@ -180,6 +216,7 @@ class AlertOut(BaseModel):
     alert_code: str | None = None
     time_label: str = ""
     created_at: datetime
+    recommended_actions: list[RecommendedActionOut] = Field(default_factory=list)
 
     model_config = {"from_attributes": True, "populate_by_name": True}
 
@@ -221,6 +258,38 @@ class ServiceProfileOut(BaseModel):
     health_summary: str
     recent_orders: list[WorkOrderOut] = Field(default_factory=list)
     metrics: list[HealthMetricOut] = Field(default_factory=list)
+
+
+class WorkOrderDetailOut(BaseModel):
+    id: str
+    code: str
+    elder_id: str | None
+    alert_id: str | None
+    tab: str
+    icon: str
+    title: str
+    description: str
+    tag: str
+    tag_tone: str
+    status: str
+    created_at: datetime
+    elder_name: str = ""
+    elder_age: int = 0
+    location: str = ""
+    timeline: list[dict[str, Any]] = Field(default_factory=list)
+    suggestion: str = ""
+    alert_type: str = "other"
+    priority: str = "普通"
+    priority_tone: str = "normal"
+    elapsed_label: str = "进行中"
+    status_label: str = "处理中"
+    status_tone: str = "warm"
+    trigger_time: str = ""
+    trigger_detail: str = ""
+
+
+class MedicineStatusUpdate(BaseModel):
+    status: Literal["pending", "done", "later"]
 
 
 class SimulatorTrigger(BaseModel):

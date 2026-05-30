@@ -2,9 +2,12 @@
   <view class="hero green score-card">
     <view class="between row-top">
       <view class="main">
-        <view class="pill">{{ pillLabel }}</view>
-        <view class="hero-title">{{ headline }}</view>
-        <view class="muted hero-desc">最近同步：{{ lastSyncLabel }} · {{ activityLabel }}</view>
+        <HeroTitle :pill="pillLabel" :title="headline" :clamp="2" />
+        <view class="muted sync-row">
+          <text class="text-nowrap">最近同步：{{ lastSyncLabel }}</text>
+          <text> · </text>
+          <text class="text-nowrap">{{ activityLabel }}</text>
+        </view>
       </view>
       <view class="score-ring">
         <text class="score-num">{{ guardScore }}</text>
@@ -13,22 +16,24 @@
     </view>
     <view class="grid3 stats">
       <view class="card stat-card">
-        <text class="muted">设备在线</text>
-        <text class="stat-num">{{ deviceCount }} 台</text>
+        <text class="muted text-nowrap">设备在线</text>
+        <text class="stat-num text-nowrap">{{ deviceCount }} 台</text>
       </view>
       <view class="card stat-card">
-        <text class="muted">风险提醒</text>
-        <text class="stat-num warm">{{ riskCount }} 条</text>
+        <text class="muted text-nowrap">风险提醒</text>
+        <text class="stat-num warm text-nowrap">{{ riskCount }} 条</text>
       </view>
       <view class="card stat-card">
-        <text class="muted">服药完成</text>
-        <text class="stat-num">{{ medicineDonePercent }}%</text>
+        <text class="muted text-nowrap">服药完成</text>
+        <text class="stat-num text-nowrap">{{ medicineDonePercent }}%</text>
       </view>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
+import HeroTitle from '@/components/HeroTitle.vue'
+
 withDefaults(defineProps<{
   pillLabel?: string
   headline: string
@@ -53,17 +58,13 @@ withDefaults(defineProps<{
   min-width: 0;
 }
 
-.hero-title {
-  margin-top: 15px;
-  font-size: 24px;
-  line-height: 1.35;
-  font-weight: 1000;
-  color: #243a31;
-}
-
-.hero-desc {
-  margin-top: 8px;
-  line-height: 1.5;
+.sync-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  font-size: 13px;
+  margin-top: 6px;
 }
 
 .score-ring {

@@ -17,9 +17,7 @@
         <view class="hero green">
           <view class="between row-top">
             <view class="main">
-              <view class="pill">{{ periodPill }}</view>
-              <view class="hero-title">{{ report.headline }}</view>
-              <view class="muted hero-desc">{{ report.summary }}</view>
+              <HeroTitle :pill="periodPill" :title="report.headline" :subtitle="report.summary" :clamp="2" />
             </view>
             <view class="score-ring">
               <text class="score-num">{{ report.healthScore }}</text>
@@ -142,6 +140,7 @@
 import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import BigButton from '@/components/BigButton.vue'
+import HeroTitle from '@/components/HeroTitle.vue'
 import HealthMetricCard from '@/components/HealthMetricCard.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import AlertCard from '@/components/family/AlertCard.vue'
@@ -236,17 +235,6 @@ function toast(title: string) {
   min-width: 0;
 }
 
-.hero-title {
-  margin-top: 15px;
-  font-size: 24px;
-  line-height: 1.35;
-  font-weight: 1000;
-}
-
-.hero-desc {
-  margin-top: 8px;
-  line-height: 1.5;
-}
 
 .score-ring {
   width: 88px;

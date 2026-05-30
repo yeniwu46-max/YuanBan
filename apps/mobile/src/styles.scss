@@ -1,3 +1,5 @@
+@import './styles/motion.scss';
+
 $bg: #f7f2e8;
 $page: #fffdf7;
 $text: #243a31;
@@ -73,6 +75,7 @@ button::after {
   font-size: 14px;
   color: $muted;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .muted {
@@ -85,6 +88,7 @@ button::after {
   line-height: 1.12;
   font-weight: 900;
   color: $text;
+  letter-spacing: -0.02em;
 }
 
 .h2 {
@@ -92,6 +96,7 @@ button::after {
   line-height: 1.2;
   font-weight: 900;
   color: $text;
+  letter-spacing: -0.01em;
 }
 
 .section {
@@ -204,6 +209,15 @@ button::after {
   font-size: 14px;
   font-weight: 900;
   color: #315943;
+  white-space: nowrap;
+}
+
+.red-pill {
+  color: #e56b5f;
+}
+
+.warm-pill {
+  color: #8b6a33;
 }
 
 .link {
@@ -251,13 +265,18 @@ button::after {
   font-size: 18px;
   font-weight: 900;
   color: $text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .desc {
   margin-top: 4px;
   font-size: 14px;
   color: $muted;
-  line-height: 1.35;
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .chev {
@@ -279,6 +298,7 @@ button::after {
   font-size: 22px;
   color: #446a57;
   flex-shrink: 0;
+  @include pressable-sm;
 }
 
 .iconbox {
@@ -328,6 +348,9 @@ button::after {
   font-size: 18px;
   font-weight: 900;
   color: $text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .smalltitle {
@@ -342,6 +365,7 @@ button::after {
   display: flex;
   align-items: flex-end;
   gap: 4px;
+  white-space: nowrap;
 }
 
 .num {
@@ -362,12 +386,14 @@ button::after {
   font-size: 14px;
   font-weight: 900;
   color: #5b8b62;
+  white-space: nowrap;
 }
 
 .status.warning {
   color: #c9822c;
 }
 
+// deprecated: 使用 <BigButton> 组件代替直接使用这些全局 class
 .bigbtn {
   width: 100%;
   box-sizing: border-box;
@@ -436,12 +462,15 @@ button::after {
   border-radius: 16px;
   color: #8c806c;
   font-weight: 900;
+  white-space: nowrap;
+  @include pressable-sm;
 }
 
 .tabbar-btn.active {
   background: #fff;
   color: #315943;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: background-color 150ms $ease-press, color 150ms $ease-press;
 }
 
 .mood {
@@ -457,6 +486,8 @@ button::after {
   font-size: 14px;
   color: $muted;
   font-weight: 900;
+  white-space: nowrap;
+  @include pressable-sm;
 }
 
 .mood.active {
@@ -498,4 +529,107 @@ button::after {
   .hero-title {
     font-size: 24px;
   }
+}
+
+// ─── 全局排版工具类 ────────────────────────────────────────
+
+// 强制单行，超出省略
+.text-nowrap {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// 长句智能换行（H5 支持 text-wrap: balance）
+.text-balance {
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+// 中文段落：避免词内强制断行
+.text-keep-all {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
+// 标题行：左侧标题 flex-1，右侧 link 不换行
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+
+  > :first-child {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// 数值 + 单位同基线，不允许折行
+.metric-inline {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+// ─── 通用 hero-title 基础样式 ─────────────────────────────
+.hero-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: $text;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// ─── 全局交互面按动反馈 ────────────────────────────────────
+.item {
+  @include pressable;
+}
+
+.quick,
+.health {
+  @include pressable;
+}
+
+.bigbtn {
+  @include pressable;
+}
+
+// ─── section 内 link 加粗提示 ─────────────────────────────
+.link {
+  white-space: nowrap;
+}
+
+// ─── 首屏 hero 进入动画（仅 H5） ──────────────────────────
+.hero-enter {
+  @include fade-up;
+}
+
+.hero-enter-1 {
+  @include fade-up(60ms);
+}
+
+.hero-enter-2 {
+  @include fade-up(120ms);
+}
+
+// ─── 全量可点击面按动（补全） ──────────────────────────────
+// row-card：社区/工单列表卡片（仅 button 类型，.static class 不加）
+button.row-card {
+  @include pressable-sm;
+}
+
+// quick-card：活动归档等操作卡片
+.quick-card {
+  @include pressable;
 }

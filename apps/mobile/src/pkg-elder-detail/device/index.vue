@@ -47,14 +47,21 @@
 </template>
 
 <script setup lang="ts">
+import { onShow } from '@dcloudio/uni-app'
 import AppHeader from '@/components/AppHeader.vue'
 import ListItem from '@/components/ListItem.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import { useDeviceStore } from '@/stores/device'
+import { useSessionStore } from '@/stores/session'
 import { goDetail } from '@/utils/navigate'
 import type { DeviceStatus } from '@/types/elder'
 
 const device = useDeviceStore()
+const session = useSessionStore()
+
+onShow(() => {
+  void device.hydrate(session.primaryElderId, { force: false })
+})
 
 function icon(name: string) {
   if (name.includes('雷达')) return '雷'

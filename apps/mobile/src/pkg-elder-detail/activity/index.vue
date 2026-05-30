@@ -1,7 +1,10 @@
 ﻿<template>
   <view class="app-page">
     <AppHeader label="社区服务" title="活动详情" back="/pages/service/index" compact />
-    <view class="scroll-section">
+    <view v-if="loading" class="section">
+      <view class="card feedback">加载中…</view>
+    </view>
+    <view v-else-if="activity" class="scroll-section">
       <view class="hero green">
         <view class="between row-top">
           <view>
@@ -12,7 +15,7 @@
           <view class="iconbox activity-icon">动</view>
         </view>
         <view class="grid3 activity-stats">
-          <view class="card stat-card"><view class="muted">地点</view><view class="h2">活动室</view></view>
+          <view class="card stat-card"><view class="muted">地点</view><view class="h2">{{ activity.location }}</view></view>
           <view class="card stat-card"><view class="muted">时长</view><view class="h2">{{ activity.duration }}</view></view>
           <view class="card stat-card"><view class="muted">积分</view><view class="h2">+{{ activity.points }}</view></view>
         </view>
@@ -38,20 +41,53 @@
       </view>
       <view v-if="joined" class="card feedback">已报名成功，小鼋会在活动前提醒您。</view>
     </view>
+    <view v-else class="section">
+      <view class="card feedback">未找到活动信息</view>
+    </view>
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { getActivityJoined, getCommunityActivity, updateActivityJoined } from '@/services/elderService'
+import { onLoad } from '@dcloudio/uni-app'
+import {
+  fetchCommunityActivityApi,
+  getActivityJoined,
+  getCommunityActivity,
+  updateActivityJoined
+} from '@/services/elderService'
 import AppHeader from '@/components/AppHeader.vue'
 import BigButton from '@/components/BigButton.vue'
 import ListItem from '@/components/ListItem.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import { goDetail } from '@/utils/navigate'
+import type { CommunityActivity } from '@/types/elder'
 
-const activity = getCommunityActivity()
+const activity = ref<CommunityActivity | null>(getCommunityActivity())
 const joined = ref(getActivityJoined())
+const loading = ref(false)
+
+onLoad(async (query) => {
+  const id = query?.id ? String(query.id) : activity.value?.id
+  if (!id) return
+  loading.value = true
+  try {
+    const row = await fetchCommunityActivityApi(id)
+    if (row) {
+      activity.value = {
+        id: row.id,
+        title: row.title,
+        timeLabel: row.time_label,
+        location: row.location,
+        duration: '45 分钟',
+        points: 20,
+        description: `${row.title} · 报名 ${row.enrolled} 人 · ${row.status_label}`
+      }
+    }
+  } finally {
+    loading.value = false
+  }
+})
 
 function joinActivity() {
   joined.value = updateActivityJoined(true)

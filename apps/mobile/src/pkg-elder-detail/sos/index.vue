@@ -12,8 +12,8 @@
         </view>
         <view class="grid2 sos-actions">
           <template v-if="sos.state === 'confirm'">
-            <BigButton tone="red" @click="sos.setState('calling')">立即求助</BigButton>
-            <BigButton tone="white" @click="sos.setState('cancel')">误触取消</BigButton>
+            <BigButton tone="red" :loading="sos.triggering" @click="sos.setState('calling')">立即求助</BigButton>
+            <BigButton tone="white" :disabled="sos.triggering" @click="sos.setState('cancel')">误触取消</BigButton>
           </template>
           <template v-else-if="sos.state === 'calling'">
             <BigButton @click="sos.setState('success')">模拟成功</BigButton>
