@@ -1,117 +1,127 @@
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    pillLabel?: string
+    headline: string
+    lastSyncLabel: string
+    activityLabel: string
+    guardScore: number
+    deviceCount: number
+    riskCount: number
+    medicineDonePercent: number
+  }>(),
+  { pillLabel: '当前守护状态' },
+)
+</script>
 <template>
-  <view class="hero green score-card">
-    <view class="between row-top">
-      <view class="main">
-        <HeroTitle :pill="pillLabel" :title="headline" :clamp="2" />
-        <view class="muted sync-row">
-          <text class="text-nowrap">最近同步：{{ lastSyncLabel }}</text>
-          <text> · </text>
-          <text class="text-nowrap">{{ activityLabel }}</text>
+  <view class="hero green guard-hero">
+    <view class="guard-heading">
+      <view class="item-main">
+        <view class="guard-eyebrow">
+          <AppIcon name="shield" :size="18" />
+          守护摘要
+        </view>
+        <view class="hero-title">
+          {{ riskCount ? riskCount + ' 项需关注' : headline }}
+        </view>
+        <view class="guard-copy">
+          最近同步 {{ lastSyncLabel }}
+
         </view>
       </view>
-      <view class="score-ring">
-        <text class="score-num">{{ guardScore }}</text>
-        <text class="score-label">守护分</text>
+      <view class="guard-score">
+        <text>{{ guardScore }}</text>
+        <view>守护分</view>
       </view>
     </view>
-    <view class="grid3 stats">
-      <view class="card stat-card">
-        <text class="muted text-nowrap">设备在线</text>
-        <text class="stat-num text-nowrap">{{ deviceCount }} 台</text>
+    <view class="guard-stats">
+      <view>
+        <text>
+          {{ deviceCount }}
+          <small>台</small>
+        </text>
+        <view>设备在线</view>
       </view>
-      <view class="card stat-card">
-        <text class="muted text-nowrap">风险提醒</text>
-        <text class="stat-num warm text-nowrap">{{ riskCount }} 条</text>
+      <view>
+        <text>
+          {{ riskCount }}
+          <small>条</small>
+        </text>
+        <view>风险提醒</view>
       </view>
-      <view class="card stat-card">
-        <text class="muted text-nowrap">服药完成</text>
-        <text class="stat-num text-nowrap">{{ medicineDonePercent }}%</text>
+      <view>
+        <text>
+          {{ medicineDonePercent }}
+          <small>%</small>
+        </text>
+        <view>服药完成</view>
       </view>
     </view>
   </view>
 </template>
-
-<script setup lang="ts">
-import HeroTitle from '@/components/HeroTitle.vue'
-
-withDefaults(defineProps<{
-  pillLabel?: string
-  headline: string
-  lastSyncLabel: string
-  activityLabel: string
-  guardScore: number
-  deviceCount: number
-  riskCount: number
-  medicineDonePercent: number
-}>(), {
-  pillLabel: '🛡️ 当前安全'
-})
-</script>
-
-<style scoped lang="scss">
-.score-card {
-  padding: 20px;
-}
-
-.main {
-  flex: 1;
-  min-width: 0;
-}
-
-.sync-row {
+<style scoped>
+.guard-heading {
   display: flex;
-  flex-wrap: wrap;
+  gap: 20px;
   align-items: center;
-  gap: 0;
-  font-size: 13px;
-  margin-top: 6px;
 }
-
-.score-ring {
-  width: 88px;
-  height: 88px;
-  border-radius: 28px;
-  background: #fff;
-  border: 1px solid #d6e8d4;
+.guard-eyebrow {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--hero-ink);
+  margin-bottom: 16px;
 }
-
-.score-num {
-  font-size: 28px;
-  font-weight: 1000;
-  color: #315943;
-  line-height: 1;
+.guard-copy {
+  margin-top: 12px;
+  color: var(--hero-ink);
+  font-size: 16px;
+  line-height: 1.7;
 }
-
-.score-label {
-  margin-top: 4px;
-  font-size: 12px;
-  font-weight: 1000;
-  color: #7a6f5d;
-}
-
-.stats {
-  margin-top: 16px;
-}
-
-.stat-card {
-  padding: 12px;
+.guard-score {
   text-align: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--hero-ink);
 }
-
-.stat-num {
-  display: block;
-  margin-top: 6px;
-  font-size: 20px;
-  font-weight: 1000;
-  color: #243a31;
+.guard-score > text {
+  font-size: 56px;
+  line-height: 1.1;
+  letter-spacing: -0.06em;
+  color: white;
 }
-
-.stat-num.warm {
-  color: #c9822c;
+.guard-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding-top: 20px;
+  margin-top: 24px;
+  border-top: 1px solid #ffffff26;
+  font-size: 14px;
+  color: var(--hero-ink);
+}
+.guard-stats text {
+  font-size: 30px;
+  color: white;
+  letter-spacing: -0.03em;
+}
+.guard-stats small {
+  font-size: 14px;
+  letter-spacing: 0;
+}
+@media (max-width: 359px) {
+  .guard-heading {
+    gap: 12px;
+  }
+  .guard-score > text {
+    font-size: 44px;
+  }
+  .guard-stats {
+    gap: 10px;
+  }
+  .guard-stats text {
+    font-size: 26px;
+  }
 }
 </style>

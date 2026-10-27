@@ -72,7 +72,8 @@ export const useSessionStore = defineStore('session', {
     async restoreSession() {
       this.restoring = true
       setUnauthorizedHandler(() => {
-        this.logout(false)
+        this.logout(true)
+        uni.showToast({ title: '登录已失效，请重新登录', icon: 'none' })
       })
       try {
         const me = await fetchMe()

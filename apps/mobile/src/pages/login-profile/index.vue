@@ -1,6 +1,6 @@
 <template>
-  <view class="app-page login-page">
-    <AppHeader :label="profileLabel" :title="profileTitle" back="/pages/login-phone/index" />
+  <AppPage class=" login-page">
+    <AppHeader :title="profileTitle" back="/pages/login-phone/index" />
     <view class="section center">
       <view class="muted intro">{{ profileIntro }}</view>
     </view>
@@ -10,7 +10,7 @@
     <view class="section">
       <BigButton @click="goNext">{{ nextLabel }}</BigButton>
     </view>
-  </view>
+  </AppPage>
 </template>
 
 <script setup lang="ts">

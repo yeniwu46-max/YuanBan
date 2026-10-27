@@ -1,7 +1,7 @@
 // ─── 动效令牌 ────────────────────────────────────────────
 $ease-press: cubic-bezier(0.2, 0, 0, 1);
-$ease-enter: cubic-bezier(0.0, 0.0, 0.2, 1);
-$duration-press: 110ms;
+$ease-enter: cubic-bezier(0, 0, 0.2, 1);
+$duration-press: 120ms;
 $duration-enter: 220ms;
 $scale-press: 0.965;
 $scale-press-sm: 0.975;
@@ -30,7 +30,9 @@ $scale-press-sm: 0.975;
 
   // 减少动画首选项：仅保留 opacity 过渡，不做几何变形
   @media (prefers-reduced-motion: reduce) {
-    transition: opacity $duration-press linear, background-color 150ms linear;
+    transition:
+      opacity $duration-press linear,
+      background-color 150ms linear;
     will-change: auto;
 
     &:active {

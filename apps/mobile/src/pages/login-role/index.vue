@@ -1,8 +1,8 @@
 <template>
-  <view class="app-page login-page">
-    <AppHeader label="请选择身份" title="您想以什么身份使用？" back="/pages/login-welcome/index" />
+  <AppPage class=" login-page">
+    <AppHeader title="选择身份" back="/pages/login-welcome/index" />
     <view class="section center intro">
-      <view class="muted">老人端会使用更大的文字和更简单的按钮。</view>
+
     </view>
     <view class="list role-list">
       <ListItem
@@ -10,7 +10,7 @@
         :class="{ selected: session.role === 'elder' }"
         icon="老"
         title="我是老人"
-        desc="查看安全状态、联系家人、记录心情"
+        desc="健康与陪伴"
         tag="推荐"
         :chev="false"
         @click="selectRole('elder')"
@@ -23,7 +23,7 @@
         icon="家"
         icon-tone="warm"
         title="我是家人"
-        desc="远程关怀、接收告警、查看报告"
+        desc="守护家人"
         :chev="false"
         @click="selectRole('family')"
       >
@@ -34,7 +34,7 @@
         :class="{ selected: session.role === 'community' }"
         icon="社"
         title="我是社区人员"
-        desc="处理告警、服务工单、活动管理"
+        desc="社区服务"
         :chev="false"
         @click="selectRole('community')"
       >
@@ -44,7 +44,7 @@
     <view class="section">
       <BigButton @click="goNext">下一步 ›</BigButton>
     </view>
-  </view>
+  </AppPage>
 </template>
 
 <script setup lang="ts">

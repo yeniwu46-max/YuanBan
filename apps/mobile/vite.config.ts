@@ -1,10 +1,18 @@
 import { defineConfig } from 'vite'
 import uni from '@dcloudio/vite-plugin-uni'
+import { realpathSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { uniSlotCompat } from './build/uni-slot-compat'
 
 const uniPlugin = typeof uni === 'function' ? uni : (uni as { default: typeof uni }).default
 
 export default defineConfig({
-  plugins: [uniPlugin()],
+  plugins: [uniSlotCompat(), uniPlugin()],
+  // Resolve real package paths for pnpm's isolated dependency graph (Reka UI).
+  resolve: {
+    preserveSymlinks: false,
+    alias: { 'reka-ui': realpathSync(fileURLToPath(new URL('./node_modules/reka-ui/dist/index.js', import.meta.url))) }
+  },
   server: {
     host: '0.0.0.0',
     port: 5180,

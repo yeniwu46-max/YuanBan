@@ -1,0 +1,109 @@
+.jade-home {
+  --jade-base: #f7faf8;
+  --jade-ink: #123e33;
+  --jade-primary: #49bd96;
+  --jade-muted: #5b7368;
+  --jade-line: #e2ece6;
+  --jade-warm: #fff5e3;
+  width: 100%; background: var(--jade-base); color: var(--jade-ink); padding: 0 24px calc(106px + env(safe-area-inset-bottom));
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  button { box-sizing: border-box; text-align: left; cursor: pointer; }
+  button::after { border: 0; }
+  button:focus-visible { outline: 3px solid #1a805e; outline-offset: 4px; }
+  button:active { opacity: .82; }
+}
+.jade-header { padding-top: calc(24px + env(safe-area-inset-top)); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.jade-brand { display: flex; align-items: center; gap: 4px; font-size: 22px; font-weight: 700; letter-spacing: -.5px; }
+.jade-brand__image { width: 36px; height: 40px; }
+.jade-header__device { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; color: #4b685b; font-size: 14px; }
+.jade-header__device :deep(.jade-icon) { width: 19px; height: 19px; }
+.jade-greeting { margin: 26px 0 24px; }
+.jade-greeting__eyebrow { color: var(--jade-muted); font-size: 17px; }
+.jade-greeting__title { font-size: 32px; line-height: 1.45; font-weight: 700; letter-spacing: -.8px; margin-top: 8px; }
+.jade-guardian { position: relative; isolation: isolate; overflow: hidden; border-radius: 28px; color: #fff; background: #123e33; padding: 20px 20px 0; }
+.jade-guardian::before { content: ''; position: absolute; width: 196px; height: 196px; right: -34px; top: 66px; border: 1px solid rgba(156, 213, 180, .18); border-radius: 50%; z-index: -1; }
+.jade-guardian__top { display: flex; align-items: center; justify-content: space-between; color: #b4daca; }
+.jade-guardian__badge { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 500; }
+.jade-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #91ddb4; flex: 0 0 auto; }
+.jade-guardian__scene { position: relative; min-height: 164px; display: flex; align-items: center; }
+.jade-guardian__copy { position: relative; z-index: 1; width: calc(100% - 146px); padding: 22px 0 18px; }
+.jade-guardian__title { font-size: clamp(23px, 6.67vw, 26px); font-weight: 600; line-height: 1.35; letter-spacing: -.5px; }
+.jade-guardian__subtitle { display: block; margin-top: 8px; max-width: 140px; color: #c5dfd3; font-size: 15px; line-height: 1.6; }
+.jade-guardian__talk { display: inline-flex; align-items: center; min-height: 44px; gap: 6px; color: #d4f9dc; font-size: 15px; font-weight: 600; margin-top: 10px; }
+.jade-guardian__talk :deep(.jade-icon) { width: 16px; height: 16px; }
+.jade-guardian__mascot { position: absolute; width: 160px; height: 176px; right: -15px; bottom: 1px; }
+.jade-guardian__footer { border-top: 1px solid rgba(208, 236, 220, .17); display: flex; align-items: center; gap: 7px; min-height: 46px; color: #c5dfd3; font-size: 12px; }
+.jade-guardian__footer :deep(.jade-icon) { width: 15px; height: 15px; }
+.jade-actions { display: grid; grid-template-columns: minmax(0, 1fr) 100px; gap: 12px; margin-top: 16px; }
+.jade-sos { display: flex; align-items: center; gap: 10px; padding: 14px 12px; border-radius: 18px; background: #fff0eb; border: 1px solid #f8d9cf; color: #a33c31; min-height: 80px; }
+.jade-sos__symbol { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: #c55043; border-radius: 50%; font-family: Arial, sans-serif; font-size: 12px; color: white; font-weight: 700; flex-shrink: 0; }
+.jade-action-title { font-size: 18px; font-weight: 700; white-space: nowrap; }
+.jade-action-copy { display: block; color: #98594e; font-size: 12px; margin-top: 4px; line-height: 1.5; }
+.jade-sos > :deep(.jade-icon) { width: 14px; height: 14px; margin-left: auto; }
+.jade-voice { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; border-radius: 18px; background: #e8f5ee; border: 1px solid #d3e9dc; color: #25664c; font-size: 14px; font-weight: 600; }
+.jade-feedback { margin-top: 12px; border-radius: 12px; padding: 14px; font-size: 15px; background: #e8f5ee; line-height: 1.6; }
+.jade-section-heading { display: flex; align-items: center; justify-content: space-between; margin: 30px 0 16px; gap: 12px; }
+.jade-section-title { font-size: 21px; font-weight: 700; }
+.jade-section-heading button { display: flex; align-items: center; gap: 3px; font-size: 14px; min-height: 44px; color: #496d5c; }
+.jade-section-heading button :deep(.jade-icon) { width: 15px; height: 15px; }
+.jade-health-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.jade-metric { padding: 18px 16px 16px; border-radius: 20px; background: #fff; border: 1px solid var(--jade-line); color: var(--jade-ink); }
+.jade-metric__head { display: flex; align-items: center; gap: 7px; color: #4d6e5e; font-size: 15px; font-weight: 500; }
+.jade-metric__head :deep(.jade-icon) { width: 20px; height: 20px; color: #308269; }
+.jade-metric__head :deep(.jade-metric__arrow) { width: 12px; height: 12px; margin-left: auto; color: #8a9e92; }
+.jade-metric__value { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px; margin-top: 14px; font-size: 36px; font-weight: 600; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+.jade-metric__value .jade-metric__unit { font-size: 12px; color: #5b7368; font-weight: 400; letter-spacing: 0; }
+.jade-metric__status { display: flex; align-items: center; gap: 5px; margin-top: 10px; font-size: 12px; color: #44725a; }
+.jade-metric__status .jade-status-dot { background: #338465; width: 5px; height: 5px; }
+.jade-metric--warning .jade-metric__status { color: #92621f; }
+.jade-metric--warning .jade-status-dot { background: #ad7e2c; }
+.jade-metric--danger .jade-metric__status { color: #a33c31; }
+.jade-metric--danger .jade-status-dot { background: #c55043; }
+.jade-reminder { display: flex; width: 100%; align-items: center; gap: 12px; padding: 16px 12px; margin-top: 14px; background: var(--jade-warm); border: 1px solid #f0e6cd; border-radius: 16px; color: #7c632b; }
+.jade-reminder__icon { flex-shrink: 0; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; }
+.jade-reminder__body { flex: 1; min-width: 0; }
+.jade-reminder__title { font-size: 16px; font-weight: 600; }
+.jade-reminder__body > text { display: block; font-size: 12px; margin-top: 6px; line-height: 1.5; }
+.jade-reminder > :deep(.jade-icon) { width: 16px; height: 16px; flex-shrink: 0; }
+.jade-family-count { color: var(--jade-muted); font-size: 13px; }
+.jade-family { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--jade-line); border-radius: 22px; background: #fff; overflow: hidden; }
+.jade-contact { display: flex; align-items: center; flex-direction: column; padding: 20px 6px 14px; min-width: 0; color: var(--jade-ink); }
+.jade-contact + .jade-contact { border-left: 1px solid var(--jade-line); }
+.jade-contact__avatar { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: #f3e8d5; font-size: 20px; font-weight: 500; color: #887247; position: relative; }
+.jade-contact__avatar--1 { background: #e4ece7; color: #4f7062; }
+.jade-contact__avatar--2 { background: #f5e5dc; color: #9c7260; }
+.jade-contact__online { position: absolute; right: 0; bottom: 0; width: 8px; height: 8px; border: 2px solid white; border-radius: 50%; background: #398561; }
+.jade-contact__relation { margin-top: 10px; font-size: 17px; font-weight: 600; }
+.jade-contact__status { margin-top: 4px; font-size: 12px; color: #61766b; }
+.jade-contact__call { display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; min-height: 38px; margin-top: 12px; border-radius: 10px; color: #31684f; background: #eff6f1; font-size: 13px; }
+.jade-contact__call :deep(.jade-icon) { width: 14px; height: 14px; }
+.jade-companion { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; padding: 24px 0 0; color: var(--jade-ink); }
+.jade-companion__title { font-size: 19px; font-weight: 600; }
+.jade-companion text { display: block; margin-top: 7px; font-size: 14px; color: var(--jade-muted); }
+.jade-companion > :deep(.jade-icon) { width: 18px; height: 18px; }
+.jade-signoff { display: flex; align-items: center; justify-content: center; gap: 6px; padding-top: 30px; color: #667c6e; font-size: 12px; }
+.jade-signoff :deep(.jade-icon) { width: 14px; height: 14px; }
+.jade-empty { padding: 20px; background: white; border: 1px solid var(--jade-line); border-radius: 16px; font-size: 16px; line-height: 1.6; }
+@media (max-width: 359px) {
+  .jade-home { padding-left: 16px; padding-right: 16px; }
+  .jade-greeting__title { font-size: 29px; }
+  .jade-guardian { padding-left: 16px; padding-right: 16px; }
+  .jade-guardian__title { font-size: 23px; }
+  .jade-guardian__copy { width: calc(100% - 130px); }
+  .jade-guardian__mascot { width: 136px; height: 152px; right: -13px; }
+  .jade-guardian__subtitle { max-width: 126px; font-size: 14px; }
+  .jade-actions { grid-template-columns: minmax(0, 1fr) 84px; gap: 8px; }
+  .jade-sos { gap: 8px; padding: 12px 8px; }
+  .jade-sos__symbol { width: 32px; height: 32px; font-size: 10px; }
+  .jade-action-title { font-size: 17px; }
+  .jade-action-copy { font-size: 12px; }
+  .jade-metric { padding: 16px 12px; }
+  .jade-metric__value { font-size: 32px; }
+}
+@media (min-width: 768px) {
+  .jade-home { padding-left: 32px; padding-right: 32px; border-color: var(--jade-line); box-shadow: none; }
+  .jade-guardian__mascot { width: 192px; height: 208px; }
+  .jade-guardian__scene { min-height: 192px; }
+  .jade-guardian__copy { width: calc(100% - 208px); }
+}
+@media (prefers-reduced-motion: reduce) { .jade-home button { transition: none; } }

@@ -1,6 +1,6 @@
 <template>
   <button class="item" @click="$emit('click')">
-    <view class="iconbox" :class="iconTone">{{ icon }}</view>
+    <view class="iconbox" :class="iconTone"><AppIcon :name="icon" /></view>
     <view class="item-main">
       <view class="item-title">
         <text>{{ title }}</text>
@@ -10,7 +10,7 @@
     </view>
     <slot name="right">
       <text v-if="rightText" class="item-right">{{ rightText }}</text>
-      <text v-if="chev" class="chev">›</text>
+      <AppIcon v-if="chev" name="chevron" />
     </slot>
   </button>
 </template>
@@ -40,9 +40,13 @@ defineEmits<{ click: [] }>()
 </script>
 
 <style scoped>
+.item { flex-wrap: wrap; }
+.item-title { flex-wrap: wrap; gap: 6px; }
 .item-right {
   font-size: 18px;
-  font-weight: 900;
-  color: #243a31;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
 }
+@media(max-width:359px) { .item-right { flex-basis:100%; padding-left:56px; } }
 </style>

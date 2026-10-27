@@ -28,16 +28,16 @@ defineEmits<{ action: [key: string] }>()
   height: 92px;
   border-radius: 24px;
   background: white;
-  border: 1px solid #efe3ce;
+  border: 1px solid var(--line);
   box-shadow: 0 4px 12px rgba(63, 52, 29, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 14px;
-  font-weight: 1000;
-  color: #315943;
+  font-size: var(--helper-size, 16px);
+  font-weight: 600;
+  color: var(--primary);
   @include pressable-sm;
 }
 

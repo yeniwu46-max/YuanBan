@@ -1,6 +1,6 @@
 <template>
   <button class="item alert-card" @click="$emit('click')">
-    <view class="iconbox" :class="iconToneClass">{{ alert.icon }}</view>
+    <view class="iconbox" :class="iconToneClass"><AppIcon :name="alert.icon" /></view>
     <view class="item-main">
       <view class="item-title">{{ alert.title }}</view>
       <view class="desc">{{ alert.description }}</view>

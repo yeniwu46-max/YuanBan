@@ -1,176 +1,75 @@
-<template>
-  <view class="switcher-wrap">
-    <button class="switcher-btn" @click="togglePanel">
-      <view class="label">{{ label }}</view>
-      <view class="title-row">
-        <text class="h1">{{ currentName }}</text>
-        <text class="chev">{{ open ? '⌃' : '⌄' }}</text>
-      </view>
-    </button>
-    <view v-if="open" class="panel">
-      <view class="panel-title">切换守护对象</view>
-      <button
-        v-for="elder in guardian.elders"
-        :key="elder.id"
-        class="panel-item"
-        :class="{ active: elder.id === guardian.currentElderId }"
-        @click="selectElder(elder.id)"
-      >
-        <view class="panel-main">
-          <text class="panel-name">{{ elder.name }}</text>
-          <text class="panel-desc">{{ elder.age }} 岁 · {{ elder.online ? '设备在线' : '设备离线' }}</text>
-        </view>
-        <StatusTag
-          :label="elder.online ? '守护中' : '需关注'"
-          :tone="elder.online ? 'normal' : 'warm'"
-        />
-      </button>
-    </view>
-    <view v-if="open" class="mask" @click="open = false" />
-  </view>
-</template>
-
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, ref } from 'vue'
+import AppSheet from '@/components/AppSheet.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import { useGuardianStore } from '@/stores/guardian'
-
-withDefaults(defineProps<{
-  label?: string
-}>(), {
-  label: '子女端 · 守护中心'
-})
-
-const guardian = useGuardianStore()
-const open = ref(false)
-
-const currentName = computed(() => guardian.currentElder?.name ?? '未绑定老人')
-
-function togglePanel() {
-  open.value = !open.value
-}
-
-async function selectElder(elderId: string) {
+withDefaults(defineProps<{ label?: string }>(), { label: '守护家人' })
+const guardian = useGuardianStore(),
+  open = ref(false)
+const currentName = computed(() => guardian.currentElder?.name || '未绑定长辈')
+async function select(id: string) {
+  await guardian.switchElder(id)
   open.value = false
-  await guardian.switchElder(elderId)
 }
-
-onBeforeUnmount(() => {
-  open.value = false
-})
 </script>
-
-<style scoped lang="scss">
-.switcher-wrap {
-  position: relative;
-  z-index: 3;
+<template>
+  <view class="elder-switcher">
+    <button
+      class="elder-switcher-trigger"
+      :aria-expanded="open"
+      aria-haspopup="dialog"
+      aria-label="切换守护对象"
+      @click="open = true"
+    >
+      <view class="label">{{ label }}</view>
+      <view class="row">
+        <text class="h1">{{ currentName }}</text>
+        <AppIcon name="down" :size="20" />
+      </view>
+    </button>
+    <AppSheet v-model="open" title="选择要守护的长辈">
+      <view class="elder-options">
+        <button
+          v-for="elder in guardian.elders"
+          :key="elder.id"
+          class="item"
+          :aria-pressed="elder.id === guardian.currentElderId"
+          @click="select(elder.id)"
+        >
+          <view class="iconbox"><AppIcon name="users" /></view>
+          <view class="item-main">
+            <view class="item-title">{{ elder.name }}</view>
+            <view class="desc">
+              {{ elder.age }} 岁 · {{ elder.online ? '设备在线' : '设备离线' }}
+            </view>
+          </view>
+          <StatusTag
+            :label="
+              elder.id === guardian.currentElderId ? '已选择' : elder.online ? '守护中' : '需关注'
+            "
+            :tone="elder.online ? 'normal' : 'warm'"
+          />
+        </button>
+      </view>
+    </AppSheet>
+  </view>
+</template>
+<style scoped>
+.elder-switcher {
   flex: 1;
   min-width: 0;
 }
-
-.switcher-btn {
-  width: 100%;
+.elder-switcher-trigger {
   text-align: left;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  line-height: 1;
-  overflow: visible;
-}
-
-.switcher-btn::after {
-  border: 0;
-}
-
-.title-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.h1 {
-  margin-top: 2px;
-  font-size: 27px;
-  line-height: 1.12;
-  font-weight: 1000;
-  letter-spacing: -0.4px;
-  color: #243a31;
-}
-
-.label {
-  font-size: 14px;
-  color: #7a6f5d;
-  font-weight: 800;
-}
-
-.chev {
-  font-size: 18px;
-  color: #7a6f5d;
-  margin-top: 4px;
-}
-
-.panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
-  background: #fffdf7;
-  border: 1px solid #e9e0d0;
-  border-radius: 24px;
-  padding: 14px;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.1);
-  z-index: 30;
-}
-
-.panel-title {
-  font-size: 14px;
-  font-weight: 900;
-  color: #8b7753;
-  margin-bottom: 10px;
-}
-
-.panel-item {
+  min-height: 60px;
   width: 100%;
-  min-height: 58px;
-  border-radius: 16px;
-  background: #fff;
-  border: 1px solid #efe3ce;
-  padding: 12px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 8px;
 }
-
-.panel-item.active {
-  background: #e6f2df;
-  border-color: #9fcb91;
+.elder-switcher-trigger .h1 {
+  margin-top: 6px;
 }
-
-.panel-main {
+.elder-options {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  min-width: 0;
-}
-
-.panel-name {
-  font-size: 18px;
-  font-weight: 1000;
-  color: #243a31;
-}
-
-.panel-desc {
-  font-size: 13px;
-  color: #7a6f5d;
-}
-
-.mask {
-  position: fixed;
-  inset: 0;
-  z-index: 19;
-  touch-action: none;
+  gap: 12px;
 }
 </style>

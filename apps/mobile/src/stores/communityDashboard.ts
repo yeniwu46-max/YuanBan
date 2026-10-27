@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { dashboardStats, focusElders, opsMetrics, todayActivityCard, urgentWorkItems } from '@/mock/community'
 import { fetchDashboard } from '@/services/communityService'
+import { useApiMode } from '@/config/apiMode'
+import { useCommunityWorkorderStore } from '@/stores/communityWorkorder'
 import type { HydrateOptions } from '@/services/requestCache'
 import type { DashboardStats, FocusElderItem, OpsMetric, TodayActivityCard, UrgentWorkItem } from '@/types/community'
 
@@ -15,6 +17,12 @@ export const useCommunityDashboardStore = defineStore('communityDashboard', {
   }),
   actions: {
     async hydrate(options: HydrateOptions = {}) {
+      if (!useApiMode()) {
+        const workorders = useCommunityWorkorderStore()
+        this.syncFromWorkorderPool(workorders.poolStats)
+        this.urgentItems = workorders.orders.filter(o => o.tab === 'urgent').map(o => ({id:o.id,icon:o.icon,iconTone:o.iconTone,title:o.title,description:o.description,tag:o.tag,tagTone:o.tagTone}))
+        return
+      }
       this.loading = true
       try {
         const data = await fetchDashboard(options)

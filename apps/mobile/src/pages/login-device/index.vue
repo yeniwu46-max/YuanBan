@@ -1,6 +1,6 @@
 <template>
-  <view class="app-page login-page">
-    <AppHeader label="绑定守护设备" title="连接小鼋设备" back="/pages/login-profile/index" />
+  <AppPage class=" login-page">
+    <AppHeader title="连接小鼋设备" back="/pages/login-profile/index" />
     <view class="section center">
       <view class="muted intro">请让设备靠近手机，或扫描设备上的二维码。</view>
     </view>
@@ -19,7 +19,7 @@
     <view class="section">
       <BigButton @click="go('/pages/login-guide/index')">完成绑定 ✓</BigButton>
     </view>
-  </view>
+  </AppPage>
 </template>
 
 <script setup lang="ts">
@@ -48,13 +48,13 @@ function go(url: string) {
   height: 150px;
   border-radius: 42px;
   background: #fff;
-  border: 1px solid #d6e8d4;
+  border: 1px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 42px;
-  font-weight: 900;
-  color: #315943;
+  font-weight: 600;
+  color: var(--primary);
 }
 
 .qr-title {

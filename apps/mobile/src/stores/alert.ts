@@ -37,7 +37,6 @@ export const useAlertStore = defineStore('alert', {
     async hydrate(elderId?: string, options: HydrateOptions = {}) {
       const cacheKey = elderId ? `alerts:${elderId}` : 'alerts:all'
       if (!useApiMode()) {
-        this.alerts = getAlerts(elderId)
         if (!this.activeAlertId && this.alerts[0]) {
           this.activeAlertId = this.alerts[0].id
         }
@@ -91,39 +90,41 @@ export const useAlertStore = defineStore('alert', {
     },
     async resolveAlert(alertId: string) {
       const target = this.alerts.find((item) => item.id === alertId)
-      if (!target) return
+      if (!target) return false
       if (useApiMode()) {
         try {
           await patchAlertApi(alertId, 'resolved', '已处理')
           await this.hydrate(target.elderId, { force: true })
-          return
+          return true
         } catch {
           uni.showToast({ title: '关闭告警失败', icon: 'none' })
-          return
+          return false
         }
       }
       target.status = 'resolved'
       target.statusLabel = '已处理'
       target.tag = '已处理'
       target.tagTone = 'normal'
+      return true
     },
     async markPending(alertId: string) {
       const target = this.alerts.find((item) => item.id === alertId)
-      if (!target) return
+      if (!target) return false
       if (useApiMode()) {
         try {
           await patchAlertApi(alertId, 'processing', '稍后处理')
           await this.hydrate(target.elderId, { force: true })
-          return
+          return true
         } catch {
           uni.showToast({ title: '更新告警失败', icon: 'none' })
-          return
+          return false
         }
       }
       target.status = 'processing'
       target.statusLabel = '稍后处理'
       target.tag = '处理中'
       target.tagTone = 'warm'
+      return true
     }
   }
 })

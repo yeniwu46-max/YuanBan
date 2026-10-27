@@ -1,115 +1,108 @@
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    tone?: 'green' | 'warm' | 'red' | 'gray'
+    pill: string
+    headline: string
+    subtitle?: string
+    badgeValue?: string | number
+    badgeLabel?: string
+    badgeIcon?: string
+    badgeTone?: string
+    stats?: { label: string; value: string | number; tone?: string }[]
+    gridCols?: 3 | 4
+  }>(),
+  { tone: 'green', stats: () => [], gridCols: 4 },
+)
+const clean = (text: string) => text.replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, '').trim()
+</script>
 <template>
-  <view class="hero" :class="tone">
-    <view class="between row-top">
-      <view class="main">
-        <HeroTitle :pill="pill" :title="headline" :subtitle="subtitle" :clamp="2" />
+  <view class="hero stats-hero" :class="tone">
+    <view class="stats-heading">
+      <view class="item-main">
+        <view class="stats-eyebrow">{{ clean(pill) }}</view>
+        <view class="hero-title">{{ headline }}</view>
+        <view v-if="subtitle" class="stats-copy">{{ subtitle }}</view>
       </view>
-      <view v-if="badgeValue != null && badgeValue !== ''" class="badge">
-        <text class="badge-num">{{ badgeValue }}</text>
-        <text class="badge-label">{{ badgeLabel }}</text>
+      <view v-if="badgeValue != null && badgeValue !== ''" class="stats-badge">
+        <text>{{ badgeValue }}</text>
+        <view>{{ badgeLabel }}</view>
       </view>
-      <view v-else-if="badgeIcon" class="iconbox large-badge" :class="badgeTone">{{ badgeIcon }}</view>
+      <AppIcon v-else-if="badgeIcon" :name="badgeIcon" :size="40" />
     </view>
-    <view v-if="stats.length" class="stat-grid" :class="gridClass">
-      <view v-for="item in stats" :key="item.label" class="card stat-mini">
-        <text class="muted text-nowrap">{{ item.label }}</text>
-        <text class="stat-num text-nowrap" :class="item.tone">{{ item.value }}</text>
+    <view
+      v-if="stats.length"
+      class="stats-strip"
+      :style="{ gridTemplateColumns: 'repeat(' + gridCols + ', minmax(0,1fr))' }"
+    >
+      <view v-for="item in stats" :key="item.label">
+        <text>{{ item.value }}</text>
+        <view>{{ item.label }}</view>
       </view>
     </view>
     <slot />
   </view>
 </template>
-
-<script setup lang="ts">
-import { computed } from 'vue'
-import HeroTitle from '@/components/HeroTitle.vue'
-
-const props = withDefaults(defineProps<{
-  tone?: 'green' | 'warm' | 'red' | 'gray'
-  pill: string
-  headline: string
-  subtitle?: string
-  badgeValue?: string | number
-  badgeLabel?: string
-  badgeIcon?: string
-  badgeTone?: string
-  stats?: { label: string; value: string | number; tone?: string }[]
-  gridCols?: 3 | 4
-}>(), {
-  tone: 'green',
-  stats: () => [],
-  gridCols: 4
-})
-
-const gridClass = computed(() => (props.gridCols === 3 ? 'cols3' : 'cols4'))
-</script>
-
-<style scoped lang="scss">
-.badge {
-  width: 88px;
-  height: 88px;
-  border-radius: 28px;
-  background: white;
-  border: 1px solid #d6e8d4;
+<style scoped>
+.stats-heading {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 24px;
+}
+.stats-eyebrow {
+  font-size: 14px;
+  margin-bottom: 14px;
+  opacity: 0.85;
+}
+.stats-copy {
+  font-size: 16px;
+  margin-top: 12px;
+  opacity: 0.85;
+}
+.stats-badge {
+  font-size: 14px;
   text-align: center;
   flex-shrink: 0;
 }
-
-.badge-num {
-  font-size: 28px;
-  color: #315943;
-  font-weight: 1000;
+.stats-badge > text {
+  font-size: 52px;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
 }
-
-.badge-label {
-  font-size: 12px;
-  font-weight: 1000;
-  color: #7a6f5d;
-}
-
-.large-badge {
-  width: 88px;
-  height: 88px;
-  border-radius: 28px;
-  font-size: 42px;
-}
-
-.stat-grid {
+.stats-strip {
   display: grid;
-  gap: 12px;
-  margin-top: 16px;
+  gap: 16px;
+  padding-top: 20px;
+  margin-top: 24px;
+  border-top: 1px solid #ffffff30;
+  font-size: 14px;
 }
-
-.stat-grid.cols4 {
-  grid-template-columns: repeat(4, 1fr);
+.stats-strip text {
+  font-size: 32px;
+  letter-spacing: -0.03em;
 }
-
-.stat-grid.cols3 {
-  grid-template-columns: repeat(3, 1fr);
+.green .stats-copy,
+.green .stats-eyebrow,
+.green .stats-strip > view > view,
+.green .stats-badge > view {
+  color: var(--hero-ink);
 }
-
-.stat-mini {
-  padding: 8px 10px;
-  text-align: center;
-}
-
-.stat-num {
-  display: block;
-  margin-top: 4px;
-  font-size: 21px;
-  font-weight: 1000;
-  color: #243a31;
-}
-
-.stat-num.warm {
-  color: #c9822c;
-}
-
-.stat-num.red {
-  color: #e56b5f;
+@media (max-width: 767px) {
+  .stats-heading {
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .stats-badge > text {
+    font-size: 40px;
+  }
+  .stats-strip {
+    gap: 8px;
+  }
+  .stats-strip text {
+    font-size: 28px;
+  }
+  .stats-hero :deep(.hero-title) {
+    font-size: 24px;
+  }
 }
 </style>

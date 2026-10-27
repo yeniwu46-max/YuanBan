@@ -26,6 +26,7 @@ export const useGuardianStore = defineStore('guardian', {
   },
   actions: {
     async hydrate(options: HydrateOptions = {}) {
+      if (!useApiMode()) return
       this.loading = true
       try {
         const data = await hydrateGuardianData(options)

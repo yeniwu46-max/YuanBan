@@ -1,167 +1,144 @@
-﻿<template>
-  <view class="app-page">
-    <AppHeader label="安全守护" title="SOS 求助" back="/pages/home/index" compact />
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import AppHeader from '@/components/AppHeader.vue'
+import BigButton from '@/components/BigButton.vue'
+import YuanMascot from '@/components/YuanMascot.vue'
+import { useSosStore } from '@/stores/sos'
+import { useElderStore } from '@/stores/elder'
+import { useApiMode } from '@/config/apiMode'
+import { goRoute } from '@/utils/navigate'
+const sos = useSosStore(),
+  elder = useElderStore(),
+  submitted = ref(false)
+const title = computed(
+  () =>
+    ({
+      confirm: '需要立即求助吗？',
+      calling: '正在提交求助…',
+      success: '求助已提交',
+      cancel: '已取消本次操作',
+    })[sos.state],
+)
+const copy = computed(() =>
+  sos.state === 'confirm'
+    ? '确认后，将向家人和社区提交求助。'
+    : sos.state === 'calling'
+      ? '请留在安全的位置，耐心等待提交结果。'
+      : sos.state === 'success'
+        ? '提交成功不代表已有人响应。请继续联系家人；紧急情况请直接拨打当地急救电话。'
+        : submitted.value
+          ? '已停止等待。已提交的通知不会撤回，请向家人说明情况。'
+          : '本次没有发送求助。如需帮助，可随时重新发起。',
+)
+async function send() {
+  await sos.setState('calling')
+  if (sos.state === 'calling') {
+    submitted.value = true
+    setTimeout(() => {
+      if (sos.state === 'calling') void sos.setState('success')
+    }, 900)
+  }
+}
+</script>
+<template>
+  <AppPage>
+    <AppHeader title="紧急求助" back="/pages/home/index" />
     <view class="section">
-      <view class="hero center" :class="heroClass">
-        <view class="sos-icon">{{ icon }}</view>
-        <view class="h1 sos-title">{{ title }}</view>
-        <view class="muted sos-copy">{{ copy }}</view>
-        <view v-if="sos.state === 'calling'" class="card notify-card">
-          <view class="between"><text class="notify-title">通知进度</text><text class="notify-count">{{ sos.notifiedCount }} / {{ sos.targetCount }}</text></view>
-          <ProgressBar :value="Math.round((sos.notifiedCount / sos.targetCount) * 100)" />
+      <view class="sos-panel" :class="'sos-' + sos.state" aria-live="polite">
+        <view class="sos-symbol">
+          <AppIcon
+            :name="sos.state === 'success' ? 'check' : sos.state === 'cancel' ? 'shield' : 'siren'"
+            :size="48"
+          />
         </view>
-        <view class="grid2 sos-actions">
+        <view class="h1">{{ title }}</view>
+        <view class="sos-copy">{{ copy }}</view>
+        <view v-if="!useApiMode()" class="sos-demo">当前为演示，不会拨打电话或通知真实人员。</view>
+        <view class="sos-actions">
           <template v-if="sos.state === 'confirm'">
-            <BigButton tone="red" :loading="sos.triggering" @click="sos.setState('calling')">立即求助</BigButton>
-            <BigButton tone="white" :disabled="sos.triggering" @click="sos.setState('cancel')">误触取消</BigButton>
+            <BigButton tone="red" :loading="sos.triggering" @click="send">确认，立即求助</BigButton>
+            <BigButton tone="white" :disabled="sos.triggering" @click="sos.setState('cancel')">
+              误触了，取消
+            </BigButton>
           </template>
           <template v-else-if="sos.state === 'calling'">
-            <BigButton @click="sos.setState('success')">模拟成功</BigButton>
-            <BigButton tone="white" @click="sos.setState('confirm')">取消求助</BigButton>
+            <BigButton loading>正在提交…</BigButton>
+            <BigButton tone="white" @click="sos.setState('cancel')">停止等待</BigButton>
           </template>
           <template v-else-if="sos.state === 'success'">
-            <BigButton @click="go('/pkg-elder-detail/family/index')">联系女儿</BigButton>
-            <BigButton tone="white" @click="go('/pages/home/index')">回到首页</BigButton>
+            <BigButton @click="goRoute('/pkg-elder-detail/family/index')">
+              <AppIcon name="phone" />
+              联系家人
+            </BigButton>
+            <BigButton tone="white" @click="goRoute('/pages/home/index')">回到首页</BigButton>
           </template>
           <template v-else>
             <BigButton tone="red" @click="sos.setState('confirm')">重新求助</BigButton>
-            <BigButton tone="white" @click="go('/pages/home/index')">回到首页</BigButton>
+            <BigButton tone="white" @click="goRoute('/pages/home/index')">回到首页</BigButton>
           </template>
         </view>
       </view>
     </view>
-    <view class="list sos-list">
-      <ListItem icon="位" title="当前位置" :desc="elder.profile.locationLabel" tag="已定位" :chev="false" />
-      <ListItem icon="设" title="设备状态" desc="SOS 按钮与监测设备在线" tag="正常" :chev="false" />
-      <ListItem icon="联" icon-tone="warm" title="将通知对象" :desc="sos.timeline.join('、')" tag="3 方" tag-tone="warm" :chev="false" />
+    <view class="section">
+      <view class="feedback-panel">
+        <view class="row">
+          <YuanMascot size="small" :state="sos.state === 'calling' ? 'thinking' : 'reminder'" />
+          <view class="item-main">
+            <view class="h2">小鼋陪着您</view>
+            <view class="desc">{{ elder.profile.locationLabel }}</view>
+          </view>
+        </view>
+        <view class="desc" style="margin-top: 16px">通知对象：{{ sos.timeline.join('、') }}</view>
+      </view>
     </view>
-    <view class="statebar">
-      <button :class="{ active: sos.state === 'confirm' }" @click="sos.setState('confirm')">确认</button>
-      <button :class="{ active: sos.state === 'calling' }" @click="sos.setState('calling')">通知中</button>
-      <button :class="{ active: sos.state === 'success' }" @click="sos.setState('success')">成功</button>
-      <button :class="{ active: sos.state === 'cancel' }" @click="sos.setState('cancel')">取消</button>
-    </view>
-  </view>
+  </AppPage>
 </template>
-
-<script setup lang="ts">
-import { computed } from 'vue'
-import AppHeader from '@/components/AppHeader.vue'
-import BigButton from '@/components/BigButton.vue'
-import ListItem from '@/components/ListItem.vue'
-import ProgressBar from '@/components/ProgressBar.vue'
-import { useElderStore } from '@/stores/elder'
-import { useSosStore } from '@/stores/sos'
-import { goDetail } from '@/utils/navigate'
-
-const elder = useElderStore()
-const sos = useSosStore()
-
-const heroClass = computed(() => ({
-  red: sos.state === 'confirm',
-  warm: sos.state === 'calling',
-  green: sos.state === 'success',
-  gray: sos.state === 'cancel'
-}))
-
-const icon = computed(() => ({ confirm: '!', calling: '...', success: '✓', cancel: '安' }[sos.state]))
-const title = computed(() => ({
-  confirm: '需要立即求助吗？',
-  calling: '正在通知家人',
-  success: '已通知成功',
-  cancel: '已取消求助'
-}[sos.state]))
-const copy = computed(() => ({
-  confirm: '确认后，小鼋会同时通知您的家人和社区服务人员。',
-  calling: '请您先坐下休息，小鼋正在帮您联系大家。',
-  success: '女儿已确认收到，社区服务人员也会继续关注您的情况。',
-  cancel: '本次不会通知家人和社区。如果您真的不舒服，可以重新发起求助。'
-}[sos.state]))
-
-function go(url: string) {
-  goDetail(url)
-}
-</script>
-
 <style scoped>
-.sos-icon {
-  margin: 0 auto;
-  width: 132px;
-  height: 132px;
-  border-radius: 50%;
-  background: #fff;
-  border: 8px solid rgba(255, 224, 218, 0.9);
+.sos-panel {
+  padding: 28px 24px;
+  border-radius: 28px;
+  border: 1px solid #ecc6c0;
+  background: var(--red-soft);
+  text-align: center;
+}
+.sos-symbol {
   display: flex;
-  align-items: center;
   justify-content: center;
-  font-size: 54px;
-  color: #e56b5f;
-  font-weight: 900;
+  align-items: center;
+  margin: 0 auto 24px;
+  width: 92px;
+  height: 92px;
+  border-radius: 28px;
+  background: white;
+  color: var(--red);
 }
-
-.green .sos-icon,
-.gray .sos-icon {
-  border-color: #d7ebcd;
-  color: #5b8b62;
-}
-
-.warm .sos-icon {
-  border-color: #f9dcac;
-  color: #c9822c;
-}
-
-.sos-title {
-  font-size: 30px;
-  margin-top: 18px;
-}
-
 .sos-copy {
-  margin-top: 12px;
-  line-height: 1.6;
+  margin-top: 16px;
+  line-height: 1.7;
+  font-size: 20px;
+  color: var(--text);
 }
-
+.sos-demo {
+  margin-top: 16px;
+  font-size: 16px;
+  color: var(--muted);
+}
 .sos-actions {
-  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
 }
-
-.notify-card {
-  padding: 16px;
-  margin-top: 18px;
+.sos-success {
+  background: var(--green-soft);
+  border-color: var(--line);
 }
-
-.notify-title,
-.notify-count {
-  font-weight: 900;
+.sos-success .sos-symbol,
+.sos-cancel .sos-symbol {
+  color: var(--primary);
 }
-
-.notify-count {
-  color: #c9822c;
-}
-
-.sos-list {
-  margin-top: 18px;
-}
-
-.statebar {
-  margin: 18px 24px 0;
-  z-index: 25;
-  display: grid;
-  gap: 6px;
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.statebar button {
-  height: 34px;
-  border-radius: 999px;
-  background: #fff;
-  border: 1px solid #efe3ce;
-  color: #7a6f5d;
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.statebar button.active {
-  background: #26382f;
-  color: #fff;
+.sos-cancel {
+  background: #eaf2f5;
+  border-color: var(--line);
 }
 </style>

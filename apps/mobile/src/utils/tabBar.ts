@@ -95,7 +95,9 @@ export function configureTabBarForRole(role: UserRole) {
     uni.setTabBarItem({
       index,
       text: tab.label,
-      pagePath: tab.shellPath.replace(/^\//, '')
+      pagePath: tab.shellPath.replace(/^\//, ''),
+      // 启动时 Tab 页面可能尚未就绪；提供回调以避免未处理的 Promise 拒绝。
+      fail: () => {}
     })
   })
 }

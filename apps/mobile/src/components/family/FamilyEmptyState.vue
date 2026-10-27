@@ -1,6 +1,6 @@
 <template>
   <view class="empty-state card">
-    <view class="empty-icon">{{ icon }}</view>
+    <view class="empty-icon"><AppIcon :name="icon" /></view>
     <view class="empty-title">{{ title }}</view>
     <view class="muted empty-desc">{{ description }}</view>
     <BigButton v-if="actionLabel" class="empty-action" @click="$emit('action')">{{ actionLabel }}</BigButton>
@@ -37,14 +37,14 @@ defineEmits<{ action: [] }>()
 .empty-title {
   margin-top: 12px;
   font-size: 18px;
-  font-weight: 1000;
-  color: #243a31;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .empty-desc {
   margin-top: 8px;
   line-height: 1.55;
-  font-size: 14px;
+  font-size: var(--helper-size, 16px);
 }
 
 .empty-action {

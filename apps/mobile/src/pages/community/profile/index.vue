@@ -1,7 +1,6 @@
-﻿<template>
-  <view class="app-page community-page">
+<template>
+  <AppPage class=" community-page">
     <CommunityPageHeader
-      label="社区端 · 服务档案"
       title="老人档案"
       :show-back="false"
     />
@@ -9,9 +8,9 @@
     <view class="section">
       <view class="hero green profile-hero">
         <view class="row row-top">
-          <view class="avatar iconbox">👤</view>
+          <view class="avatar iconbox"><AppIcon name="👤" /></view>
           <view class="flex1">
-            <view class="pill">🛡️ 重点服务对象</view>
+            <view class="pill">重点服务对象</view>
             <view class="profile-name text-nowrap">{{ profile.name }}</view>
             <view class="muted profile-meta text-keep-all">
               {{ profile.age }} 岁 · 独居 · 高血压慢病管理 · {{ profile.address }}
@@ -47,7 +46,7 @@
           v-for="m in profile.metrics"
           :key="m.key"
           :metric="m"
-          :icon="metricIcon(m.key)"
+          :icon="metricIcon(m.key)" @click="openReport"
         />
       </view>
     </view>
@@ -56,14 +55,16 @@
       <view class="h2">近期风险记录</view>
       <text class="muted count-label">近 30 天</text>
     </view>
+    <view class="section" style="margin-bottom:16px"><WdInput v-model="recordQuery" placeholder="搜索当前档案的风险记录" clearable/></view>
+    <view v-if="!riskRecords.length" class="section"><view class="feedback-panel">暂无匹配的风险记录。</view></view>
     <view class="list flush section-gap">
       <button
-        v-for="risk in profile.riskRecords"
+        v-for="risk in riskRecords"
         :key="risk.id"
         class="row-card"
         @click="openRisk(risk.workOrderId)"
       >
-        <view class="iconbox" :class="risk.iconTone">{{ risk.icon }}</view>
+        <view class="iconbox" :class="risk.iconTone"><AppIcon :name="risk.icon" /></view>
         <view class="row-main">
           <view class="row-title">{{ risk.title }}</view>
           <view class="row-desc">{{ risk.description }}</view>
@@ -81,7 +82,7 @@
         <view v-for="(sr, idx) in profile.serviceRecords" :key="sr.id" class="service-row">
           <view v-if="idx > 0" class="divider" />
           <view class="row">
-            <view class="iconbox">{{ sr.icon }}</view>
+            <view class="iconbox"><AppIcon :name="sr.icon" /></view>
             <view>
               <view class="duty-name">{{ sr.title }}</view>
               <view class="muted">{{ sr.detail }}</view>
@@ -99,7 +100,7 @@
         <view v-for="(c, idx) in profile.contacts" :key="c.id" class="contact-row">
           <view v-if="idx > 0" class="divider" />
           <view class="row">
-            <view class="iconbox" :class="c.iconTone">👤</view>
+            <view class="iconbox" :class="c.iconTone"><AppIcon name="👤" /></view>
             <view class="flex1">
               <view class="duty-name">{{ c.name }}</view>
               <view class="muted">{{ c.role }}</view>
@@ -123,12 +124,12 @@
     <view class="section compact-top">
       <view class="grid2">
         <button class="quick-card" @click="goActivity">
-          <view class="iconbox">📅</view>
+          <view class="iconbox"><AppIcon name="📅" /></view>
           <text class="qc-title">活动参与</text>
           <text class="muted qc-desc">{{ profile.participation.activityLabel }}</text>
         </button>
         <button class="quick-card" @click="toast('鼋气罐积分')">
-          <view class="iconbox warm">🎁</view>
+          <view class="iconbox warm"><AppIcon name="🎁" /></view>
           <text class="qc-title">鼋气罐积分</text>
           <text class="muted qc-desc">{{ profile.participation.pointsLabel }}</text>
         </button>
@@ -147,16 +148,17 @@
           </view>
         </view>
         <view class="grid2 action-row">
-          <BigButton tone="warm" @click="goMainTab('/pages/community/workorders/index')">➤ 同步建议</BigButton>
-          <BigButton tone="white" @click="toast('写入档案')">▤ 写入档案</BigButton>
+          <BigButton tone="warm" @click="goMainTab('/pages/community/workorders/index')">同步建议</BigButton>
+          <BigButton tone="white" @click="toast('写入档案')">写入档案</BigButton>
         </view>
       </view>
-    </view></view>
+    </view></AppPage>
 </template>
 
 <script setup lang="ts">
 import { onShow } from '@dcloudio/uni-app'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import WdInput from 'wot-design-uni/components/wd-input/wd-input.vue'
 import BigButton from '@/components/BigButton.vue'
 import HealthMetricCard from '@/components/HealthMetricCard.vue'
 import StatusTag from '@/components/StatusTag.vue'
@@ -170,6 +172,8 @@ import { goDetail, goMainTab } from '@/utils/navigate'
 
 const profileStore = useCommunityProfileStore()
 const profile = computed(() => profileStore.profile)
+const recordQuery=ref('')
+const riskRecords=computed(()=>profile.value.riskRecords.filter(r=>(r.title+' '+r.description).includes(recordQuery.value.trim())))
 const { elderId } = useElderContext()
 
 onShow(() => {
@@ -251,7 +255,7 @@ function goActivity() {
 .profile-name {
   margin-top: 12px;
   font-size: 24px;
-  font-weight: 1000;
+  font-weight: 600;
 }
 
 .profile-meta {
@@ -273,7 +277,7 @@ function goActivity() {
 .mini-btn {
   width: 72px !important;
   height: 38px !important;
-  font-size: 13px !important;
+  font-size: var(--helper-size, 16px) !important;
   padding: 0 !important;
 }
 
@@ -286,7 +290,7 @@ function goActivity() {
   min-height: 116px;
   border-radius: 24px;
   background: white;
-  border: 1px solid #efe3ce;
+  border: 1px solid var(--line);
   padding: 16px;
   text-align: left;
 }
@@ -294,6 +298,6 @@ function goActivity() {
 .qc-title {
   display: block;
   margin-top: 12px;
-  font-weight: 1000;
+  font-weight: 600;
 }
 </style>

@@ -1,8 +1,8 @@
-﻿<template>
-  <view class="app-page family-page">
+<template>
+  <AppPage class=" family-page">
     <view class="header">
       <ElderSwitcher />
-      <button class="iconbtn">🔔</button>
+      <button class="iconbtn" aria-label="通知设置" @click="go('/pages/family/settings/index')"><AppIcon name="bell"/></button>
     </view>
 
     <FamilyPageSkeleton v-if="switching" />
@@ -22,13 +22,6 @@
       </view>
 
       <view class="section-title">
-        <view class="h2">快捷关怀</view>
-      </view>
-      <view class="section compact-top">
-        <QuickCareGrid @action="onQuickCare" />
-      </view>
-
-      <view class="section-title">
         <view class="h2">风险提醒</view>
         <button v-if="pendingAlerts.length" class="link" @click="showAllAlerts">查看全部 ›</button>
       </view>
@@ -43,10 +36,17 @@
           v-if="!elderAlerts.length"
           icon="✅"
           title="暂无风险提醒"
-          description="老人当前状态平稳，有新异常时会第一时间通知您。"
+          description="有新提醒时将在这里显示。"
           action-label="查看健康报告"
           @action="go('/pages/family/report/index')"
         />
+      </view>
+
+      <view class="section-title">
+        <view class="h2">快捷关怀</view>
+      </view>
+      <view class="section compact-top">
+        <QuickCareGrid @action="onQuickCare" />
       </view>
 
       <view class="section-title">
@@ -60,6 +60,7 @@
             :key="item.key"
             :metric="item"
             :icon="metricIcon(item.key)"
+            @click="go('/pages/family/report/index')"
           />
         </view>
         <FamilyEmptyState
@@ -82,12 +83,12 @@
             </view>
           </view>
           <view class="grid2 action-row">
-            <BigButton tone="green" @click="go('/pages/family/care/index')">➤ 发关怀消息</BigButton>
-            <BigButton tone="white" @click="go('/pages/family/care/index')">💬 查看建议</BigButton>
+            <BigButton tone="green" @click="go('/pages/family/care/index')">发关怀消息</BigButton>
+            <BigButton tone="white" @click="go('/pages/family/care/index')">查看建议</BigButton>
           </view>
         </view>
       </view>
-    </template></view>
+    </template></AppPage>
 </template>
 
 <script setup lang="ts">
@@ -213,14 +214,14 @@ function onQuickCare(action: QuickCareAction) {
 
 .suggestion-title {
   font-size: 18px;
-  font-weight: 900;
-  color: #243a31;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .suggestion-copy {
   margin-top: 6px;
   line-height: 1.5;
-  font-size: 14px;
+  font-size: var(--helper-size, 16px);
 }
 
 .action-row {

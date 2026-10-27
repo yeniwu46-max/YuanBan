@@ -1,6 +1,6 @@
 <template>
   <view class="empty card">
-    <text class="empty-icon">{{ icon }}</text>
+    <text class="empty-icon"><AppIcon :name="icon" /></text>
     <view class="empty-title">{{ title }}</view>
     <view class="muted empty-desc">{{ description }}</view>
     <button v-if="actionLabel" class="link action" @click="$emit('action')">{{ actionLabel }}</button>
@@ -31,7 +31,7 @@ defineEmits<{ action: [] }>()
 .empty-title {
   margin-top: 12px;
   font-size: 18px;
-  font-weight: 1000;
+  font-weight: 600;
 }
 
 .empty-desc {
@@ -41,6 +41,6 @@ defineEmits<{ action: [] }>()
 
 .action {
   margin-top: 14px;
-  font-weight: 1000;
+  font-weight: 600;
 }
 </style>

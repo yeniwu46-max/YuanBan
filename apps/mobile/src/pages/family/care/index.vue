@@ -1,6 +1,6 @@
-﻿<template>
-  <view class="app-page family-page">
-    <FamilyPageHeader label="子女端 · 关怀中心" switchable />
+<template>
+  <AppPage class=" family-page">
+    <FamilyPageHeader label="关怀中心" switchable />
 
     <FamilyPageSkeleton v-if="switching" />
 
@@ -12,7 +12,7 @@
               <HeroTitle pill="💚 今日适合主动关怀" :title="stats.headline" :subtitle="stats.suggestion" :clamp="2" />
             </view>
             <view class="iconbox warm mascot-large">
-              <YuanMascot size="large" />
+              <YuanMascot size="large" state="caring" />
             </view>
           </view>
           <view class="grid3 stats">
@@ -42,15 +42,15 @@
       <view class="section">
         <view class="card greeting-card">
           <view class="row row-top">
-            <view class="iconbox warm">✨</view>
+            <view class="iconbox warm"><AppIcon name="✨" /></view>
             <view>
               <view class="greeting-title">小鼋生成的问候</view>
               <view class="muted greeting-copy">{{ stats.generatedGreeting }}</view>
             </view>
           </view>
           <view class="grid2 action-row">
-            <BigButton tone="green" @click="toast('发送给老人')">➤ 发送给老人</BigButton>
-            <BigButton tone="white" @click="toast('录语音')">🎙 录语音</BigButton>
+            <BigButton tone="green" @click="toast('发送给老人')">发送给老人</BigButton>
+            <BigButton tone="white" @click="toast('录语音')">录语音</BigButton>
           </view>
         </view>
       </view>
@@ -73,8 +73,8 @@
             </button>
           </view>
           <view class="grid2 action-row">
-            <BigButton tone="green" @click="toast('上传照片')">🖼 上传照片</BigButton>
-            <BigButton tone="white" @click="toast('配一句话')">💬 配一句话</BigButton>
+            <BigButton tone="green" @click="toast('上传照片')">上传照片</BigButton>
+            <BigButton tone="white" @click="toast('配一句话')">配一句话</BigButton>
           </view>
         </view>
         <FamilyEmptyState
@@ -118,7 +118,7 @@
         action-label="返回守护首页"
         @action="goHome('/pages/family/guardian/index')"
       />
-    </view></view>
+    </view></AppPage>
 </template>
 
 <script setup lang="ts">
@@ -202,12 +202,12 @@ function toast(title: string) {
   display: block;
   margin-top: 6px;
   font-size: 20px;
-  font-weight: 1000;
-  color: #243a31;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .stat-num.warm {
-  color: #c9822c;
+  color: var(--warm);
 }
 
 .compact-top {
@@ -221,13 +221,13 @@ function toast(title: string) {
 
 .greeting-title {
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .greeting-copy {
   margin-top: 8px;
   line-height: 1.5;
-  font-size: 14px;
+  font-size: var(--helper-size, 16px);
 }
 
 .photo-grid {
@@ -237,8 +237,8 @@ function toast(title: string) {
 .photo {
   min-height: 92px;
   border-radius: 22px;
-  background: #f7f2e8;
-  border: 1px solid #efe3ce;
+  background: var(--bg);
+  border: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -252,14 +252,14 @@ function toast(title: string) {
 }
 
 .photo-label {
-  font-size: 12px;
-  font-weight: 1000;
-  color: #7a6f5d;
+  font-size: var(--helper-size, 16px);
+  font-weight: 600;
+  color: var(--muted);
 }
 
 .task-progress {
-  font-weight: 1000;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: var(--helper-size, 16px);
 }
 
 .section-gap {

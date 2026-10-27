@@ -1,7 +1,6 @@
-﻿<template>
-  <view class="app-page community-page">
+<template>
+  <AppPage class=" community-page">
     <CommunityPageHeader
-      label="社区端 · 服务工作台"
       :title="site.name"
       :notify-dot="stats.urgentCount > 0"
     />
@@ -9,28 +8,12 @@
     <view class="section">
       <StatsHero
         pill="📋 今日工单总览"
-        :headline="`今日待处理 ${stats.pendingCount} 项，其中紧急告警 ${stats.urgentCount} 项。`"
-        :subtitle="`当前值班：${site.dutyStaff} · 设备在线率 ${site.deviceOnlineRate}% · ${site.serviceStatusLabel}`"
+        :headline="`${stats.pendingCount} 项待处理`"
+        :subtitle="`值班 ${site.dutyStaff}`"
         :badge-value="stats.totalCount"
         badge-label="总工单"
         :stats="heroStats"
       />
-    </view>
-
-    <view class="section-title">
-      <view class="h2">快捷操作</view>
-    </view>
-    <view class="section compact-top">
-      <QuickActionGrid :actions="quickActions" @action="onQuick" />
-    </view>
-
-    <view class="section-title">
-      <view class="h2">运营概览</view>
-    </view>
-    <view class="section compact-top">
-      <view class="grid2">
-        <OpsMetricCard v-for="m in ops" :key="m.key" :metric="m" @click="openOpsMetric(m.key)" />
-      </view>
     </view>
 
     <view class="section-title">
@@ -55,13 +38,29 @@
     </view>
 
     <view class="section-title">
+      <view class="h2">快捷操作</view>
+    </view>
+    <view class="section compact-top">
+      <QuickActionGrid :actions="quickActions" @action="onQuick" />
+    </view>
+
+    <view class="section-title">
+      <view class="h2">运营概览</view>
+    </view>
+    <view class="section compact-top">
+      <view class="grid2">
+        <OpsMetricCard v-for="m in ops" :key="m.key" :metric="m" @click="openOpsMetric(m.key)" />
+      </view>
+    </view>
+
+    <view class="section-title">
       <view class="h2">社区活动</view>
       <button class="link" @click="goTab('activity')">管理活动 ›</button>
     </view>
     <view class="section compact-top">
       <view class="card activity-card">
         <view class="row">
-          <view class="iconbox warm">📅</view>
+          <view class="iconbox warm"><AppIcon name="📅" /></view>
           <view class="flex1">
             <view class="act-title">今日活动：{{ todayActivity.title }}</view>
             <view class="muted act-desc">
@@ -71,8 +70,8 @@
           <StatusTag :label="todayActivity.statusLabel" :tone="todayActivity.statusTone === 'warm' ? 'warm' : 'normal'" />
         </view>
         <view class="grid2 action-row">
-          <BigButton tone="green" @click="goTab('activity')">✓ 活动签到</BigButton>
-          <BigButton tone="white" @click="goTab('activity')">▤ 查看名单</BigButton>
+          <BigButton tone="green" @click="goTab('activity')">活动签到</BigButton>
+          <BigButton tone="white" @click="goTab('activity')">查看名单</BigButton>
         </view>
       </view>
     </view>
@@ -88,14 +87,14 @@
         class="row-card"
         @click="goProfile"
       >
-        <view class="iconbox" :class="elder.iconTone">{{ elder.icon }}</view>
+        <view class="iconbox" :class="elder.iconTone"><AppIcon :name="elder.icon" /></view>
         <view class="row-main">
           <view class="row-title">{{ elder.name }}</view>
           <view class="row-desc">{{ elder.description }}</view>
         </view>
-        <text class="chev">›</text>
+        <AppIcon name="chevron" />
       </button>
-    </view></view>
+    </view></AppPage>
 </template>
 
 <script setup lang="ts">
@@ -221,7 +220,7 @@ function goProfile() {
 
 .act-title {
   font-size: 18px;
-  font-weight: 1000;
+  font-weight: 600;
 }
 
 .act-desc {
@@ -239,6 +238,6 @@ function goProfile() {
 }
 
 .count-label {
-  font-weight: 1000;
+  font-weight: 600;
 }
 </style>

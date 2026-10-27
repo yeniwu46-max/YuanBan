@@ -11,11 +11,16 @@ import { getPrimaryElderId } from '@/utils/authContext'
 import { mockClone } from '@/services/mockClone'
 import type { HydrateOptions } from '@/services/requestCache'
 import type { HealthMetric } from '@/types/elder'
+import { isMetricUsable } from '@/utils/trends'
 
 export const useHealthStore = defineStore('health', {
   state: () => ({
-    metrics: mockClone(healthMetrics),
-    medicines: mockClone(medicines),
+    metrics: useApiMode() ? [] as HealthMetric[] : mockClone(healthMetrics),
+    medicines: useApiMode() ? [] as typeof medicines : mockClone(medicines),
+    dataSource: (useApiMode() ? 'unknown' : 'mock') as 'api' | 'mock' | 'unknown',
+    loadedElderId: '',
+    requestVersion: 0,
+    error: '',
     metricHistory: {} as Record<string, Array<{ recorded_at: string; value: string; status: string }>>,
     reportTab: 'week' as 'day' | 'week' | 'month',
     medicineMessage: '',
@@ -23,6 +28,15 @@ export const useHealthStore = defineStore('health', {
     loading: false
   }),
   getters: {
+    summaryTitle: (state) => {
+      if (state.loading) return '正在更新'
+      if (state.error) return '数据待更新'
+      const candidates = state.metrics.filter(m => m.key !== 'medicine')
+      const rows = candidates.filter(isMetricUsable)
+      if (!rows.length) return '暂无健康数据'
+      const count = rows.filter(m => m.status === 'warning' || m.status === 'danger').length
+      return count ? count + '项需关注' : rows.length < candidates.length ? '部分数据缺失' : '指标平稳'
+    },
     metricByKey: (state) => (key: string) => state.metrics.find((item) => item.key === key),
     metricDetail: (state) => (key: HealthMetric['key']) => {
       const metric = state.metrics.find((m) => m.key === key)
@@ -49,19 +63,33 @@ export const useHealthStore = defineStore('health', {
   },
   actions: {
     async hydrate(elderId?: string, options: HydrateOptions = {}) {
+      if (!useApiMode()) return
       this.loading = true
       const id = elderId ?? getPrimaryElderId()
+      const version = ++this.requestVersion
+      this.error = ''
+      if (this.loadedElderId !== id) {
+        this.metrics = []
+        this.medicines = []
+        this.dataSource = 'unknown'
+        this.metricHistory = {}
+      }
       try {
         const [metrics, meds] = await Promise.all([
           hydrateHealthMetrics(id, options),
           hydrateMedicines(id, options)
         ])
+        if (version !== this.requestVersion) return
+        this.loadedElderId = id
+        this.dataSource = 'api'
         this.metrics = metrics
         this.medicines = meds
       } catch {
+        if (version !== this.requestVersion) return
+        this.error = '健康数据更新失败'
         uni.showToast({ title: '体征加载失败', icon: 'none' })
       } finally {
-        this.loading = false
+        if (version === this.requestVersion) this.loading = false
       }
     },
     async hydrateMetricHistory(elderId: string, metricKey: string) {

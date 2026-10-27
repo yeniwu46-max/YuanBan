@@ -1,15 +1,15 @@
-﻿<template>
-  <view class="app-page">
-    <AppHeader label="亲情联络" title="联系家人" back="/pages/home/index" compact />
+<template>
+  <AppPage class="">
+    <AppHeader title="联系家人" back="/pages/home/index" compact />
     <view class="section">
       <view class="hero green">
         <view class="between row-top">
           <view>
             <view class="pill">{{ elder.onlineContactCount }} 位家人可联系</view>
-            <view class="family-copy">女儿现在在线，可以直接视频。</view>
-            <view class="muted family-desc">小鼋也可以帮您把想说的话转成消息发给家人。</view>
+            <view class="family-copy">家庭联系人</view>
+
           </view>
-          <view class="iconbox family-icon">家</view>
+          <view class="iconbox family-icon"><AppIcon name="家" /></view>
         </view>
         <view class="grid2 action-row">
           <BigButton @click="quickAction('video')">一键视频</BigButton>
@@ -71,7 +71,7 @@
     <view v-if="elder.contactActionMessage" class="section">
       <view class="card feedback">{{ elder.contactActionMessage }}</view>
     </view>
-  </view>
+  </AppPage>
 </template>
 
 <script setup lang="ts">
@@ -102,7 +102,7 @@ function quickAction(action: 'phone' | 'video' | 'message') {
   margin-top: 15px;
   font-size: 24px;
   line-height: 1.3;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .family-desc {
@@ -115,7 +115,7 @@ function quickAction(action: 'phone' | 'video' | 'message') {
   height: 86px;
   border-radius: 28px;
   font-size: 34px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .action-row {
@@ -131,12 +131,12 @@ function quickAction(action: 'phone' | 'video' | 'message') {
 }
 
 .family-card.selected {
-  background: #e7f3df;
+  background: var(--green-soft);
 }
 
 .family-avatar {
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .contact-detail {
@@ -145,7 +145,7 @@ function quickAction(action: 'phone' | 'video' | 'message') {
 
 .contact-name {
   font-size: 20px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .contact-actions {
@@ -154,7 +154,7 @@ function quickAction(action: 'phone' | 'video' | 'message') {
 
 .small-action {
   min-height: 72px;
-  font-size: 14px;
+  font-size: var(--helper-size, 16px);
   flex-direction: column;
 }
 
@@ -176,7 +176,7 @@ function quickAction(action: 'phone' | 'video' | 'message') {
 
 .feedback {
   padding: 12px 14px;
-  color: #315943;
-  font-weight: 900;
+  color: var(--primary);
+  font-weight: 600;
 }
 </style>

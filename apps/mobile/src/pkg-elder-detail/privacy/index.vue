@@ -1,15 +1,15 @@
 <template>
-  <view class="app-page">
-    <AppHeader label="安全与设置" title="隐私授权" back="/pages/service/index" compact />
+  <AppPage class="">
+    <AppHeader title="隐私授权" back="/pages/service/index" compact />
     <view class="scroll-section">
       <view class="hero green">
         <view class="between row-top">
           <view>
             <view class="pill">您可以自己决定谁能查看</view>
-            <view class="privacy-copy">不是监控，是由您掌握的守护授权。</view>
-            <view class="muted privacy-desc">小鼋只在守护需要时共享必要信息。</view>
+            <view class="privacy-copy">管理共享范围</view>
+
           </view>
-          <view class="iconbox privacy-icon">隐</view>
+          <view class="iconbox privacy-icon"><AppIcon name="隐" /></view>
         </view>
       </view>
       <view class="section-title flush-title"><view class="h2">谁可以看到什么</view></view>
@@ -21,16 +21,16 @@
       <view class="section-title flush-title"><view class="h2">我的授权设置</view></view>
       <view class="list flush">
         <view v-for="permission in companion.privacyPermissions" :key="permission.key" class="item">
-          <view class="iconbox">{{ permission.key === 'bedroomMonitor' ? '卧' : permission.key === 'familyReport' ? '报' : '位' }}</view>
+          <view class="iconbox"><AppIcon :name="permission.key === 'bedroomMonitor' ? 'shield' : permission.key === 'familyReport' ? 'chart' : 'home'" /></view>
           <view class="item-main">
             <view class="item-title">{{ permission.title }}</view>
             <view class="desc">{{ permission.description }}</view>
           </view>
-          <PrivacyToggle :model-value="permission.enabled" @update:model-value="companion.togglePermission(permission.key)" />
+          <PrivacyToggle :model-value="permission.enabled" :label="permission.title" @update:model-value="companion.togglePermission(permission.key)" />
         </view>
       </view>
     </view>
-  </view>
+  </AppPage>
 </template>
 
 <script setup lang="ts">
@@ -47,7 +47,7 @@ const companion = useCompanionStore()
   margin-top: 15px;
   font-size: 23px;
   line-height: 1.35;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .privacy-desc {
@@ -60,7 +60,7 @@ const companion = useCompanionStore()
   height: 84px;
   border-radius: 28px;
   font-size: 34px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .flush-title {

@@ -9,7 +9,7 @@ export const useCommunityWorkorderStore = defineStore('communityWorkorder', {
   state: () => ({
     activeTab: 'urgent' as WorkOrderTab,
     orders: cloneWorkOrders(workOrders),
-    poolStats: { ...workorderPoolStats } as DashboardStats,
+    poolStats: computePoolStats(workOrders) as DashboardStats,
     staff: staffDuties.map((s) => ({ ...s })) as StaffDuty[],
     loading: false,
     apiError: '' as string
@@ -40,28 +40,31 @@ export const useCommunityWorkorderStore = defineStore('communityWorkorder', {
     },
     async finishOrder(orderId: string) {
       const order = this.orders.find((o) => o.id === orderId)
-      if (!order || order.tab === 'done') return
+      if (!order) return false
+      if (order.tab === 'done') return true
 
       if (useApiMode()) {
         try {
           await finishWorkOrder(orderId)
           await this.fetchOrders()
-          return
+          return true
         } catch {
           uni.showToast({ title: '完成工单失败', icon: 'none' })
-          return
+          return false
         }
       }
 
+      const wasUrgent = order.tab === 'urgent'
       order.tab = 'done'
       order.status = 'resolved'
       order.tag = '已完成'
       order.tagTone = 'green'
       if (this.poolStats.pendingCount > 0) this.poolStats.pendingCount -= 1
-      if (orderId === 'wo-sos-018' && this.poolStats.urgentCount > 0) {
+      if (wasUrgent && this.poolStats.urgentCount > 0) {
         this.poolStats.urgentCount -= 1
       }
       this.poolStats.doneCount += 1
+      return true
     },
     moveUrgentToDone(orderId: string) {
       return this.finishOrder(orderId)

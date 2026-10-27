@@ -68,13 +68,13 @@ function go(tab: keyof typeof tabRoutes) {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
-  font-weight: 1000;
+  font-size: var(--helper-size, 16px);
+  font-weight: 600;
   color: inherit;
 }
 
 .navitem.active {
-  color: #416348;
+  color: var(--primary);
 }
 
 .navicon {
@@ -88,6 +88,6 @@ function go(tab: keyof typeof tabRoutes) {
 }
 
 .navitem.active .navicon {
-  background: #e6f2df;
+  background: var(--green-soft);
 }
 </style>

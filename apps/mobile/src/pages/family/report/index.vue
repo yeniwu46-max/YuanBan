@@ -1,372 +1,265 @@
-﻿<template>
-  <view class="app-page family-page">
-    <FamilyPageHeader label="子女端 · 报告中心" switchable />
+<script setup lang="ts">
+import { computed, watch } from 'vue'
+import FamilyPageHeader from '@/components/family/FamilyPageHeader.vue'
+import FamilyPageSkeleton from '@/components/family/FamilyPageSkeleton.vue'
+import HealthMetricCard from '@/components/HealthMetricCard.vue'
+import YuanMascot from '@/components/YuanMascot.vue'
+import TrendPanel from '@/components/TrendPanel.vue'
+import BigButton from '@/components/BigButton.vue'
+import StatusTag from '@/components/StatusTag.vue'
+// #ifdef H5
+import Tabs from '@/components/ui/Tabs.vue'
+// #endif
+import { useFamilyElderContext } from '@/composables/useFamilyElderContext'
+import { useHealthStore } from '@/stores/health'
+import { useApiMode } from '@/config/apiMode'
+import { goRoute } from '@/utils/navigate'
+import type { ApiReportPeriod } from '@/types/family'
+const health = useHealthStore()
+const { elderId, reportStore, reportAnomalies, alertStore } = useFamilyElderContext()
+const options = [
+  { value: 'day', label: '日报' },
+  { value: 'week', label: '周报' },
+  { value: 'month', label: '月报' },
+]
+const period = computed<string>({
+  get: () => health.reportTab,
+  set: (value: string) => health.setReportTab(value as ApiReportPeriod),
+})
+const days = computed(() => ({ day: 1, week: 7, month: 30 })[health.reportTab])
+const report = computed(() => reportStore.reportByElder(elderId.value, health.reportTab))
+const error = computed(() => reportStore.errors[elderId.value + ':' + health.reportTab])
+const loading = computed(() => reportStore.pending[elderId.value + ':' + health.reportTab])
+watch(
+  () => [elderId.value, health.reportTab],
+  () => {
+    void reportStore.hydrate(elderId.value, health.reportTab)
+  },
+  { immediate: true },
+)
+function showMetric(title: string) {
+  uni.showToast({ title, icon: 'none' })
+}
+function openAnomaly(id?: string) {
+  if (id) {
+    alertStore.setActiveAlert(id)
+    goRoute('/pkg-family-detail/family/alert/index')
+  } else uni.showToast({ title: '此记录暂无关联告警详情', icon: 'none' })
+}
+</script>
+<template>
+  <AppPage class="family-page">
+    <FamilyPageHeader label="健康报告" switchable />
+    <view class="section">
+      <!-- #ifdef H5 -->
+      <Tabs v-model="period" :options="options" label="报告时间范围">
+        <view class="data-source">
 
-    <FamilyPageSkeleton v-if="switching" />
-
+          {{ days === 1 ? '最近一天' : '最近 ' + days + ' 天' }}
+        </view>
+      </Tabs>
+      <!-- #endif -->
+      <!-- #ifndef H5 -->
+      <view class="tabbar">
+        <button v-for="o in options" :key="o.value" class="tabbar-btn" @click="period = o.value">
+          {{ o.label }}
+        </button>
+      </view>
+      <!-- #endif -->
+    </view>
+    <FamilyPageSkeleton v-if="loading" />
+    <view v-else-if="error" class="section">
+      <view class="feedback-panel" role="alert">
+        {{ error }}
+        <button
+          class="link"
+          @click="reportStore.hydrate(elderId, health.reportTab, { force: true })"
+        >
+          重试加载
+        </button>
+      </view>
+    </view>
     <template v-else-if="report">
       <view class="section">
-        <view class="tabbar">
-          <button class="tabbar-btn" :class="{ active: health.reportTab === 'day' }" @click="health.setReportTab('day')">日报</button>
-          <button class="tabbar-btn" :class="{ active: health.reportTab === 'week' }" @click="health.setReportTab('week')">周报</button>
-          <button class="tabbar-btn" :class="{ active: health.reportTab === 'month' }" @click="health.setReportTab('month')">月报</button>
-        </view>
-      </view>
+        <view class="hero green report-hero">
+          <view class="report-heading">
+            <view class="item-main">
 
-      <view class="section">
-        <view class="hero green">
-          <view class="between row-top">
-            <view class="main">
-              <HeroTitle :pill="periodPill" :title="report.headline" :subtitle="report.summary" :clamp="2" />
+              <view class="hero-title">{{ report.headline }}</view>
+
             </view>
-            <view class="score-ring">
-              <text class="score-num">{{ report.healthScore }}</text>
-              <text class="score-label">健康分</text>
+            <view class="report-score">
+              <text>{{ report.healthScore }}</text>
+              <view>健康分</view>
             </view>
           </view>
-          <view class="grid4 mini-stats">
-            <view class="card stat-card">
-              <text class="muted">风险</text>
-              <text class="stat-num warm">{{ report.riskCount }}次</text>
-            </view>
-            <view class="card stat-card">
-              <text class="muted">服药</text>
-              <text class="stat-num">{{ report.medicineDonePercent }}%</text>
-            </view>
-            <view class="card stat-card">
-              <text class="muted">睡眠</text>
-              <text class="stat-num">{{ report.avgSleepHours }}h</text>
-            </view>
-            <view class="card stat-card">
-              <text class="muted">设备</text>
-              <text class="stat-num small">{{ report.deviceStatusLabel }}</text>
-            </view>
-          </view>
-        </view>
-      </view>
-
-      <view class="section">
-        <view class="hero warm summary-card">
-          <view class="row row-top">
-            <view class="iconbox warm mascot-box">
-              <YuanMascot size="small" />
+          <view class="report-stats">
+            <view>
+              <text>{{ report.riskCount }}</text>
+              <view>风险提醒</view>
             </view>
             <view>
-              <view class="summary-title">小鼋{{ periodLabel }}解读 🔊</view>
-              <view class="muted summary-copy">{{ report.yuanInterpretation }}</view>
+              <text>
+                {{ report.medicineDonePercent }}
+                <small>%</small>
+              </text>
+              <view>服药完成</view>
+            </view>
+            <view>
+              <text>
+                {{ report.avgSleepHours }}
+                <small>h</small>
+              </text>
+              <view>平均睡眠</view>
             </view>
           </view>
         </view>
       </view>
-
+      <view class="section">
+        <view class="report-interpretation">
+          <YuanMascot size="small" :state="report.riskCount ? 'reminder' : 'encouraging'" />
+          <view class="item-main">
+            <view class="h2">小鼋解读</view>
+            <view class="desc">{{ report.yuanInterpretation }}</view>
+          </view>
+        </view>
+      </view>
       <view class="section-title">
         <view class="h2">核心指标</view>
-        <button class="link" @click="toast('详细报告')">详细报告 ›</button>
+        <StatusTag
+          :label="report.deviceStatusLabel"
+          :tone="report.deviceStatusLabel === '离线' ? 'warm' : 'normal'"
+        />
       </view>
-      <view class="section compact-top">
+      <view class="section compact">
         <view class="grid2">
           <HealthMetricCard
             v-for="item in report.metrics"
             :key="item.key"
             :metric="item"
-            :icon="metricIcon(item.key)"
+            :icon="item.key"
+            @click="showMetric(item.description)"
           />
         </view>
       </view>
-
-      <view class="section-title">
-        <view class="h2">趋势分析</view>
-        <text class="muted trend-label">近 7 天</text>
-      </view>
-      <view class="section compact-top">
-        <view class="card chart-card">
-          <view class="trend-title">血压与睡眠变化</view>
-          <view class="muted trend-copy">{{ trendCopy }}</view>
-          <view class="chart">
-            <view class="line orange"></view>
-            <view class="line greenline"></view>
-          </view>
-        </view>
-      </view>
-
-      <view class="section-title">
-        <view class="h2">异常记录汇总</view>
-        <text class="muted trend-label">本周 {{ reportAnomalies.length }} 条</text>
-      </view>
-      <view class="list flush section-gap">
-        <AlertCard
-          v-for="item in reportAnomalies"
-          :key="item.id"
-          :alert="anomalyAsAlert(item)"
-          @click="openAnomaly(item)"
-        />
-        <FamilyEmptyState
-          v-if="!reportAnomalies.length"
-          icon="🌿"
-          title="本周暂无异常"
-          description="老人整体状态平稳，可继续保持日常关怀节奏。"
-        />
-      </view>
-
-      <view class="section">
-        <view class="hero green advice-card">
-          <view class="row row-top">
-            <view class="iconbox">💬</view>
-            <view>
-              <view class="advice-title">给家人的建议</view>
-              <view class="muted advice-copy">{{ report.familyAdvice }}</view>
-            </view>
-          </view>
-          <view class="grid2 action-row">
-            <BigButton tone="green" @click="openContact">📹 发起视频</BigButton>
-            <BigButton tone="white" @click="openContact">☎ 电话关怀</BigButton>
-          </view>
-        </view>
-      </view>
     </template>
-
     <view v-else class="section">
-      <FamilyEmptyState
-        icon="📋"
-        title="暂无健康报告"
-        description="该老人还没有可查看的报告，绑定设备后会自动生成。"
-        action-label="返回守护首页"
-        @action="goHome('/pages/family/guardian/index')"
-      />
-    </view></view>
+      <view class="feedback-panel">该长辈在此时间范围内暂无健康报告。</view>
+    </view>
+    <view class="section-title"><view class="h2">近期变化</view></view>
+    <view class="section compact responsive-columns">
+      <TrendPanel :elder-id="elderId" metric="bloodPressure" :days="days" />
+      <TrendPanel :elder-id="elderId" metric="sleep" :days="days" />
+    </view>
+    <view class="section-title">
+      <view class="h2">异常记录</view>
+      <text class="data-source">{{ reportAnomalies.length }} 条</text>
+    </view>
+    <view class="list">
+      <button
+        v-for="item in reportAnomalies"
+        :key="item.id"
+        class="item"
+        @click="openAnomaly(item.alertId)"
+      >
+        <view class="iconbox warm"><AppIcon name="alert" /></view>
+        <view class="item-main">
+          <view class="item-title">{{ item.title }}</view>
+          <view class="desc">{{ item.description }}</view>
+        </view>
+        <StatusTag :label="item.tag" :tone="item.tagTone" />
+      </button>
+      <view v-if="!reportAnomalies.length" class="feedback-panel">
+        暂无异常记录，继续保持日常关怀。
+      </view>
+    </view>
+    <view v-if="report" class="section">
+      <view class="feedback-panel">
+        <view class="h2">下一步，可以这样关心</view>
+        <view class="desc">{{ report.familyAdvice }}</view>
+        <BigButton
+          tone="white"
+          style="margin-top: 20px"
+          @click="goRoute('/pages/family/care/index')"
+        >
+          <AppIcon name="care" />
+          去关怀
+        </BigButton>
+      </view>
+    </view>
+  </AppPage>
 </template>
-
-<script setup lang="ts">
-import { onShow } from '@dcloudio/uni-app'
-import { computed } from 'vue'
-import BigButton from '@/components/BigButton.vue'
-import HeroTitle from '@/components/HeroTitle.vue'
-import HealthMetricCard from '@/components/HealthMetricCard.vue'
-import YuanMascot from '@/components/YuanMascot.vue'
-import AlertCard from '@/components/family/AlertCard.vue'
-import FamilyEmptyState from '@/components/family/FamilyEmptyState.vue'
-import FamilyPageHeader from '@/components/family/FamilyPageHeader.vue'
-import FamilyPageSkeleton from '@/components/family/FamilyPageSkeleton.vue'
-import { useFamilyElderContext } from '@/composables/useFamilyElderContext'
-import { useHealthStore } from '@/stores/health'
-import { goDetail, goHome, goMainTab } from '@/utils/navigate'
-import type { AlertEvent, ReportAnomaly } from '@/types/family'
-
-const health = useHealthStore()
-const { switching, report, reportAnomalies, alertStore, elderId, reportStore } = useFamilyElderContext()
-
-onShow(() => {
-  void reportStore.hydrate(elderId.value, health.reportTab, { force: false })
-})
-
-const periodPill = computed(() => {
-  if (health.reportTab === 'day') return '🛡️ 今日整体平稳'
-  if (health.reportTab === 'month') return '🛡️ 本月整体平稳'
-  return '🛡️ 本周整体平稳'
-})
-
-const periodLabel = computed(() => {
-  if (health.reportTab === 'day') return '今日'
-  if (health.reportTab === 'month') return '本月'
-  return '本周'
-})
-
-const trendCopy = computed(() =>
-  report.value?.deviceStatusLabel === '离线'
-    ? '设备离线，趋势数据暂不可用'
-    : '今天血压略高，睡眠稳定提升'
-)
-
-function metricIcon(key: string) {
-  const map: Record<string, string> = {
-    heartRate: '❤️',
-    breathRate: '🌬️',
-    bloodPressure: '💧',
-    sleep: '🌙'
-  }
-  return map[key] ?? '📊'
-}
-
-function anomalyAsAlert(item: ReportAnomaly): AlertEvent {
-  return {
-    id: item.id,
-    elderId: item.elderId,
-    type: 'summary',
-    level: 'medium',
-    icon: item.icon,
-    title: item.title,
-    description: item.description,
-    detail: item.description,
-    timeLabel: '本周',
-    status: item.tag === '已处理' ? 'resolved' : 'pending',
-    statusLabel: item.tag,
-    tag: item.tag,
-    tagTone: item.tagTone,
-    timeline: [],
-    suggestion: ''
-  }
-}
-
-function openAnomaly(item: ReportAnomaly) {
-  if (item.alertId) {
-    alertStore.setActiveAlert(item.alertId)
-    goDetail('/pkg-family-detail/family/alert/index')
-    return
-  }
-  toast(item.title)
-}
-
-function go(url: string) {
-  goMainTab(url)
-}
-
-function openContact() {
-  goDetail('/pkg-elder-detail/contact-detail/index')
-}
-
-function toast(title: string) {
-  uni.showToast({ title: `${title}（演示）`, icon: 'none' })
-}
-</script>
-
-<style scoped lang="scss">
-.main {
-  flex: 1;
-  min-width: 0;
-}
-
-
-.score-ring {
-  width: 88px;
-  height: 88px;
-  border-radius: 28px;
-  background: #fff;
-  border: 1px solid #d6e8d4;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.score-num {
-  font-size: 28px;
-  font-weight: 1000;
-  color: #315943;
-  line-height: 1;
-}
-
-.score-label {
-  margin-top: 4px;
-  font-size: 12px;
-  font-weight: 1000;
-  color: #7a6f5d;
-}
-
-.mini-stats {
-  margin-top: 16px;
-}
-
-.stat-card {
-  padding: 8px;
-  text-align: center;
-}
-
-.stat-num {
-  display: block;
-  margin-top: 6px;
-  font-size: 18px;
-  font-weight: 1000;
-  color: #243a31;
-}
-
-.stat-num.warm {
-  color: #c9822c;
-}
-
-.stat-num.small {
-  font-size: 16px;
-}
-
-.summary-card,
-.advice-card {
-  padding: 16px;
-  border-radius: 28px;
-}
-
-.mascot-box {
-  width: 48px;
-  height: 48px;
-  overflow: hidden;
-}
-
-.summary-title,
-.advice-title {
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.summary-copy,
-.advice-copy {
-  margin-top: 6px;
-  line-height: 1.5;
-  font-size: 14px;
-}
-
-.compact-top {
+<style scoped>
+.compact {
   margin-top: 0;
 }
-
-.trend-label {
-  font-weight: 1000;
+.report-heading {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.report-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: #b9dbc9;
+  margin-bottom: 12px;
+}
+.report-copy {
+  font-size: 16px;
+  color: var(--hero-ink);
+  margin-top: 12px;
+}
+.report-score {
+  text-align: center;
+  flex-shrink: 0;
+  color: var(--hero-ink);
   font-size: 14px;
 }
-
-.chart-card {
-  padding: 16px;
+.report-score > text {
+  font-size: 56px;
+  line-height: 1.1;
+  letter-spacing: -0.06em;
+  color: white;
 }
-
-.trend-title {
-  font-size: 18px;
-  font-weight: 900;
+.report-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #ffffff26;
+  color: var(--hero-ink);
+  font-size: 14px;
 }
-
-.trend-copy {
-  font-size: 13px;
-  margin-top: 4px;
+.report-stats text {
+  font-size: 30px;
+  color: white;
+  letter-spacing: -0.03em;
 }
-
-.chart {
-  position: relative;
-  height: 146px;
-  margin-top: 8px;
+.report-stats small {
+  font-size: 16px;
+  margin-left: 3px;
 }
-
-.line {
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  height: 4px;
-  border-radius: 999px;
+.report-interpretation {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 22px;
+  border-radius: 20px;
+  background: var(--warm-soft);
 }
-
-.orange {
-  top: 58px;
-  background: #c9822c;
-  transform: skewY(-8deg);
+@media (max-width: 767px) {
+  .responsive-columns > view + view {
+    margin-top: 20px;
+  }
 }
-
-.greenline {
-  top: 92px;
-  background: #7ab66b;
-  transform: skewY(-3deg);
-}
-
-.section-gap {
-  padding: 0 24px;
-}
-
-.action-row {
-  margin-top: 16px;
+@media (max-width: 359px) {
+  .report-heading {
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .report-score > text {
+    font-size: 44px;
+  }
 }
 </style>

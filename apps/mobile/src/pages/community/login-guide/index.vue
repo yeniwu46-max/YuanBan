@@ -1,6 +1,6 @@
 <template>
-  <view class="app-page login-page community-page">
-    <AppHeader label="新手引导" title="社区服务，从这 3 步开始" back="/pages/login-profile/index" />
+  <AppPage class=" login-page community-page">
+    <AppHeader title="社区使用指南" back="/pages/login-profile/index" />
     <view class="list guide-list">
       <ListItem icon="⌂" title="看服务工作台" desc="掌握今日工单、紧急告警与运营概览。" :chev="false" />
       <ListItem icon="▤" icon-tone="warm" title="处理工单" desc="按优先级处理 SOS、上门与设备类工单。" :chev="false" />
@@ -12,7 +12,7 @@
           <YuanMascot size="small" />
           <view>
             <view class="h2 guide-title">小鼋会帮您高效派单</view>
-            <view class="muted guide-copy">紧急工单优先提醒，处理结果会同步给子女端。</view>
+
           </view>
         </view>
       </view>
@@ -20,7 +20,7 @@
     <view class="section">
       <BigButton @click="enter">进入服务工作台 ⌂</BigButton>
     </view>
-  </view>
+  </AppPage>
 </template>
 
 <script setup lang="ts">

@@ -1,28 +1,33 @@
 @import './styles/motion.scss';
 
-$bg: #f7f2e8;
-$page: #fffdf7;
-$text: #243a31;
-$muted: #7a6f5d;
-$green: #7ab66b;
-$green-soft: #e7f3df;
-$green-border: #cbe2bf;
-$warm: #e8a64e;
-$warm-soft: #fff7e8;
-$warm-border: #f0d8a8;
-$red: #e56b5f;
-$red-soft: #fff1ec;
-$red-border: #f0b5ae;
-$gray-soft: #f7faf1;
-$gray-border: #dce9cf;
-$surface-border: #efe3ce;
-$shadow: 0 4px 12px rgba(63, 52, 29, 0.05);
+$bg: var(--bg);
+$page: var(--surface);
+$text: var(--text);
+$muted: var(--muted);
+$green: var(--primary);
+$green-soft: var(--green-soft);
+$green-border: var(--line);
+$warm: var(--warm);
+$warm-soft: var(--warm-soft);
+$warm-border: var(--line);
+$red: var(--red);
+$red-soft: var(--red-soft);
+$red-border: var(--line);
+$gray-soft: var(--bg);
+$gray-border: var(--line);
+$surface-border: var(--line);
+$shadow: var(--shadow);
 
 page {
   min-height: 100%;
   background: $page;
   color: $text;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+body {
+  margin: 0;
+  background: $bg;
 }
 
 button {
@@ -42,12 +47,27 @@ button::after {
 }
 
 .app-page {
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+  box-sizing: border-box;
   min-height: 100vh;
   padding-bottom: calc(122px + env(safe-area-inset-bottom));
-  background:
-    radial-gradient(circle at 18% 2%, rgba(151, 201, 159, 0.24), transparent 30%),
-    radial-gradient(circle at 86% 4%, rgba(255, 194, 103, 0.18), transparent 28%),
-    $page;
+  background: $bg;
+}
+
+@media screen and (min-width: 768px) {
+  page {
+    min-height: 100vh;
+    background: $bg;
+  }
+
+  .app-page {
+    min-height: 100vh;
+    border-left: 1px solid rgba(203, 226, 191, 0.55);
+    border-right: 1px solid rgba(203, 226, 191, 0.55);
+    box-shadow: 0 0 48px rgba(63, 52, 29, 0.08);
+  }
 }
 
 .login-page {
@@ -208,7 +228,7 @@ button::after {
   background: rgba(255, 255, 255, 0.78);
   font-size: 14px;
   font-weight: 900;
-  color: #315943;
+  color: var(--primary);
   white-space: nowrap;
 }
 
@@ -221,7 +241,7 @@ button::after {
 }
 
 .link {
-  color: #5b8b62;
+  color: var(--primary);
   font-size: 15px;
   font-weight: 900;
 }
@@ -290,13 +310,13 @@ button::after {
   height: 48px;
   border-radius: 50%;
   background: #fff;
-  border: 1px solid #e9e0d0;
+  border: 1px solid var(--line);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
-  color: #446a57;
+  color: var(--primary);
   flex-shrink: 0;
   @include pressable-sm;
 }
@@ -305,8 +325,8 @@ button::after {
   width: 44px;
   height: 44px;
   border-radius: 16px;
-  background: #e6f2df;
-  color: #5b8b62;
+  background: var(--green-soft);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -325,7 +345,7 @@ button::after {
 }
 
 .iconbox.gray {
-  background: #f4efe5;
+  background: var(--green-soft);
   color: #8e816e;
 }
 
@@ -385,7 +405,7 @@ button::after {
   margin-top: 8px;
   font-size: 14px;
   font-weight: 900;
-  color: #5b8b62;
+  color: var(--primary);
   white-space: nowrap;
 }
 
@@ -428,8 +448,8 @@ button::after {
 
 .btnwhite {
   background: #fff;
-  color: #315943;
-  border: 1px solid #d6e8d4;
+  color: var(--primary);
+  border: 1px solid var(--line);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
 }
 
@@ -452,7 +472,7 @@ button::after {
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   border-radius: 22px;
-  background: #f4efe5;
+  background: var(--green-soft);
   padding: 6px;
   margin-bottom: 16px;
 }
@@ -468,7 +488,7 @@ button::after {
 
 .tabbar-btn.active {
   background: #fff;
-  color: #315943;
+  color: var(--primary);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: background-color 150ms $ease-press, color 150ms $ease-press;
 }
@@ -492,8 +512,8 @@ button::after {
 
 .mood.active {
   background: $green-soft;
-  border-color: #9fcb91;
-  color: #315943;
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .mood-icon {
@@ -504,20 +524,6 @@ button::after {
   text-align: center;
 }
 
-@media (min-width: 520px) {
-  page {
-    background: $bg;
-  }
-
-  .app-page {
-    width: 390px;
-    min-height: 844px;
-    margin: 20px auto;
-    border-radius: 42px;
-    overflow: hidden;
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.22);
-  }
-}
 
 .family-page,
 .community-page {
@@ -633,3 +639,5 @@ button.row-card {
 .quick-card {
   @include pressable;
 }
+
+@import './styles/forest.scss';

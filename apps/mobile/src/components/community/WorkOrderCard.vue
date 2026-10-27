@@ -1,6 +1,6 @@
 <template>
   <button class="row-card order-card" @click="$emit('click')">
-    <view class="iconbox" :class="toneClass">{{ order.icon }}</view>
+    <view class="iconbox" :class="toneClass"><AppIcon :name="order.icon" /></view>
     <view class="row-main">
       <view class="row-title">{{ order.title }}</view>
       <view class="row-desc">{{ order.description }}</view>
@@ -8,7 +8,7 @@
     </view>
     <view class="row-end">
       <StatusTag :label="order.tag" :tone="tagTone" />
-      <text class="chev">›</text>
+      <AppIcon name="chevron" />
     </view>
   </button>
 </template>
@@ -45,8 +45,8 @@ const tagTone = computed(() => {
 .code {
   display: block;
   margin-top: 4px;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: var(--helper-size, 16px);
+  font-weight: 600;
   color: #9b8b71;
 }
 

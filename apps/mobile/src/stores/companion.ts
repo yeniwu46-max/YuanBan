@@ -37,7 +37,7 @@ export const useCompanionStore = defineStore('companion', {
       {
         id: 'welcome',
         role: 'assistant' as const,
-        text: '我在呢。您可以和我说说心情，也可以问问今天身体情况。'
+        text: '想聊些什么？'
       }
     ] as CompanionChatMessage[],
     suggestedActions: [] as CompanionSuggestedAction[],

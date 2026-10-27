@@ -5,7 +5,7 @@
     :disabled="completing"
     @click="$emit('click')"
   >
-    <view class="iconbox" :class="task.iconTone">{{ task.icon }}</view>
+    <view class="iconbox" :class="task.iconTone"><AppIcon :name="task.icon" /></view>
     <view class="item-main">
       <view class="item-title">{{ task.title }}</view>
       <view class="desc">{{ task.description }}</view>

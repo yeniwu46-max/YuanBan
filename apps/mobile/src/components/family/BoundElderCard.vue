@@ -1,7 +1,7 @@
 <template>
   <view class="card bound-card" :class="{ active: active }">
     <button class="row select-row" @click="$emit('select')">
-      <view class="iconbox">👤</view>
+      <view class="iconbox"><AppIcon name="👤" /></view>
       <view class="item-main">
         <view class="elder-name">{{ elder.name }}</view>
         <view class="muted elder-desc">
@@ -12,8 +12,8 @@
     </button>
     <view class="grid3 actions">
       <BigButton tone="white" class="action-btn" @click.stop="$emit('bind-code')">▣ 绑定码</BigButton>
-      <BigButton tone="warm" class="action-btn" @click.stop="$emit('permission')">⚙ 权限</BigButton>
-      <BigButton tone="white" class="action-btn" @click.stop="$emit('contact')">☎ 联系</BigButton>
+      <BigButton tone="warm" class="action-btn" @click.stop="$emit('permission')">权限</BigButton>
+      <BigButton tone="white" class="action-btn" @click.stop="$emit('contact')">联系</BigButton>
     </view>
   </view>
 </template>
@@ -64,13 +64,13 @@ const locationShort = computed(() => {
 
 .elder-name {
   font-size: 20px;
-  font-weight: 1000;
-  color: #243a31;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .elder-desc {
   margin-top: 4px;
-  font-size: 14px;
+  font-size: var(--helper-size, 16px);
   line-height: 1.35;
 }
 
@@ -80,6 +80,6 @@ const locationShort = computed(() => {
 
 .action-btn {
   min-height: 48px;
-  font-size: 14px;
+  font-size: var(--helper-size, 16px);
 }
 </style>

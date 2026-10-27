@@ -1,11 +1,11 @@
-﻿<template>
-  <view class="app-page community-page">
-    <CommunityPageHeader label="社区端 · 活动管理" title="银龄活动" />
+<template>
+  <AppPage class=" community-page">
+    <CommunityPageHeader title="银龄活动" />
 
     <view class="section">
       <StatsHero
         pill="📅 今日活动总览"
-        :headline="`今日 ${overview.todayCount} 场活动，共 ${overview.totalEnrolled} 位老人报名。`"
+        :headline="`今日 ${overview.todayCount} 场活动`"
         :subtitle="`${overview.inProgressCount} 场进行中 · ${overview.pendingCheckInCount} 人待签到 · ${overview.endedCount} 场已结束`"
         :badge-value="overview.totalEnrolled"
         badge-label="报名人数"
@@ -27,7 +27,7 @@
     <view class="section compact-top" v-if="featured">
       <view class="hero warm featured">
         <view class="row">
-          <view class="iconbox warm">☯</view>
+          <view class="iconbox warm"><AppIcon name="☯" /></view>
           <view class="flex1">
             <view class="feat-title">{{ featured.title }}</view>
             <view class="muted">{{ featured.description }}</view>
@@ -41,18 +41,20 @@
         </view>
         <view class="grid2 action-row">
           <BigButton tone="green" @click="focusCheckIn">▣ 签到核销</BigButton>
-          <BigButton tone="white" @click="focusCheckIn">👥 报名名单</BigButton>
+          <BigButton tone="white" @click="focusCheckIn">报名名单</BigButton>
         </view>
       </view>
     </view>
 
     <view class="section-title">
       <view class="h2">活动列表</view>
-      <button class="link" @click="toast('筛选')">筛选 ☰</button>
+      <button class="link" :aria-pressed="onlyActive" @click="onlyActive=!onlyActive">{{onlyActive?'显示全部':'仅看进行中'}}</button>
     </view>
+    <view class="section" style="margin-bottom:16px"><WdInput v-model="query" placeholder="搜索活动名称或地点" clearable/></view>
+    <view v-if="!activities.length" class="section"><view class="feedback-panel">没有匹配的活动，请调整搜索或筛选。</view></view>
     <view class="list flush section-gap">
       <button v-for="act in activities" :key="act.id" class="row-card static-card" @click="openActivity(act.id)">
-        <view class="iconbox" :class="act.iconTone">{{ act.icon }}</view>
+        <view class="iconbox" :class="act.iconTone"><AppIcon :name="act.icon" /></view>
         <view class="row-main">
           <view class="row-title">{{ act.title }}</view>
           <view class="row-desc">{{ act.description }}</view>
@@ -70,7 +72,7 @@
         <view v-for="(c, idx) in checkIns" :key="c.id" class="checkin-row">
           <view v-if="idx > 0" class="divider" />
           <view class="row">
-            <view class="iconbox" :class="c.tagTone === 'warm' ? 'warm' : ''">{{ c.tag === '已签到' ? '✓' : '👤' }}</view>
+            <view class="iconbox" :class="c.tagTone === 'warm' ? 'warm' : ''"><AppIcon :name="c.tag === '已签到' ? 'check' : 'users'" /></view>
             <view class="flex1">
               <view class="duty-name">{{ c.elderName }}</view>
               <view class="muted">{{ c.detail }}</view>
@@ -84,14 +86,14 @@
     <view class="section">
       <view class="hero gray">
         <view class="row row-top">
-          <view class="iconbox">💬</view>
+          <view class="iconbox"><AppIcon name="💬" /></view>
           <view class="flex1">
             <view class="batch-title">活动通知模板</view>
             <view class="muted">「李奶奶已报名今日太极体验课，活动结束后将同步参与记录和鼋气罐积分。」</view>
           </view>
         </view>
         <view class="grid2 action-row">
-          <BigButton tone="green" @click="toast('通知家属')">➤ 通知家属</BigButton>
+          <BigButton tone="green" @click="toast('通知家属')">通知家属</BigButton>
           <BigButton tone="white" @click="toast('修改模板')">✎ 修改模板</BigButton>
         </view>
       </view>
@@ -103,22 +105,23 @@
     <view class="section compact-top">
       <view class="grid2">
         <button class="quick-card" @click="toast('生成服务记录')">
-          <view class="iconbox">▤</view>
+          <view class="iconbox"><AppIcon name="▤" /></view>
           <text class="qc-title">生成服务记录</text>
           <text class="muted qc-desc">写入老人服务档案</text>
         </button>
         <button class="quick-card" @click="toast('发放鼋气罐')">
-          <view class="iconbox warm">🎁</view>
+          <view class="iconbox warm"><AppIcon name="🎁" /></view>
           <text class="qc-title">发放鼋气罐</text>
           <text class="muted qc-desc">参与老人 +20 积分</text>
         </button>
       </view>
-    </view></view>
+    </view></AppPage>
 </template>
 
 <script setup lang="ts">
 import { onShow } from '@dcloudio/uni-app'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import WdInput from 'wot-design-uni/components/wd-input/wd-input.vue'
 import BigButton from '@/components/BigButton.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import CommunityPageHeader from '@/components/community/CommunityPageHeader.vue'
@@ -130,7 +133,8 @@ import { goMainTab } from '@/utils/navigate'
 const activityStore = useCommunityActivityStore()
 
 const overview = computed(() => activityStore.overview)
-const activities = computed(() => activityStore.activities)
+const query=ref(''), onlyActive=ref(false)
+const activities = computed(() => activityStore.activities.filter(a => (a.title+' '+a.description).includes(query.value.trim()) && (!onlyActive.value || a.tag.includes('进行'))))
 const checkIns = computed(() => activityStore.checkIns)
 const featured = computed(() => activities.value[0])
 
@@ -188,7 +192,7 @@ function openActivity(activityId: string) {
 
 .feat-title {
   font-size: 19px;
-  font-weight: 1000;
+  font-weight: 600;
 }
 
 .mini-stats {
@@ -207,11 +211,11 @@ function openActivity(activityId: string) {
   display: block;
   margin-top: 4px;
   font-size: 21px;
-  font-weight: 1000;
+  font-weight: 600;
 }
 
 .stat-mini .num.warm {
-  color: #c9822c;
+  color: var(--warm);
 }
 
 .static-card {
@@ -221,7 +225,7 @@ function openActivity(activityId: string) {
   align-items: center;
   gap: 12px;
   background: white;
-  border: 1px solid #efe3ce;
+  border: 1px solid var(--line);
   border-radius: 24px;
   box-shadow: 0 4px 12px rgba(63, 52, 29, 0.05);
 }
@@ -234,7 +238,7 @@ function openActivity(activityId: string) {
   min-height: 116px;
   border-radius: 24px;
   background: white;
-  border: 1px solid #efe3ce;
+  border: 1px solid var(--line);
   padding: 16px;
   text-align: left;
 }
@@ -242,12 +246,12 @@ function openActivity(activityId: string) {
 .qc-title {
   display: block;
   margin-top: 12px;
-  font-weight: 1000;
+  font-weight: 600;
   font-size: 16px;
 }
 
 .qc-desc {
-  font-size: 13px;
+  font-size: var(--helper-size, 16px);
   margin-top: 4px;
 }
 </style>

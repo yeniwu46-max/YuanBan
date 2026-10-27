@@ -69,8 +69,8 @@ function go(tab: keyof typeof tabRoutes) {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
-  font-weight: 900;
+  font-size: var(--helper-size, 16px);
+  font-weight: 600;
   color: #9a927f;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -87,11 +87,11 @@ function go(tab: keyof typeof tabRoutes) {
 }
 
 .navitem.active {
-  color: #416348;
+  color: var(--primary);
 }
 
 .navitem.active .navicon {
-  background: #e6f2df;
+  background: var(--green-soft);
 }
 
 @media (min-width: 520px) {

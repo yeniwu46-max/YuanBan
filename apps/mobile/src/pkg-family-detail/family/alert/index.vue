@@ -1,7 +1,6 @@
-﻿<template>
-  <view class="app-page family-page">
+<template>
+  <AppPage class=" family-page">
     <AppHeader
-      label="子女端 · 告警处理"
       title="告警详情"
       back="/pages/family/guardian/index"
       compact
@@ -20,7 +19,7 @@
                 nowrap
               />
             </view>
-            <view class="iconbox red alert-icon">{{ alert.icon }}</view>
+            <view class="iconbox red alert-icon"><AppIcon :name="alert.icon" /></view>
           </view>
           <view class="grid3 stats">
             <view class="card stat-card">
@@ -41,8 +40,8 @@
 
       <view class="section">
         <view class="grid2">
-          <BigButton tone="green" @click="openContact">☎ 联系老人</BigButton>
-          <BigButton tone="white" @click="openContact">📹 发起视频</BigButton>
+          <BigButton tone="green" @click="openContact">联系老人</BigButton>
+          <BigButton tone="white" @click="openContact">发起视频</BigButton>
         </view>
       </view>
 
@@ -64,7 +63,7 @@
           <HealthMetricCard :metric="metric('breathRate')" icon="🌬️" />
           <HealthMetricCard :metric="metric('bloodPressure')" icon="💧" />
           <button class="health device-card">
-            <view class="iconbox">📶</view>
+            <view class="iconbox"><AppIcon name="📶" /></view>
             <view class="smalltitle">设备</view>
             <view class="val">
               <text class="num device-num">{{ elder.online ? '在线' : '离线' }}</text>
@@ -86,8 +85,8 @@
             </view>
           </view>
           <view class="grid2 action-row">
-            <BigButton tone="warm" @click="openCare">➤ 发送提醒</BigButton>
-            <BigButton tone="white" @click="openCare">🎙 语音留言</BigButton>
+            <BigButton tone="warm" @click="openCare">发送提醒</BigButton>
+            <BigButton tone="white" @click="openCare">语音留言</BigButton>
           </view>
         </view>
       </view>
@@ -109,15 +108,15 @@
       <view class="section">
         <view class="card result-card">
           <view class="row row-top">
-            <view class="iconbox">📋</view>
+            <view class="iconbox"><AppIcon name="📋" /></view>
             <view>
               <view class="result-title">处理结果</view>
               <view class="muted result-copy">联系老人后，可记录并关闭本次提醒。</view>
             </view>
           </view>
           <view class="grid2 action-row">
-            <BigButton tone="green" @click="handleResolve">✓ 已处理</BigButton>
-            <BigButton tone="white" @click="handlePending">⏳ 稍后处理</BigButton>
+            <BigButton tone="green" @click="handleResolve">已处理</BigButton>
+            <BigButton tone="white" @click="handlePending">稍后处理</BigButton>
           </view>
         </view>
       </view>
@@ -132,7 +131,7 @@
         @action="go('/pages/family/guardian/index')"
       />
     </view>
-  </view>
+  </AppPage>
 </template>
 
 <script setup lang="ts">
@@ -264,18 +263,18 @@ function toast(title: string) {
 
 async function handleResolve() {
   if (!alert.value) return
-  await alertStore.resolveAlert(alert.value.id)
+  if (!await alertStore.resolveAlert(alert.value.id)) return
   syncFamilyDerivedState()
   uni.showToast({ title: '已记录处理结果', icon: 'none' })
-  setTimeout(() => goBack('/pages/family/guardian/index'), 300)
+  goBack('/pages/family/guardian/index')
 }
 
 async function handlePending() {
   if (!alert.value) return
-  await alertStore.markPending(alert.value.id)
+  if (!await alertStore.markPending(alert.value.id)) return
   syncFamilyDerivedState()
   uni.showToast({ title: '已标记稍后处理', icon: 'none' })
-  setTimeout(() => goBack('/pages/family/guardian/index'), 300)
+  goBack('/pages/family/guardian/index')
 }
 </script>
 
@@ -307,12 +306,12 @@ async function handlePending() {
   display: block;
   margin-top: 6px;
   font-size: 20px;
-  font-weight: 1000;
-  color: #243a31;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .stat-num.warm {
-  color: #c9822c;
+  color: var(--warm);
 }
 
 .compact-top {
@@ -320,13 +319,13 @@ async function handlePending() {
 }
 
 .status-text {
-  font-weight: 1000;
-  color: #5b8b62;
-  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary);
+  font-size: var(--helper-size, 16px);
 }
 
 .status-text.warm {
-  color: #c9822c;
+  color: var(--warm);
 }
 
 .section-gap {
@@ -356,14 +355,14 @@ async function handlePending() {
 .suggestion-title,
 .result-title {
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .suggestion-copy,
 .result-copy {
   margin-top: 6px;
   line-height: 1.5;
-  font-size: 14px;
+  font-size: var(--helper-size, 16px);
 }
 
 .action-row {

@@ -1,22 +1,17 @@
-﻿<template>
-  <view class="app-page">
-    <AppHeader label="小鼋陪伴" title="今天想聊点什么？" />
+<template>
+  <AppPage class="">
+    <AppHeader title="小鼋陪伴" />
     <view class="section">
-      <view class="hero green">
-        <view class="row row-top">
-          <YuanMascot size="large" heart />
-          <view class="item-main">
-            <view class="pill">陪伴值 {{ companion.points }}</view>
-            <view class="hero-copy text-balance">我在呢，您可以直接和我说话。</view>
-            <view class="muted hero-desc text-keep-all">我会帮您记录心情，也可以帮您联系家人。</view>
+      <AquaHero :state="mascotState" title="我在呢">
+        <view class="pill">陪伴值 {{ companion.points }}</view>
+        <template #footer>
+          <view class="grid2 action-row">
+            <BigButton tone="white" @click="companion.startVoiceChat()"><AppIcon name="mic" />说说话</BigButton>
+            <BigButton tone="white" @click="companion.askHealthSummary()">问健康</BigButton>
           </view>
-        </view>
-        <view class="grid2 action-row">
-          <BigButton @click="companion.startVoiceChat()">和小鼋说话</BigButton>
-          <BigButton tone="white" @click="companion.askHealthSummary()">问身体情况</BigButton>
-        </view>
-        <view v-if="companion.voiceState" class="card feedback">{{ companion.voiceState }}</view>
-      </view>
+          <view v-if="companion.voiceState" class="card feedback" role="status">{{ companion.voiceState }}</view>
+        </template>
+      </AquaHero>
     </view>
 
     <view class="section">
@@ -44,12 +39,14 @@
             placeholder="和小鼋说句话"
             @input="onInput"
             @confirm="send"
+            @focus="inputFocused=true"
+            @blur="inputFocused=false"
           />
           <button class="send-btn" :disabled="companion.loading" @click="send">
             {{ companion.loading ? '...' : '发送' }}
           </button>
         </view>
-        <view v-if="companion.aiError" class="muted error-copy">云端暂不可用，已使用本地兜底回应。</view>
+        <view v-if="companion.aiError" class="muted error-copy">云端不可用，当前为本地回复。</view>
       </view>
     </view>
 
@@ -61,9 +58,9 @@
           class="quick suggestion-action"
           @click="openAction(action.route)"
         >
-          <view class="iconbox" :class="{ warm: companion.safetyLevel !== 'normal' }">{{ action.key === 'sos' ? 'SOS' : '去' }}</view>
+          <view class="iconbox" :class="{ warm: companion.safetyLevel !== 'normal' }"><AppIcon :name="action.key === 'sos' ? 'siren' : 'arrow'" /></view>
           <view class="quick-title">{{ action.label }}</view>
-          <view class="muted mini-copy">{{ companion.safetyLevel === 'emergency' ? '优先处理安全' : '小鼋建议' }}</view>
+
         </button>
       </view>
     </view>
@@ -75,28 +72,28 @@
     <view class="section compact">
       <view class="grid4">
         <button v-for="mood in moods" :key="mood.name" class="mood" :class="{ active: companion.selectedMood === mood.name, 'mood--loading': companion.moodLoading && companion.selectedMood === mood.name }" :disabled="companion.moodLoading" @click="companion.setMood(mood.name)">
-          <text class="mood-icon">{{ mood.icon }}</text>
+          <text class="mood-icon"><AppIcon :name="mood.icon" /></text>
           <text class="mood-label">{{ mood.name }}</text>
         </button>
       </view>
     </view>
     <view class="section">
       <view class="grid2">
-        <button class="quick" @click="go('/pkg-elder-detail/family/index')"><view class="iconbox warm">联</view><view class="quick-title">联系家人</view><view class="muted mini-copy">给儿女打电话</view></button>
-        <button class="quick" @click="companion.playFamilyMessage()"><view class="iconbox">信</view><view class="quick-title">家人留言</view><view class="muted mini-copy">听听新消息</view></button>
+        <button class="quick" @click="go('/pkg-elder-detail/family/index')"><view class="iconbox warm"><AppIcon name="联" /></view><view class="quick-title">联系家人</view></button>
+        <button class="quick" @click="companion.playFamilyMessage()"><view class="iconbox"><AppIcon name="信" /></view><view class="quick-title">家人留言</view></button>
       </view>
     </view>
     <view class="section">
       <button class="card yuanqi-card" @click="go('/pkg-elder-detail/yuanqi/index')">
         <view class="between">
           <view class="row">
-            <view class="iconbox warm">罐</view>
+            <view class="iconbox warm"><AppIcon name="罐" /></view>
             <view>
               <view class="h2 yuanqi-title">鼋气罐</view>
               <view class="muted yuanqi-copy">今天还差 {{ companion.unfinishedTasks.length }} 个小任务</view>
             </view>
           </view>
-          <text class="chev">›</text>
+          <AppIcon name="chevron" />
         </view>
         <view class="hero warm progress-card">
           <view class="between"><text class="progress-title">今日进度</text><text class="progress-num">{{ companion.todayDone }} / {{ companion.todayTotal }}</text></view>
@@ -106,19 +103,32 @@
     </view>
     <view v-if="companion.messageState" class="section">
       <view class="card feedback">{{ companion.messageState }}</view>
-    </view></view>
+    </view></AppPage>
 </template>
 
 <script setup lang="ts">
+import { computed, ref as vueRef } from 'vue'
+const inputFocused = vueRef(false)
 import AppHeader from '@/components/AppHeader.vue'
+import AquaHero from '@/components/AquaHero.vue'
 import BigButton from '@/components/BigButton.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import YuanMascot from '@/components/YuanMascot.vue'
 import { useCompanionStore } from '@/stores/companion'
 import { goDetail, goFromCompanionAction } from '@/utils/navigate'
 import type { CompanionScene } from '@/services/companionService'
+import type { MascotState } from '@/types/presentation'
 
 const companion = useCompanionStore()
+const mascotState = computed<MascotState>(() => {
+  if (companion.safetyLevel === 'emergency') return 'reminder'
+  if (companion.loading) return 'thinking'
+  if (inputFocused.value) return 'listening'
+  if (['想家', '低落'].includes(companion.selectedMood)) return 'caring'
+  if (companion.safetyLevel === 'attention') return 'reminder'
+  if (companion.selectedMood === '开心') return 'encouraging'
+  return 'greeting'
+})
 const moods = [
   { icon: '安', name: '安心' },
   { icon: '乐', name: '开心' },
@@ -158,7 +168,7 @@ function openAction(route?: string | null) {
   margin-top: 12px;
   font-size: 21px;
   line-height: 1.35;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .hero-desc {
@@ -173,8 +183,8 @@ function openAction(route?: string | null) {
 .feedback {
   margin-top: 12px;
   padding: 12px 14px;
-  color: #315943;
-  font-weight: 900;
+  color: var(--primary);
+  font-weight: 600;
 }
 
 .chat-card {
@@ -198,16 +208,16 @@ function openAction(route?: string | null) {
 .chat-bubble {
   max-width: 82%;
   border-radius: 20px;
-  background: #f7f2e8;
+  background: var(--bg);
   padding: 12px 14px;
   line-height: 1.45;
-  font-size: 16px;
-  color: #243a31;
-  font-weight: 800;
+  font-size: var(--body-size);
+  color: var(--text);
+  font-weight: 600;
 }
 
 .chat-row.user .chat-bubble {
-  background: #315943;
+  background: var(--primary);
   color: white;
 }
 
@@ -219,14 +229,14 @@ function openAction(route?: string | null) {
 }
 
 .prompt {
-  min-height: 38px;
+  min-height: 48px;
   border-radius: 18px;
-  background: #f7f2e8;
-  border: 1px solid #efe3ce;
+  background: var(--bg);
+  border: 1px solid var(--line);
   padding: 0 12px;
-  color: #315943;
-  font-weight: 900;
-  font-size: 13px;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: var(--helper-size, 16px);
   white-space: nowrap;
   @include pressable-sm;
 }
@@ -243,23 +253,24 @@ function openAction(route?: string | null) {
 
 .chat-input {
   flex: 1;
-  height: 46px;
+  min-width: 0;
+  height: 56px;
   border-radius: 20px;
-  background: #fffdf7;
-  border: 1px solid #efe3ce;
+  background: var(--bg);
+  border: 1px solid var(--line);
   padding: 0 14px;
   font-size: 16px;
-  color: #243a31;
+  color: var(--text);
 }
 
 .send-btn {
   width: 72px;
-  height: 46px;
+  height: 56px;
   border-radius: 20px;
-  background: #315943;
+  background: var(--primary);
   color: white;
-  font-size: 15px;
-  font-weight: 1000;
+  font-size: var(--helper-size, 16px);
+  font-weight: 600;
   @include pressable-sm;
 }
 
@@ -270,11 +281,11 @@ function openAction(route?: string | null) {
 
 .error-copy {
   margin-top: 10px;
-  font-size: 13px;
+  font-size: var(--helper-size, 16px);
 }
 
 .mood-now {
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .mood {
@@ -300,15 +311,15 @@ function openAction(route?: string | null) {
   background: rgba(255, 255, 255, 0.78);
   font-size: 34px;
   line-height: 1;
-  color: #315943;
+  color: var(--primary);
 }
 
 .mood-label {
   display: block;
   width: 100%;
   line-height: 1.1;
-  font-size: 14px;
-  font-weight: 1000;
+  font-size: var(--helper-size, 16px);
+  font-weight: 600;
   text-align: center;
   white-space: nowrap;
 }
@@ -318,7 +329,7 @@ function openAction(route?: string | null) {
 }
 
 .mini-copy {
-  font-size: 13px;
+  font-size: var(--helper-size, 16px);
   margin-top: 5px;
 }
 
@@ -338,7 +349,7 @@ function openAction(route?: string | null) {
 }
 
 .yuanqi-copy {
-  font-size: 14px;
+  font-size: var(--helper-size, 16px);
   margin-top: 3px;
 }
 
@@ -350,10 +361,10 @@ function openAction(route?: string | null) {
 
 .progress-title,
 .progress-num {
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .progress-num {
-  color: #c9822c;
+  color: var(--warm);
 }
 </style>

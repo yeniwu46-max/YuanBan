@@ -42,3 +42,24 @@ venv/
 
 # Local no-docker deploy PIDs
 .deploy/
+
+# Android demo packaging artifacts / local signing key
+apps/android/build/
+apps/android/.local/
+
+# Local previews, generated bundles and private reporting material
+/.playwright-cli/
+/tmp/
+/apps/mobile/build/
+/output/apk/
+/output/deploy/
+/output/quarterly-report-2026-first/
+/output/**/*.zip
+/output/**/*.tar.gz
+
+# Private signing and authentication material
+*.keystore
+*.jks
+*.pem
+*.key
+*.p12

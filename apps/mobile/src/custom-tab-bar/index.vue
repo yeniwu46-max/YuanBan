@@ -104,8 +104,8 @@ onShow(() => {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
-  font-weight: 900;
+  font-size: var(--helper-size, 16px);
+  font-weight: 600;
   color: #9a927f;
   background: transparent;
   border: none;
@@ -134,18 +134,18 @@ onShow(() => {
 }
 
 .navitem.active {
-  color: #416348;
+  color: var(--primary);
 }
 
 .navitem.active .navicon,
 .navitem.active .navyuan {
-  background: #e6f2df;
+  background: var(--green-soft);
 }
 
 .navitem.center .navyuan {
-  background: #416348;
+  background: var(--primary);
   color: #fff;
-  font-weight: 1000;
+  font-weight: 600;
 }
 
 @media (min-width: 520px) {

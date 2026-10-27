@@ -1,114 +1,78 @@
-<template>
-  <view class="app-page">
-    <AppHeader label="我的身体" :title="detail.title" back="/pages/health/index" compact />
-    <view class="scroll-section">
-      <view class="hero" :class="metric?.status === 'warning' ? 'warm' : metric?.status === 'danger' ? 'red' : 'green'">
-        <view class="between row-top">
-          <view>
-            <view class="pill">{{ statusText }}</view>
-            <view class="metric-value">
-              {{ metric?.value }}
-              <text v-if="metric?.unit" class="metric-unit">{{ metric.unit }}</text>
-            </view>
-            <view class="muted metric-copy">{{ detail.headline }}</view>
-          </view>
-          <view class="iconbox metric-icon">{{ detail.icon }}</view>
-        </view>
-      </view>
-      <view class="hero warm tip">
-        <view class="h2 tip-title">小鼋建议</view>
-        <view class="muted tip-copy">{{ detail.advice }}</view>
-      </view>
-      <view class="section-title flush-title">
-        <view class="h2">{{ detail.trendLabel }}</view>
-        <button class="link" @click="health.playVoiceSummary(`正在播报${detail.title}`)">语音播报</button>
-      </view>
-      <view v-if="health.voiceMessage" class="card feedback">{{ health.voiceMessage }}</view>
-      <view class="list flush">
-        <ListItem
-          v-for="record in detail.records"
-          :key="record.id"
-          icon="记"
-          :title="record.time"
-          :desc="record.value"
-          :tag="record.status === 'warning' ? '关注' : record.status === 'danger' ? '处理' : '正常'"
-          :tag-tone="record.status === 'warning' ? 'warm' : record.status === 'danger' ? 'red' : 'normal'"
-          :chev="false"
-        />
-      </view>
-    </view>
-  </view>
-</template>
-
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import AppHeader from '@/components/AppHeader.vue'
-import ListItem from '@/components/ListItem.vue'
+import TrendPanel from '@/components/TrendPanel.vue'
+import { useElderContext } from '@/composables/useElderContext'
 import { useHealthStore } from '@/stores/health'
+import { metricPresentation } from '@/utils/trends'
+import { useApiMode } from '@/config/apiMode'
 import type { HealthMetric } from '@/types/elder'
-
-const health = useHealthStore()
+const health = useHealthStore(),
+  { elderId } = useElderContext()
 const activeKey = ref<HealthMetric['key']>('heartRate')
 const metric = computed(() => health.metricByKey(activeKey.value))
-const detail = computed(() => health.metricDetail(activeKey.value) ?? health.metricDetail('heartRate')!)
-const statusText = computed(() => (metric.value?.status === 'warning' ? '需要关注' : metric.value?.status === 'danger' ? '需要处理' : '状态正常'))
-
+const detail = computed(() => health.metricDetail(activeKey.value))
 onLoad((query) => {
-  const key = query?.key as HealthMetric['key'] | undefined
-  if (key && health.metricByKey(key)) {
-    activeKey.value = key
-  }
+  const key = query?.key as HealthMetric['key']
+  if (key && ['heartRate', 'breathRate', 'bloodPressure', 'sleep', 'fallRisk', 'medicine'].includes(key)) activeKey.value = key
 })
+onShow(() => { void health.hydrate(elderId.value) })
 </script>
-
+<template>
+  <AppPage :data-source="health.dataSource">
+    <AppHeader
+      :title="(metric?.label || '健康') + '详情'"
+      back="/pages/health/index"
+    />
+    <view class="section">
+      <view class="hero green">
+        <view class="row">
+          <AppIcon :name="activeKey" />
+          <text>最新{{ metric?.label }}摘要</text>
+        </view>
+        <view class="metric-value">
+          {{ metric?.value ?? '—' }}
+          <text>{{ metric?.unit }}</text>
+        </view>
+        <view class="desc">{{ metric?.description || '暂无最新摘要' }}</view>
+      </view>
+    </view>
+    <view v-if="metricPresentation[activeKey]" class="section">
+      <TrendPanel :elder-id="elderId" :metric="activeKey" :days="7" />
+    </view>
+    <view v-else class="section">
+      <view class="feedback-panel">
+        <view class="h2">状态记录</view>
+        <view v-if="useApiMode()" class="desc">该指标暂不提供数值趋势，请查看最新状态。</view>
+        <template v-else>
+          <view class="data-source">来源：示例</view>
+          <view v-for="record in detail?.records" :key="record.id" class="record">
+            <text>{{ record.time }}</text>
+            <text>{{ record.value }}</text>
+          </view>
+        </template>
+      </view>
+    </view>
+  </AppPage>
+</template>
 <style scoped>
 .metric-value {
-  margin-top: 16px;
   font-size: 44px;
-  font-weight: 900;
-  color: #243a31;
+  margin: 18px 0;
+  letter-spacing: -0.04em;
 }
-
-.metric-unit {
-  font-size: 14px;
-  color: #7a6f5d;
+.metric-value text {
+  font-size: 16px;
+  color: var(--hero-ink);
+  letter-spacing: 0;
 }
-
-.metric-copy {
-  margin-top: 8px;
-  line-height: 1.5;
-}
-
-.metric-icon {
-  width: 84px;
-  height: 84px;
-  border-radius: 28px;
-  font-size: 34px;
-  font-weight: 900;
-}
-
-.tip {
-  margin-top: 18px;
-}
-
-.tip-title {
-  font-size: 19px;
-}
-
-.tip-copy {
-  margin-top: 8px;
-  line-height: 1.55;
-}
-
-.flush-title {
-  padding: 0;
-}
-
-.feedback {
-  padding: 12px 14px;
-  margin-bottom: 12px;
-  color: #315943;
-  font-weight: 900;
+.record {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 </style>

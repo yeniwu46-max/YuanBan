@@ -1,6 +1,6 @@
-﻿<template>
-  <view class="app-page">
-    <AppHeader label="生活帮手" title="设备详情" back="/pkg-elder-detail/device/index" compact />
+<template>
+  <AppPage class="">
+    <AppHeader title="设备详情" back="/pkg-elder-detail/device/index" compact />
     <view class="scroll-section">
       <view class="hero" :class="deviceInfo?.status === 'warning' ? 'warm' : deviceInfo?.status === 'offline' ? 'gray' : 'green'">
         <view class="between row-top">
@@ -9,7 +9,7 @@
             <view class="device-title">{{ deviceInfo?.name }}</view>
             <view class="muted device-copy">{{ deviceInfo?.location }} · {{ deviceInfo?.online ? '在线' : '离线' }}</view>
           </view>
-          <view class="iconbox device-icon">设</view>
+          <view class="iconbox device-icon"><AppIcon name="设" /></view>
         </view>
         <view class="grid3 stats">
           <view class="card stat-card"><view class="muted">位置</view><view class="h2">{{ deviceInfo?.location }}</view></view>
@@ -28,7 +28,7 @@
         <view class="muted tip-copy">当前为演示状态，暂不连接真实硬件。后续接入设备后会同步电量、在线状态和异常提醒。</view>
       </view>
     </view>
-  </view>
+  </AppPage>
 </template>
 
 <script setup lang="ts">
@@ -65,7 +65,7 @@ function requestHelp() {
   margin-top: 16px;
   font-size: 28px;
   line-height: 1.2;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .device-copy {
@@ -77,7 +77,7 @@ function requestHelp() {
   height: 84px;
   border-radius: 28px;
   font-size: 34px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .stats {
@@ -96,8 +96,8 @@ function requestHelp() {
 .feedback {
   margin-top: 16px;
   padding: 12px 14px;
-  color: #315943;
-  font-weight: 900;
+  color: var(--primary);
+  font-weight: 600;
 }
 
 .tip {

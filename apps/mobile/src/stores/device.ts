@@ -1,10 +1,16 @@
+import { useApiMode } from '@/config/apiMode'
+import { getPrimaryElderId } from '@/utils/authContext'
 import { defineStore } from 'pinia'
 import { getDevices, hydrateDevices } from '@/services/elderService'
 import type { HydrateOptions } from '@/services/requestCache'
 
 export const useDeviceStore = defineStore('device', {
   state: () => ({
-    devices: getDevices(),
+    devices: useApiMode() ? [] as ReturnType<typeof getDevices> : getDevices(),
+    dataSource: (useApiMode() ? 'unknown' : 'mock') as 'api' | 'mock' | 'unknown',
+    error: '',
+    loadedElderId: '',
+    requestVersion: 0,
     operationMessage: '',
     loading: false
   }),
@@ -17,12 +23,22 @@ export const useDeviceStore = defineStore('device', {
   actions: {
     async hydrate(elderId?: string, options: HydrateOptions = {}) {
       this.loading = true
+      this.error = ''
+      const id = elderId ?? getPrimaryElderId()
+      const version = ++this.requestVersion
+      if (useApiMode() && this.loadedElderId !== id) { this.devices = []; this.dataSource = 'unknown' }
       try {
-        this.devices = await hydrateDevices(elderId, options)
+        const rows = await hydrateDevices(id, options)
+        if (version !== this.requestVersion) return
+        this.devices = rows
+        this.loadedElderId = id
+        this.dataSource = useApiMode() ? 'api' : 'mock'
       } catch {
+        if (version !== this.requestVersion) return
+        this.error = '设备更新失败'
         uni.showToast({ title: '设备加载失败', icon: 'none' })
       } finally {
-        this.loading = false
+        if (version === this.requestVersion) this.loading = false
       }
     },
     refreshDevice(id: string) {

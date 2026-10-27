@@ -1,6 +1,6 @@
-﻿<template>
-  <view class="app-page">
-    <AppHeader label="亲情联络" title="联系人详情" back="/pkg-elder-detail/family/index" compact />
+<template>
+  <AppPage class="">
+    <AppHeader title="联系人详情" back="/pkg-elder-detail/family/index" compact />
     <view class="scroll-section">
       <view class="hero green">
         <view class="center">
@@ -25,7 +25,7 @@
       </view>
       <view v-if="elder.contactActionMessage" class="card feedback">{{ elder.contactActionMessage }}</view>
     </view>
-  </view>
+  </AppPage>
 </template>
 
 <script setup lang="ts">
@@ -62,15 +62,15 @@ function act(action: 'phone' | 'video' | 'message') {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #315943;
+  color: var(--primary);
   font-size: 42px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .contact-name {
   margin-top: 16px;
   font-size: 30px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .contact-meta {
@@ -106,7 +106,7 @@ function act(action: 'phone' | 'video' | 'message') {
 .feedback {
   margin-top: 16px;
   padding: 12px 14px;
-  color: #315943;
-  font-weight: 900;
+  color: var(--primary);
+  font-weight: 600;
 }
 </style>

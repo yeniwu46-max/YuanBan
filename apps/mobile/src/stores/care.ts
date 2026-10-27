@@ -22,6 +22,7 @@ export const useCareStore = defineStore('care', {
   },
   actions: {
     async hydrate(elderId: string, options: HydrateOptions = {}) {
+      if (!useApiMode()) return
       this.loading = true
       try {
         const data = await hydrateCareData(elderId, options)
@@ -36,6 +37,7 @@ export const useCareStore = defineStore('care', {
       }
     },
     async hydrateNotificationRules(options: HydrateOptions = {}) {
+      if (!useApiMode()) return
       this.notificationRules = await hydrateNotificationRules(options)
     },
     toggleNotificationRule(key: string) {
@@ -46,6 +48,7 @@ export const useCareStore = defineStore('care', {
     },
     async setNotificationRule(key: string, enabled: boolean) {
       const target = this.notificationRules.find((item) => item.key === key)
+      const previous = target?.enabled
       if (target) {
         target.enabled = enabled
       }
@@ -66,6 +69,7 @@ export const useCareStore = defineStore('care', {
           enabled: r.enabled
         }))
       } catch {
+        if (target && previous !== undefined) target.enabled = previous
         uni.showToast({ title: '通知规则保存失败', icon: 'none' })
       }
     },

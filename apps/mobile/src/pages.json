@@ -1,6 +1,8 @@
 {
+  "easycom": { "autoscan": true, "custom": { "^wd-(.*)": "wot-design-uni/components/wd-$1/wd-$1.vue" } },
   "pages": [
     { "path": "pages/login-welcome/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/ui-preview/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/login-role/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/login-phone/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/login-profile/index", "style": { "navigationStyle": "custom" } },
@@ -84,9 +86,9 @@
   },
   "tabBar": {
     "custom": true,
-    "color": "#9a927f",
-    "selectedColor": "#416348",
-    "backgroundColor": "#FFFDF7",
+    "color": "#536e79",
+    "selectedColor": "#1864b5",
+    "backgroundColor": "#F3FAFB",
     "borderStyle": "white",
     "list": [
       { "pagePath": "pages/tabs/tab0/index", "text": "首页" },
@@ -96,8 +98,9 @@
     ]
   },
   "globalStyle": {
+    "navigationBarTitleText": "鼋伴伴",
     "navigationStyle": "custom",
-    "backgroundColor": "#FFFDF7",
+    "backgroundColor": "#F3FAFB",
     "backgroundTextStyle": "dark"
   }
 }

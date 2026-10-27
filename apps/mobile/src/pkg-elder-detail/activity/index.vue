@@ -1,6 +1,6 @@
-﻿<template>
-  <view class="app-page">
-    <AppHeader label="社区服务" title="活动详情" back="/pages/service/index" compact />
+<template>
+  <AppPage class="">
+    <AppHeader title="活动详情" back="/pages/service/index" compact />
     <view v-if="loading" class="section">
       <view class="card feedback">加载中…</view>
     </view>
@@ -12,7 +12,7 @@
             <view class="activity-title">{{ activity.title }}</view>
             <view class="muted activity-desc">{{ activity.description }}</view>
           </view>
-          <view class="iconbox activity-icon">动</view>
+          <view class="iconbox activity-icon"><AppIcon name="动" /></view>
         </view>
         <view class="grid3 activity-stats">
           <view class="card stat-card"><view class="muted">地点</view><view class="h2">{{ activity.location }}</view></view>
@@ -44,11 +44,12 @@
     <view v-else class="section">
       <view class="card feedback">未找到活动信息</view>
     </view>
-  </view>
+  </AppPage>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useApiMode } from '@/config/apiMode'
 import { onLoad } from '@dcloudio/uni-app'
 import {
   fetchCommunityActivityApi,
@@ -68,6 +69,7 @@ const joined = ref(getActivityJoined())
 const loading = ref(false)
 
 onLoad(async (query) => {
+  if (!useApiMode()) return
   const id = query?.id ? String(query.id) : activity.value?.id
   if (!id) return
   loading.value = true
@@ -84,6 +86,8 @@ onLoad(async (query) => {
         description: `${row.title} · 报名 ${row.enrolled} 人 · ${row.status_label}`
       }
     }
+  } catch {
+    uni.showToast({ title: '活动加载失败，当前展示演示信息', icon: 'none' })
   } finally {
     loading.value = false
   }
@@ -103,7 +107,7 @@ function go(url: string) {
   margin-top: 15px;
   font-size: 29px;
   line-height: 1.15;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .activity-desc {
@@ -116,7 +120,7 @@ function go(url: string) {
   height: 84px;
   border-radius: 28px;
   font-size: 34px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .activity-stats {
@@ -152,7 +156,7 @@ function go(url: string) {
 .feedback {
   margin-top: 14px;
   padding: 12px 14px;
-  color: #315943;
-  font-weight: 900;
+  color: var(--primary);
+  font-weight: 600;
 }
 </style>

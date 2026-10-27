@@ -1,6 +1,6 @@
 <template>
   <view class="hero-title-wrap">
-    <view v-if="pill" class="pill hero-pill" :class="pillClass">{{ pill }}</view>
+    <view v-if="pill" class="pill hero-pill" :class="pillClass">{{ pill.replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, '').trim() }}</view>
     <view
       class="hero-title"
       :class="{
@@ -39,8 +39,8 @@ withDefaults(defineProps<{
 .hero-title {
   margin-top: 15px;
   font-size: 24px;
-  font-weight: 1000;
-  color: #243a31;
+  font-weight: 600;
+  color: var(--text);
   line-height: 1.25;
   letter-spacing: -0.02em;
 }

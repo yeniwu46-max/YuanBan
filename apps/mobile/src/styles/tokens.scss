@@ -1,0 +1,38 @@
+/* Blue-green embrace — shared by business, Wot and locally adapted UI components. */
+:root,
+page {
+  --bg: #f3fafb;
+  --surface: #ffffff;
+  --forest: #123d4a;
+  --primary: #1864b5;
+  --ocean: #2877dd;
+  --jade: #14b6a1;
+  --text: #123d4a;
+  --muted: #536e79;
+  --line: #dcebef;
+  --green-soft: #e4f4f5;
+  --hero-gradient: linear-gradient(118deg, #1760b5 0%, #087c9b 58%, #078573 100%);
+  --action-gradient: linear-gradient(110deg, #216ac2, #087d83);
+  --hero-ink: #eafaff;
+  --gutter: 20px;
+  --warm: #80602b;
+  --warm-soft: #f6edda;
+  --red: #b83838;
+  --red-soft: #fff0ed;
+  --shadow: 0 8px 28px rgba(24, 99, 126, 0.06);
+  --radius: 20px;
+  --body-size: 16px;
+  --helper-size: 16px;
+  --wot-color-theme: #1864b5;
+  --wot-color-success: #087b70;
+  --wot-color-danger: #b83838;
+  --wot-color-warning: #80602b;
+  --wot-color-title: #123d4a;
+  --wot-color-content: #123d4a;
+  --wot-color-secondary: #536e79;
+  --wot-color-border: #dcebef;
+  --wot-button-primary-bg-color: #1864b5;
+  --wot-button-primary-border-color: #1864b5;
+  --wot-switch-checked-color: #1864b5;
+  --wot-input-fs: 18px;
+}

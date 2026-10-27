@@ -60,8 +60,8 @@ function go(url: string) {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
-  font-weight: 900;
+  font-size: var(--helper-size, 16px);
+  font-weight: 600;
   color: #9a927f;
 }
 
@@ -73,15 +73,15 @@ function go(url: string) {
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .navitem.active {
-  color: #416348;
+  color: var(--primary);
 }
 
 .navitem.active .navicon {
-  background: #e6f2df;
+  background: var(--green-soft);
 }
 
 .navcenter {
@@ -90,23 +90,23 @@ function go(url: string) {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  color: #416348;
-  font-size: 13px;
-  font-weight: 900;
+  color: var(--primary);
+  font-size: var(--helper-size, 16px);
+  font-weight: 600;
 }
 
 .navyuan {
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  background: #7ab66b;
-  border: 6px solid #fffdf7;
+  background: var(--primary);
+  border: 6px solid var(--bg);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 600;
   box-shadow: 0 6px 16px rgba(63, 80, 49, 0.18);
 }
 

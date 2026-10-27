@@ -1,6 +1,6 @@
-﻿<template>
-  <view class="app-page family-page">
-    <FamilyPageHeader label="子女端 · 设置中心" title="设置与绑定" />
+<template>
+  <AppPage class=" family-page">
+    <FamilyPageHeader title="设置与绑定" />
 
     <FamilyPageSkeleton v-if="switching" />
 
@@ -8,7 +8,7 @@
       <view class="section">
         <view class="hero green profile-hero">
           <view class="row row-top">
-            <view class="iconbox profile-icon">👤</view>
+            <view class="iconbox profile-icon"><AppIcon name="👤" /></view>
             <view>
               <HeroTitle
                 :pill="`🛡️ 已绑定 ${guardian.elders.length} 位老人`"
@@ -53,12 +53,12 @@
         />
         <view class="grid2 bind-methods">
           <button class="quick bind-card" @click="toast('扫码绑定')">
-            <view class="iconbox">▣</view>
+            <view class="iconbox"><AppIcon name="▣" /></view>
             <text class="bind-title">扫码绑定</text>
             <text class="muted bind-desc">扫描老人端二维码</text>
           </button>
           <button class="quick bind-card" @click="toast('邀请码绑定')">
-            <view class="iconbox warm">🔗</view>
+            <view class="iconbox warm"><AppIcon name="🔗" /></view>
             <text class="bind-title">邀请码绑定</text>
             <text class="muted bind-desc">输入 6 位绑定码</text>
           </button>
@@ -71,12 +71,13 @@
       </view>
       <view class="list flush section-gap">
         <view v-for="rule in careStore.notificationRules" :key="rule.key" class="item rule-item">
-          <view class="iconbox" :class="rule.iconTone">{{ rule.icon }}</view>
+          <view class="iconbox" :class="rule.iconTone"><AppIcon :name="rule.icon" /></view>
           <view class="item-main">
             <view class="item-title">{{ rule.title }}</view>
             <view class="desc">{{ rule.description }}</view>
           </view>
           <PrivacyToggle
+            :label="rule.title"
             :model-value="rule.enabled"
             @update:model-value="(enabled) => careStore.setNotificationRule(rule.key, enabled)"
           />
@@ -86,16 +87,16 @@
       <view class="section">
         <view class="hero warm device-tip">
           <view class="row">
-            <view class="iconbox warm">🔋</view>
+            <view class="iconbox warm"><AppIcon name="🔋" /></view>
             <view class="item-main">
-              <view class="tip-title">SOS 按钮电量偏低</view>
-              <view class="muted tip-copy">当前电量 23%，建议尽快帮老人检查或更换电池。</view>
+              <view class="tip-title">守护设备</view>
+
             </view>
-            <text class="chev">›</text>
+            <AppIcon name="chevron" />
           </view>
           <view class="grid2 action-row">
-            <BigButton tone="warm" @click="toast('提醒家人')">💬 提醒家人</BigButton>
-            <BigButton tone="white" @click="openDevice">📶 查看设备</BigButton>
+
+            <BigButton tone="white" @click="openDevice">查看设备</BigButton>
           </view>
         </view>
       </view>
@@ -106,9 +107,9 @@
       <view class="list flush section-gap">
         <ListItem icon="🔐" title="数据访问权限" desc="查看你能访问哪些老人数据" tag="已授权" @click="openPrivacy" />
         <ListItem icon="🙈" title="隐私说明" desc="了解哪些内容不会被采集" tag="保护中" @click="openPrivacy" />
-        <ListItem icon="👪" title="家庭成员管理" desc="添加兄弟姐妹或其他联系人" tag="3 人" :chev="false" />
+        <ListItem icon="users" title="家庭成员管理" :chev="false" @click="toast('家庭成员管理')" />
       </view>
-    </template></view>
+    </template></AppPage>
 </template>
 
 <script setup lang="ts">
@@ -180,12 +181,12 @@ function toast(title: string) {
   display: block;
   margin-top: 6px;
   font-size: 18px;
-  font-weight: 1000;
-  color: #243a31;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .stat-num.warm {
-  color: #c9822c;
+  color: var(--warm);
 }
 
 .compact-top {
@@ -212,13 +213,13 @@ function toast(title: string) {
   display: block;
   margin-top: 12px;
   font-size: 18px;
-  font-weight: 1000;
-  color: #243a31;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .bind-desc {
   margin-top: 5px;
-  font-size: 13px;
+  font-size: var(--helper-size, 16px);
   line-height: 1.35;
 }
 
@@ -237,13 +238,13 @@ function toast(title: string) {
 
 .tip-title {
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .tip-copy {
   margin-top: 6px;
   line-height: 1.5;
-  font-size: 14px;
+  font-size: var(--helper-size, 16px);
 }
 
 .action-row {

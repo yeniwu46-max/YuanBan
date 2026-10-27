@@ -1,3 +1,4 @@
+import { requestFailed, requestSucceeded } from './requestStatus'
 const DEFAULT_BASE = 'http://localhost:8000'
 const TOKEN_KEY = 'yuanbanban_access_token'
 
@@ -112,6 +113,14 @@ export function setUnauthorizedHandler(handler: () => void) {
 }
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  try {
+    const result = await performRequest<T>(path, options)
+    requestSucceeded(path)
+    return result
+  } catch (error) { requestFailed(path); throw error }
+}
+
+async function performRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const url = `${getApiBaseUrl()}${path}`
   const method = options.method || 'GET'
   const headers = buildHeaders(options)

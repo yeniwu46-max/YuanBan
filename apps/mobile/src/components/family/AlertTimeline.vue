@@ -46,13 +46,13 @@ function stepIcon(step: AlertTimelineStep) {
 
 .step-title {
   font-size: 16px;
-  font-weight: 900;
-  color: #243a31;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .step-desc {
   margin-top: 4px;
-  font-size: 14px;
+  font-size: var(--helper-size, 16px);
   line-height: 1.35;
 }
 

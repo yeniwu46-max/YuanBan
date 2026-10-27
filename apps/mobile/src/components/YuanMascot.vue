@@ -1,144 +1,75 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { mascotArtwork, mascotPortrait } from '@/config/mascot'
+import type { MascotState } from '@/types/presentation'
+
+const props = withDefaults(
+  defineProps<{
+    size?: 'small' | 'normal' | 'large' | 'xlarge'
+    shape?: 'circle' | 'square' | 'mini'
+    /** Kept for existing callers; the heart is part of the generated artwork. */
+    heart?: boolean
+    state?: MascotState
+    portrait?: boolean
+  }>(),
+  { size: 'normal', shape: 'circle', heart: false, state: 'greeting', portrait: false },
+)
+const artwork = computed(() => mascotArtwork[props.state] ?? mascotArtwork.greeting)
+const source = computed(() => props.portrait ? mascotPortrait : artwork.value.src)
+const label = computed(() => props.portrait ? '鼋伴伴小鼋品牌头像' : artwork.value.label)
+</script>
+
 <template>
-  <view class="yuanwrap" :class="[`shape-${shape}`, `wrap-${size}`]">
-    <view class="yuan" :class="size">
-      <view class="head"></view>
-      <view class="body"></view>
-      <view class="eye-l"></view>
-      <view class="eye-r"></view>
-      <view class="mouth"></view>
-      <text v-if="heart" class="heart">♥</text>
-    </view>
+  <view
+    class="yuan-mascot"
+    :class="[`yuan-mascot--${size}`, `yuan-mascot--${state}`, { 'yuan-mascot--portrait': portrait }]"
+    :data-mascot-state="portrait ? 'avatar' : state"
+    role="img"
+    :aria-label="label"
+  >
+    <image
+      :key="source"
+      :src="source"
+      class="yuan-mascot-image"
+      mode="aspectFit"
+      aria-hidden="true"
+    />
   </view>
 </template>
 
-<script setup lang="ts">
-withDefaults(defineProps<{
-  size?: 'small' | 'normal' | 'large' | 'xlarge'
-  shape?: 'circle' | 'square' | 'mini'
-  heart?: boolean
-}>(), {
-  size: 'normal',
-  shape: 'circle',
-  heart: false
-})
-
-</script>
-
 <style scoped lang="scss">
-.yuanwrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f8fff5;
-  border: 4px solid #fff;
-  box-shadow: inset 0 2px 12px rgba(64, 90, 55, 0.12);
+.yuan-mascot {
+  width: 90px;
+  height: 98px;
+  position: relative;
   flex-shrink: 0;
 }
-
-.yuanwrap.wrap-small {
+.yuan-mascot-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: yuan-appear 180ms ease-out both;
+}
+.yuan-mascot--small {
   width: 48px;
-  height: 48px;
-  border-radius: 18px;
+  height: 52px;
 }
-
-.yuanwrap.wrap-normal {
-  width: 86px;
-  height: 86px;
-  border-radius: 50%;
+.yuan-mascot--large {
+  width: 132px;
+  height: 142px;
 }
-
-.yuanwrap.wrap-large {
-  width: 112px;
-  height: 112px;
-  border-radius: 36px;
-}
-
-.yuanwrap.wrap-xlarge {
+.yuan-mascot--xlarge {
   width: 220px;
-  height: 220px;
-  border-radius: 58px;
-  background: #e7f3df;
-  border: 1px solid #cbe2bf;
+  height: 236px;
 }
-
-.yuan {
-  position: relative;
-  width: 64px;
-  height: 64px;
+.yuan-mascot--portrait {
+  aspect-ratio: 1;
 }
-
-.yuan.small {
-  width: 36px;
-  height: 36px;
+@keyframes yuan-appear {
+  from { opacity: 0.65; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
-.yuan.large {
-  width: 86px;
-  height: 86px;
-}
-
-.yuan.xlarge {
-  width: 118px;
-  height: 118px;
-}
-
-.head,
-.body,
-.eye-l,
-.eye-r,
-.mouth {
-  position: absolute;
-}
-
-.head {
-  left: 22%;
-  top: 7%;
-  width: 56%;
-  height: 38%;
-  border-radius: 999px 999px 8px 8px;
-  background: #7ab66b;
-}
-
-.body {
-  left: 8%;
-  top: 35%;
-  width: 84%;
-  height: 45%;
-  border-radius: 999px;
-  background: #87c977;
-}
-
-.eye-l,
-.eye-r {
-  top: 47%;
-  width: 8%;
-  height: 8%;
-  border-radius: 50%;
-  background: #26382f;
-}
-
-.eye-l {
-  left: 27%;
-}
-
-.eye-r {
-  right: 27%;
-}
-
-.mouth {
-  left: 40%;
-  top: 63%;
-  width: 20%;
-  height: 5%;
-  border-radius: 999px;
-  background: rgba(38, 56, 47, 0.45);
-}
-
-.heart {
-  position: absolute;
-  left: 0;
-  top: 4%;
-  color: #e88379;
-  font-size: 20px;
+@media (prefers-reduced-motion: reduce) {
+  .yuan-mascot-image { animation: none; }
 }
 </style>
