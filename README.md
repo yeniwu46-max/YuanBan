@@ -8,6 +8,21 @@
 - 后端：FastAPI + SQLite（本地）/ PostgreSQL（Docker 可选）
 - 设备：MQTT 协议（模拟器 + ESP32 占位）
 
+## 最新界面与素材
+
+三端 H5 已统一为蓝绿主题，包含 3D 小鼋、移动优先布局、桌面侧栏，以及集中管理的演示与数据更新状态。UI 使用 Wot Design Uni、Lucide 和定制 shadcn-vue 组件。
+
+- [蓝绿 UI 验收记录](docs/ui-aqua-acceptance.md)
+- [五页设计效果图](output/ui-bluegreen-concepts/README.md)
+- [3D 小鼋素材与动作](output/mascot-ip-3d/README.md)
+- [三端响应式截图](output/playwright/)
+
+<img src="output/playwright/aqua-phone-final.png" alt="鼋伴伴蓝绿主题手机端预览" width="300" />
+
+仅查看演示界面时，在启动前设置 PowerShell 环境变量 `$env:VITE_USE_API = 'false'`。演示数据不用于真实健康监护或紧急救援。
+
+本仓库保留源码、设计素材和验收记录；签名密钥、个人报告、依赖缓存与生成的 APK / 部署包不纳入版本管理。Android 构建方法见 [封装说明](apps/android/README.md)，本轮蓝绿 UI 未重新打包 APK。
+
 ## 快速开始
 
 ### 前端 H5 开发

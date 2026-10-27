@@ -1,0 +1,61 @@
+// Run on the local Mock build: playwright-cli -s=ybb-ip-check run-code --filename scripts/ui-mascot-acceptance.js
+async (page) => {
+  const errors = [], failedImages = [], checks = []
+  page.on('pageerror', e => errors.push(e.message))
+  page.on('response', r => { if (/\.(webp|png)(\?|$)/.test(r.url()) && r.status() >= 400) failedImages.push(r.url()) })
+  const assert = (ok, label) => { if (!ok) throw Error(label); checks.push(label) }
+  const nav = p => page.goto('http://127.0.0.1:5182/#/' + p)
+  const poses = { greeting: '挥手问候', listening: '认真倾听', thinking: '托腮思考', encouraging: '点赞鼓励', reminder: '温柔提醒', caring: '抱心陪伴' }
+  const stableArtwork = () => page.waitForFunction(() => [...document.querySelectorAll('.yuan-mascot-image')].every(el => getComputedStyle(el).opacity === '1') && [...document.querySelectorAll('.yuan-mascot-image img')].every(i => i.complete && i.naturalWidth > 0))
+  await page.goto('http://127.0.0.1:5182/')
+  await page.reload()
+  await page.setViewportSize({ width: 390, height: 844 })
+  await nav('pages/ui-preview/index')
+  for (const [state, title] of Object.entries(poses)) {
+    const button = page.getByRole('button', { name: '预览' + title, exact: true })
+    await button.click()
+    await page.locator(`.mascot-preview-hero [data-mascot-state="${state}"]`).waitFor()
+    assert(await button.getAttribute('aria-pressed') === 'true', 'Pose selectable: ' + state)
+  }
+  const images = await page.locator('.mascot-pose-card .yuan-mascot-image img').evaluateAll(imgs => imgs.map(i => i.getAttribute('src')))
+  assert(images.length === 6 && new Set(images).size === 6, 'Six distinct pose image URLs')
+  assert(images.every(src => src && src.includes('.webp')), 'All poses use bundled WebP assets')
+  await page.getByRole('button', { name: '预览挥手问候', exact: true }).focus()
+  await page.keyboard.press('Enter')
+  assert(await page.getByRole('button', { name: '预览挥手问候', exact: true }).getAttribute('aria-pressed') === 'true', 'Pose gallery keyboard selection')
+  for (const width of [320, 390, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 })
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Gallery no overflow: ' + width)
+    await stableArtwork()
+    if (width === 390 || width === 1440) await page.screenshot({ path: `output/playwright/aqua-mascot-gallery-${width}.png`, fullPage: true })
+  }
+  await page.setViewportSize({ width: 390, height: 844 })
+  await nav('pages/login-welcome/index')
+  await page.locator('.brand-logo__image img').waitFor()
+  await page.waitForFunction(() => [...document.querySelectorAll('.yuan-mascot-image img,.brand-logo__image img')].every(i => i.complete && i.naturalWidth > 0))
+  await stableArtwork()
+  await page.screenshot({ path: 'output/playwright/aqua-mascot-welcome-390.png' })
+  assert((await page.locator('.brand-logo__image img').getAttribute('src')).includes('avatar'), 'Brand avatar replaced')
+  await nav('pages/login-role/index')
+  await page.getByRole('button', { name: /我是老人/ }).click()
+  await nav('pages/companion/index')
+  await page.getByRole('textbox', { name: '和小鼋说句话', exact: true }).focus()
+  await page.locator('.aqua-hero [data-mascot-state="listening"]').waitFor()
+  assert(true, 'Input focus activates listening')
+  await page.getByRole('button', { name: '想家', exact: true }).click()
+  await page.locator('.aqua-hero [data-mascot-state="caring"]').waitFor()
+  assert(true, 'Missing family activates caring')
+  await page.getByRole('button', { name: '开心', exact: true }).click()
+  await page.locator('.aqua-hero [data-mascot-state="encouraging"]').waitFor()
+  assert(true, 'Happy mood activates encouraging')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  assert(await page.locator('.aqua-hero .yuan-mascot-image').evaluate(el => getComputedStyle(el).animationName === 'none'), 'Reduced motion respected')
+  await stableArtwork()
+  await page.screenshot({ path: 'output/playwright/aqua-mascot-companion-390.png' })
+  await page.getByRole('button', { name: '紧急演示', exact: true }).click()
+  await page.locator('.aqua-hero [data-mascot-state="reminder"]').waitFor()
+  assert(true, 'Emergency response takes precedence over mood artwork')
+  assert(failedImages.length === 0, 'No failed image requests')
+  assert(errors.length === 0, 'No runtime errors')
+  return { passed: checks.length, checks, errors, failedImages }
+}
